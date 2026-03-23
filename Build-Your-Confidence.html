@@ -1,0 +1,820 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>English Practice: Build Your Confidence!</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800&family=Outfit:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #0F0F1A;
+  --bg-card: #181828;
+  --bg-card-hover: #1E1E32;
+  --surface: #232338;
+  --border: #2A2A42;
+  --border-light: #35355A;
+
+  --primary: #FF6B6B;
+  --primary-glow: rgba(255,107,107,0.15);
+  --teal: #4ECDC4;
+  --teal-glow: rgba(78,205,196,0.15);
+  --purple: #A78BFA;
+  --purple-glow: rgba(167,139,250,0.15);
+  --pink: #F472B6;
+  --pink-glow: rgba(244,114,182,0.15);
+  --gold: #FBBF24;
+  --gold-glow: rgba(251,191,36,0.15);
+  --green: #34D399;
+  --green-soft: rgba(52,211,153,0.12);
+  --red: #FB7185;
+  --red-soft: rgba(251,113,133,0.12);
+
+  --text: #E8E8F0;
+  --text-mid: #9CA3AF;
+  --text-dim: #6B7280;
+
+  --radius: 20px;
+  --radius-sm: 12px;
+  --font-display: 'Outfit', sans-serif;
+  --font-body: 'DM Sans', sans-serif;
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+body {
+  font-family: var(--font-body);
+  background: var(--bg);
+  color: var(--text);
+  line-height: 1.75;
+  overflow-x: hidden;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* ═══ ANIMATED GRADIENT MESH BACKGROUND ═══ */
+.bg-mesh {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  overflow: hidden;
+}
+.bg-mesh .orb {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(120px);
+  animation: orbMove 25s ease-in-out infinite alternate;
+}
+.bg-mesh .orb:nth-child(1) {
+  width: 600px; height: 600px;
+  background: var(--primary);
+  opacity: 0.07;
+  top: -20%; left: -10%;
+}
+.bg-mesh .orb:nth-child(2) {
+  width: 500px; height: 500px;
+  background: var(--purple);
+  opacity: 0.06;
+  top: 30%; right: -15%;
+  animation-delay: -8s;
+  animation-duration: 30s;
+}
+.bg-mesh .orb:nth-child(3) {
+  width: 450px; height: 450px;
+  background: var(--teal);
+  opacity: 0.06;
+  bottom: -10%; left: 20%;
+  animation-delay: -15s;
+  animation-duration: 28s;
+}
+.bg-mesh .orb:nth-child(4) {
+  width: 350px; height: 350px;
+  background: var(--gold);
+  opacity: 0.04;
+  top: 60%; left: 60%;
+  animation-delay: -20s;
+  animation-duration: 35s;
+}
+@keyframes orbMove {
+  0% { transform: translate(0, 0) scale(1); }
+  25% { transform: translate(60px, -40px) scale(1.1); }
+  50% { transform: translate(-30px, 50px) scale(0.95); }
+  75% { transform: translate(40px, 20px) scale(1.05); }
+  100% { transform: translate(-20px, -30px) scale(1); }
+}
+
+/* Grid overlay */
+.bg-mesh::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background-image:
+    linear-gradient(rgba(255,255,255,0.02) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255,255,255,0.02) 1px, transparent 1px);
+  background-size: 60px 60px;
+}
+
+/* ═══ FLOATING PARTICLES ═══ */
+.particles {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+}
+.particles span {
+  position: absolute;
+  width: 4px;
+  height: 4px;
+  border-radius: 50%;
+  animation: sparkRise 15s linear infinite;
+  opacity: 0;
+}
+.particles span:nth-child(1) { left: 8%; background: var(--primary); animation-delay: 0s; }
+.particles span:nth-child(2) { left: 20%; background: var(--teal); animation-delay: 2s; }
+.particles span:nth-child(3) { left: 35%; background: var(--purple); animation-delay: 4s; }
+.particles span:nth-child(4) { left: 50%; background: var(--gold); animation-delay: 6s; }
+.particles span:nth-child(5) { left: 65%; background: var(--pink); animation-delay: 8s; }
+.particles span:nth-child(6) { left: 80%; background: var(--teal); animation-delay: 10s; }
+.particles span:nth-child(7) { left: 92%; background: var(--primary); animation-delay: 12s; }
+.particles span:nth-child(8) { left: 45%; background: var(--purple); animation-delay: 1s; width: 3px; height: 3px; }
+.particles span:nth-child(9) { left: 72%; background: var(--gold); animation-delay: 5s; width: 5px; height: 5px; }
+.particles span:nth-child(10) { left: 15%; background: var(--pink); animation-delay: 9s; width: 3px; height: 3px; }
+@keyframes sparkRise {
+  0% { transform: translateY(100vh) scale(0); opacity: 0; }
+  5% { opacity: 0.7; transform: translateY(95vh) scale(1); }
+  95% { opacity: 0.4; }
+  100% { transform: translateY(-5vh) scale(0.5); opacity: 0; }
+}
+
+/* ═══ CONTAINER ═══ */
+.container {
+  max-width: 820px;
+  margin: 0 auto;
+  padding: 48px 24px 100px;
+  position: relative;
+  z-index: 1;
+}
+
+/* ═══ HERO ═══ */
+.hero {
+  text-align: center;
+  margin-bottom: 56px;
+  opacity: 0;
+  transform: translateY(30px);
+  animation: fadeUp 0.9s 0.2s cubic-bezier(0.22,1,0.36,1) forwards;
+}
+@keyframes fadeUp { to { opacity: 1; transform: translateY(0); } }
+@keyframes fadeScale { to { opacity: 1; transform: scale(1); } }
+
+.hero-icon-row {
+  display: flex;
+  justify-content: center;
+  gap: 16px;
+  margin-bottom: 24px;
+}
+.hero-icon-circle {
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid var(--border);
+  animation: iconPulse 4s ease-in-out infinite;
+  position: relative;
+}
+.hero-icon-circle::after {
+  content: '';
+  position: absolute;
+  inset: -4px;
+  border-radius: 50%;
+  border: 1px solid;
+  opacity: 0;
+  animation: ringPulse 4s ease-in-out infinite;
+}
+.hero-icon-circle:nth-child(1) { background: var(--primary-glow); color: var(--primary); }
+.hero-icon-circle:nth-child(1)::after { border-color: var(--primary); animation-delay: 0s; }
+.hero-icon-circle:nth-child(2) { background: var(--teal-glow); color: var(--teal); animation-delay: 0.5s; }
+.hero-icon-circle:nth-child(2)::after { border-color: var(--teal); animation-delay: 0.5s; }
+.hero-icon-circle:nth-child(3) { background: var(--purple-glow); color: var(--purple); animation-delay: 1s; }
+.hero-icon-circle:nth-child(3)::after { border-color: var(--purple); animation-delay: 1s; }
+.hero-icon-circle svg { width: 26px; height: 26px; }
+@keyframes iconPulse { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-8px); } }
+@keyframes ringPulse { 0% { transform: scale(1); opacity: 0.5; } 50% { transform: scale(1.3); opacity: 0; } 100% { transform: scale(1); opacity: 0; } }
+
+.hero-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: linear-gradient(135deg, var(--primary), #FF8E53);
+  color: white;
+  padding: 6px 20px;
+  border-radius: 50px;
+  font-family: var(--font-display);
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 2.5px;
+  text-transform: uppercase;
+  margin-bottom: 20px;
+  box-shadow: 0 4px 20px rgba(255,107,107,0.3);
+}
+.hero-badge svg { width: 14px; height: 14px; }
+
+.hero h1 {
+  font-family: var(--font-display);
+  font-size: clamp(2.4rem, 6vw, 3.6rem);
+  font-weight: 800;
+  line-height: 1.1;
+  letter-spacing: -1.5px;
+  margin-bottom: 16px;
+}
+.hero h1 .gr {
+  background: linear-gradient(135deg, var(--primary), var(--purple), var(--teal));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.hero p {
+  font-size: 1.05rem;
+  color: var(--text-mid);
+  max-width: 460px;
+  margin: 0 auto;
+}
+
+/* ═══ PROGRESS ═══ */
+.progress-bar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  height: 3px;
+  background: linear-gradient(90deg, var(--primary), var(--purple), var(--teal));
+  z-index: 100;
+  transition: width 0.5s ease;
+  box-shadow: 0 0 12px rgba(167,139,250,0.5);
+}
+.score-pill {
+  position: fixed;
+  top: 14px;
+  right: 14px;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 50px;
+  padding: 6px 16px;
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 0.82rem;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  z-index: 99;
+  backdrop-filter: blur(12px);
+  box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+}
+.score-pill svg { width: 16px; height: 16px; color: var(--gold); }
+.score-pill .sn { color: var(--primary); }
+
+/* ═══ SECTIONS ═══ */
+.section {
+  background: var(--bg-card);
+  border-radius: var(--radius);
+  padding: 36px 32px;
+  margin-bottom: 24px;
+  border: 1px solid var(--border);
+  position: relative;
+  overflow: hidden;
+  opacity: 0;
+  transform: translateY(30px);
+  transition: all 0.4s cubic-bezier(0.22,1,0.36,1);
+}
+.section:hover {
+  background: var(--bg-card-hover);
+  border-color: var(--border-light);
+  box-shadow: 0 8px 40px rgba(0,0,0,0.2);
+}
+.section.visible { animation: fadeUp 0.7s ease forwards; }
+
+/* Glowing top edge */
+.section::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 2px;
+}
+.section::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 20%;
+  right: 20%;
+  height: 1px;
+  filter: blur(8px);
+}
+.section.c-primary::before, .section.c-primary::after { background: linear-gradient(90deg, transparent, var(--primary), transparent); }
+.section.c-teal::before, .section.c-teal::after { background: linear-gradient(90deg, transparent, var(--teal), transparent); }
+.section.c-purple::before, .section.c-purple::after { background: linear-gradient(90deg, transparent, var(--purple), transparent); }
+.section.c-pink::before, .section.c-pink::after { background: linear-gradient(90deg, transparent, var(--pink), transparent); }
+.section.c-gold::before, .section.c-gold::after { background: linear-gradient(90deg, transparent, var(--gold), transparent); }
+
+.section-header { display: flex; align-items: center; gap: 16px; margin-bottom: 18px; }
+.section-icon {
+  width: 46px;
+  height: 46px;
+  border-radius: 13px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  position: relative;
+}
+.section-icon svg { width: 22px; height: 22px; stroke: white; position: relative; z-index: 1; }
+.section-icon.primary { background: linear-gradient(135deg, var(--primary), #FF8E53); box-shadow: 0 4px 16px rgba(255,107,107,0.3); }
+.section-icon.teal { background: linear-gradient(135deg, var(--teal), #45B7D1); box-shadow: 0 4px 16px rgba(78,205,196,0.3); }
+.section-icon.purple { background: linear-gradient(135deg, var(--purple), #818CF8); box-shadow: 0 4px 16px rgba(167,139,250,0.3); }
+.section-icon.pink { background: linear-gradient(135deg, var(--pink), #FB923C); box-shadow: 0 4px 16px rgba(244,114,182,0.3); }
+.section-icon.gold { background: linear-gradient(135deg, var(--gold), #F97316); box-shadow: 0 4px 16px rgba(251,191,36,0.3); }
+
+.section-title h2 { font-family: var(--font-display); font-size: 1.25rem; font-weight: 700; letter-spacing: -0.3px; }
+.section-title .sub { font-size: 0.8rem; color: var(--text-dim); font-weight: 500; }
+
+.instruction {
+  background: var(--surface);
+  border-radius: var(--radius-sm);
+  padding: 14px 18px;
+  margin-bottom: 22px;
+  font-size: 0.86rem;
+  color: var(--text-mid);
+  line-height: 1.6;
+  border: 1px solid var(--border);
+}
+
+/* ═══ EXERCISES ═══ */
+.exercise {
+  border-radius: var(--radius-sm);
+  padding: 18px 20px;
+  margin-bottom: 12px;
+  border: 1px solid var(--border);
+  background: var(--surface);
+  transition: all 0.3s;
+}
+.exercise:hover { border-color: var(--border-light); background: rgba(255,255,255,0.03); }
+
+.exercise-num {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  margin-bottom: 8px;
+  display: inline-block;
+  padding: 2px 10px;
+  border-radius: 6px;
+}
+.exercise-num.primary { color: var(--primary); background: var(--primary-glow); }
+.exercise-num.teal { color: var(--teal); background: var(--teal-glow); }
+.exercise-num.purple { color: var(--purple); background: var(--purple-glow); }
+.exercise-num.pink { color: var(--pink); background: var(--pink-glow); }
+.exercise-num.gold { color: var(--gold); background: var(--gold-glow); }
+
+.prompt { font-size: 1rem; font-weight: 500; margin-bottom: 12px; color: var(--text); }
+.prompt .kw { font-weight: 700; color: var(--purple); }
+.polish { color: var(--purple); font-weight: 700; font-size: 0.9rem; }
+.verb-hint {
+  display: inline-block;
+  background: var(--purple-glow);
+  color: var(--purple);
+  font-weight: 600;
+  font-size: 0.85rem;
+  padding: 2px 10px;
+  border-radius: 6px;
+  border: 1px solid rgba(167,139,250,0.2);
+}
+
+/* ═══ INPUTS ═══ */
+.answer-input {
+  width: 100%;
+  border: 1.5px solid var(--border);
+  border-radius: 10px;
+  background: var(--bg);
+  font-family: var(--font-body);
+  font-size: 0.95rem;
+  padding: 12px 16px;
+  color: var(--text);
+  outline: none;
+  transition: all 0.3s;
+}
+.answer-input:focus { border-color: var(--purple); box-shadow: 0 0 0 3px var(--purple-glow); }
+.answer-input::placeholder { color: var(--text-dim); }
+.answer-input.correct { border-color: var(--green) !important; background: var(--green-soft) !important; box-shadow: 0 0 0 3px rgba(52,211,153,0.1), 0 0 20px rgba(52,211,153,0.08) !important; }
+.answer-input.incorrect { border-color: var(--red) !important; background: var(--red-soft) !important; box-shadow: 0 0 0 3px rgba(251,113,133,0.1) !important; }
+
+.gap-row { font-size: 1rem; line-height: 2.4; font-weight: 500; }
+.gap-input {
+  border: none;
+  border-bottom: 2px solid var(--border-light);
+  background: transparent;
+  font-family: var(--font-body);
+  font-size: 0.95rem;
+  font-weight: 600;
+  padding: 4px 8px;
+  color: var(--purple);
+  outline: none;
+  width: 220px;
+  text-align: center;
+  transition: all 0.3s;
+}
+.gap-input:focus { border-bottom-color: var(--purple); }
+.gap-input.correct { border-bottom-color: var(--green) !important; color: var(--green) !important; }
+.gap-input.incorrect { border-bottom-color: var(--red) !important; color: var(--red) !important; }
+
+.answer-area {
+  width: 100%;
+  border: 1.5px solid var(--border);
+  border-radius: 10px;
+  background: var(--bg);
+  font-family: var(--font-body);
+  font-size: 0.95rem;
+  padding: 14px 16px;
+  color: var(--text);
+  outline: none;
+  resize: vertical;
+  min-height: 80px;
+  transition: all 0.3s;
+  line-height: 1.7;
+}
+.answer-area:focus { border-color: var(--purple); box-shadow: 0 0 0 3px var(--purple-glow); }
+
+/* ═══ FEEDBACK ═══ */
+.feedback {
+  margin-top: 8px;
+  font-size: 0.84rem;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  opacity: 0;
+  height: 0;
+  overflow: hidden;
+  transition: all 0.3s;
+}
+.feedback.show { opacity: 1; height: auto; padding-top: 4px; }
+.feedback.correct { color: var(--green); }
+.feedback.incorrect { color: var(--red); }
+.feedback svg { width: 16px; height: 16px; flex-shrink: 0; }
+.feedback .ca { font-weight: 400; color: var(--text-mid); margin-left: 4px; }
+
+/* ═══ DIVIDER ═══ */
+.divider {
+  text-align: center;
+  margin: 44px 0;
+  position: relative;
+  opacity: 0;
+  transform: scale(0.95);
+}
+.divider.visible { animation: fadeUp 0.7s ease forwards; }
+.divider::before, .divider::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  width: calc(50% - 90px);
+  height: 1px;
+  background: linear-gradient(90deg, transparent, var(--border-light), transparent);
+}
+.divider::before { left: 0; } .divider::after { right: 0; }
+.divider-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: linear-gradient(135deg, var(--purple), #818CF8);
+  color: white;
+  padding: 10px 24px;
+  border-radius: 50px;
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 0.92rem;
+  box-shadow: 0 4px 20px rgba(167,139,250,0.4);
+  animation: dividerGlow 3s ease-in-out infinite;
+}
+@keyframes dividerGlow {
+  0%,100% { box-shadow: 0 4px 20px rgba(167,139,250,0.4); }
+  50% { box-shadow: 0 4px 30px rgba(167,139,250,0.6), 0 0 60px rgba(167,139,250,0.15); }
+}
+.divider-pill svg { width: 20px; height: 20px; }
+
+/* ═══ KEY ═══ */
+.key-toggle { display: flex; justify-content: center; margin: 44px 0 16px; opacity: 0; transform: translateY(20px); }
+.key-toggle.visible { animation: fadeUp 0.6s ease forwards; }
+.key-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  background: linear-gradient(135deg, var(--primary), #FF8E53);
+  color: white;
+  border: none;
+  padding: 14px 28px;
+  border-radius: 50px;
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: 0.92rem;
+  cursor: pointer;
+  transition: all 0.3s;
+  box-shadow: 0 4px 20px rgba(255,107,107,0.3);
+}
+.key-btn:hover { transform: translateY(-2px); box-shadow: 0 8px 30px rgba(255,107,107,0.4); }
+.key-btn svg { width: 18px; height: 18px; }
+.key-btn .chev { transition: transform 0.3s; }
+.key-btn.open .chev { transform: rotate(180deg); }
+
+.key-panel { max-height: 0; overflow: hidden; transition: max-height 0.6s cubic-bezier(0.22,1,0.36,1); }
+.key-panel.open { max-height: 6000px; }
+.key-inner {
+  background: var(--bg-card);
+  border-radius: var(--radius);
+  padding: 32px;
+  border: 1px solid var(--border);
+}
+.key-inner h3 {
+  font-family: var(--font-display);
+  font-size: 1.2rem;
+  font-weight: 700;
+  margin-bottom: 24px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.key-inner h3 svg { width: 22px; height: 22px; color: var(--gold); }
+.key-group { margin-bottom: 18px; }
+.key-group h4 { font-family: var(--font-display); font-size: 0.82rem; font-weight: 700; color: var(--text-dim); margin-bottom: 8px; text-transform: uppercase; letter-spacing: 0.5px; }
+.key-item {
+  background: var(--surface);
+  border-radius: 10px;
+  padding: 10px 16px;
+  margin-bottom: 6px;
+  font-size: 0.9rem;
+  border-left: 3px solid;
+}
+.key-item.primary { border-color: var(--primary); }
+.key-item.teal { border-color: var(--teal); }
+.key-item.purple { border-color: var(--purple); }
+.key-item.pink { border-color: var(--pink); }
+.key-item.gold { border-color: var(--gold); }
+.key-item strong { font-weight: 700; }
+.key-item .note { display: block; font-size: 0.78rem; color: var(--text-dim); margin-top: 2px; }
+
+.footer { text-align: center; margin-top: 48px; opacity: 0; padding: 24px; }
+.footer.visible { animation: fadeUp 0.6s ease forwards; }
+.footer p { color: var(--text-dim); font-size: 0.85rem; }
+.footer svg { width: 36px; height: 36px; color: var(--teal); margin-bottom: 8px; }
+
+/* Stagger */
+.section.visible .exercise { opacity: 0; animation: fadeUp 0.5s ease forwards; }
+.section.visible .exercise:nth-child(1) { animation-delay: 0.05s; }
+.section.visible .exercise:nth-child(2) { animation-delay: 0.1s; }
+.section.visible .exercise:nth-child(3) { animation-delay: 0.15s; }
+.section.visible .exercise:nth-child(4) { animation-delay: 0.2s; }
+
+@media print {
+  .bg-mesh, .particles, .progress-bar, .score-pill { display: none !important; }
+  .section, .hero, .divider, .footer, .key-toggle { opacity: 1 !important; transform: none !important; animation: none !important; }
+  .section { break-inside: avoid; box-shadow: none; border: 1px solid #ccc; background: white; color: #111; }
+  .key-btn { display: none; }
+  body { background: white; color: #111; }
+}
+@media (max-width: 600px) {
+  .container { padding: 24px 14px 60px; }
+  .section { padding: 24px 18px; }
+  .gap-input { width: 160px; }
+  .key-inner { padding: 20px 16px; }
+  .score-pill { top: 8px; right: 8px; padding: 5px 12px; font-size: 0.75rem; }
+}
+</style>
+</head>
+<body>
+
+<div class="bg-mesh">
+  <div class="orb"></div>
+  <div class="orb"></div>
+  <div class="orb"></div>
+  <div class="orb"></div>
+</div>
+<div class="particles">
+  <span></span><span></span><span></span><span></span><span></span>
+  <span></span><span></span><span></span><span></span><span></span>
+</div>
+
+<div class="progress-bar" id="progressBar" style="width:0%"></div>
+<div class="score-pill">
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 14.66v1.626a2 2 0 0 1-.976 1.696A5 5 0 0 0 7 21.978"/><path d="M14 14.66v1.626a2 2 0 0 0 .976 1.696A5 5 0 0 1 17 21.978"/><path d="M18 9h1.5a1 1 0 0 0 0-5H18"/><path d="M4 22h16"/><path d="M6 9a6 6 0 0 0 12 0V3a1 1 0 0 0-1-1H7a1 1 0 0 0-1 1z"/><path d="M6 9H4.5a1 1 0 0 1 0-5H6"/></svg>
+  <span class="sn" id="scoreNum">0</span> / <span>13</span>
+</div>
+
+<div class="container">
+
+<!-- HERO -->
+<header class="hero">
+  <div class="hero-icon-row">
+    <div class="hero-icon-circle"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 0-20"/><path d="M2 12h20"/></svg></div>
+    <div class="hero-icon-circle"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 7v14"/><path d="M16 12h2"/><path d="M16 8h2"/><path d="M3 18a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1h5a4 4 0 0 1 4 4 4 4 0 0 1 4-4h5a1 1 0 0 1 1 1v13a1 1 0 0 1-1 1h-6a3 3 0 0 0-3 3 3 3 0 0 0-3-3z"/><path d="M6 12h2"/><path d="M6 8h2"/></svg></div>
+    <div class="hero-icon-circle"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m5 8 6 6"/><path d="m4 14 6-6 2-3"/><path d="M2 5h12"/><path d="M7 2h1"/><path d="m22 22-5-10-5 10"/><path d="M14 18h6"/></svg></div>
+  </div>
+  <div class="hero-badge"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg> English Practice</div>
+  <h1>Build Your <span class="gr">Confidence!</span></h1>
+  <p>Ćwicz angielski krok po kroku. Uzupełniaj, tłumacz, poprawiaj i pisz!</p>
+</header>
+
+<!-- PART 1 -->
+<section class="section c-primary" data-anim>
+  <div class="section-header">
+    <div class="section-icon primary"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15.39 4.39a1 1 0 0 0 1.68-.474 2.5 2.5 0 1 1 3.014 3.015 1 1 0 0 0-.474 1.68l1.683 1.682a2.414 2.414 0 0 1 0 3.414L19.61 15.39a1 1 0 0 1-1.68-.474 2.5 2.5 0 1 0-3.014 3.015 1 1 0 0 1 .474 1.68l-1.683 1.682a2.414 2.414 0 0 1-3.414 0L8.61 19.61a1 1 0 0 0-1.68.474 2.5 2.5 0 1 1-3.014-3.015 1 1 0 0 0 .474-1.68l-1.683-1.682a2.414 2.414 0 0 1 0-3.414L4.39 8.61a1 1 0 0 1 1.68.474 2.5 2.5 0 1 0 3.014-3.015 1 1 0 0 1-.474-1.68l1.683-1.682a2.414 2.414 0 0 1 3.414 0z"/></svg></div>
+    <div class="section-title"><h2>Part 1: Word Scramble</h2><span class="sub">Rozsypanka wyrazowa</span></div>
+  </div>
+  <div class="instruction">Ułóż słowa w odpowiedniej kolejności, aby powstały logiczne i poprawne zdania. Zwróć uwagę na znaki zapytania!</div>
+  <div class="exercise"><div class="exercise-num primary">Zadanie 1</div><div class="prompt">usually / weekends / play / I / games / board / on</div><input type="text" class="answer-input" data-check="1" placeholder="Wpisz poprawne zdanie..."><div class="feedback" id="fb-1"></div></div>
+  <div class="exercise"><div class="exercise-num primary">Zadanie 2</div><div class="prompt">listening / you / music / to / are / right now / ?</div><input type="text" class="answer-input" data-check="2" placeholder="Wpisz poprawne zdanie..."><div class="feedback" id="fb-2"></div></div>
+  <div class="exercise"><div class="exercise-num primary">Zadanie 3</div><div class="prompt">yesterday / go / didn't / park / to / she / the</div><input type="text" class="answer-input" data-check="3" placeholder="Wpisz poprawne zdanie..."><div class="feedback" id="fb-3"></div></div>
+</section>
+
+<!-- PART 2 -->
+<section class="section c-teal" data-anim>
+  <div class="section-header">
+    <div class="section-icon teal"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m5 8 6 6"/><path d="m4 14 6-6 2-3"/><path d="M2 5h12"/><path d="M7 2h1"/><path d="m22 22-5-10-5 10"/><path d="M14 18h6"/></svg></div>
+    <div class="section-title"><h2>Part 2: Phrase Translation</h2><span class="sub">Przetłumacz fragmenty zdań</span></div>
+  </div>
+  <div class="instruction">Uzupełnij luki, tłumacząc fragmenty w nawiasach na język angielski. Potrzebujesz więcej niż jednego słowa!</div>
+  <div class="exercise"><div class="exercise-num teal">Zadanie 4</div><p class="gap-row">My best friend is <input type="text" class="gap-input" data-check="4" placeholder="..."> <span class="polish">(bardzo dobra w)</span> playing the guitar.</p><div class="feedback" id="fb-4"></div></div>
+  <div class="exercise"><div class="exercise-num teal">Zadanie 5</div><p class="gap-row">I really enjoy <input type="text" class="gap-input" data-check="5" placeholder="..."> <span class="polish">(spędzać czas)</span> with my family on Sunday afternoons.</p><div class="feedback" id="fb-5"></div></div>
+  <div class="exercise"><div class="exercise-num teal">Zadanie 6</div><p class="gap-row">We didn't go to the cinema because we <input type="text" class="gap-input" data-check="6" placeholder="..."> <span class="polish">(byliśmy zbyt zmęczeni)</span>.</p><div class="feedback" id="fb-6"></div></div>
+</section>
+
+<!-- PART 3 -->
+<section class="section c-purple" data-anim>
+  <div class="section-header">
+    <div class="section-icon purple"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m21 21-4.34-4.34"/><circle cx="11" cy="11" r="8"/></svg></div>
+    <div class="section-title"><h2>Part 3: Error Detective</h2><span class="sub">Zostań detektywem błędów</span></div>
+  </div>
+  <div class="instruction">W poniższych zdaniach ukrył się jeden błąd gramatyczny. Znajdź go i przepisz całe zdanie poprawnie.</div>
+  <div class="exercise"><div class="exercise-num purple">Zadanie 7</div><div class="prompt">My older sister don't like eating vegetables.</div><input type="text" class="answer-input" data-check="7" placeholder="Przepisz zdanie poprawnie..."><div class="feedback" id="fb-7"></div></div>
+  <div class="exercise"><div class="exercise-num purple">Zadanie 8</div><div class="prompt">What did you did with your friends last weekend?</div><input type="text" class="answer-input" data-check="8" placeholder="Przepisz zdanie poprawnie..."><div class="feedback" id="fb-8"></div></div>
+</section>
+
+<!-- PART 4 -->
+<section class="section c-pink" data-anim>
+  <div class="section-header">
+    <div class="section-icon pink"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M13 21h8"/><path d="M21.174 6.812a1 1 0 0 0-3.986-3.987L3.842 16.174a2 2 0 0 0-.5.83l-1.321 4.352a.5.5 0 0 0 .623.622l4.353-1.32a2 2 0 0 0 .83-.497z"/></svg></div>
+    <div class="section-title"><h2>Part 4: Mini-Writing</h2><span class="sub">Twój czas na pisanie</span></div>
+  </div>
+  <div class="instruction">Odpowiedz na poniższe pytania pełnymi zdaniami po angielsku. Postaraj się użyć przynajmniej 5-6 słów w każdej odpowiedzi.</div>
+  <div class="exercise"><div class="exercise-num pink">Zadanie 9</div><div class="prompt">What is your favorite hobby and why do you like it?</div><textarea class="answer-area" placeholder="Write your answer here..."></textarea></div>
+  <div class="exercise"><div class="exercise-num pink">Zadanie 10</div><div class="prompt">Write one thing you did yesterday, and one thing you are doing today.</div><textarea class="answer-area" placeholder="Write your answer here..."></textarea></div>
+</section>
+
+<!-- LEVEL UP -->
+<div class="divider" data-anim>
+  <div class="divider-pill"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4 14a1 1 0 0 1-.78-1.63l9.9-10.2a.5.5 0 0 1 .86.46l-1.92 6.02A1 1 0 0 0 13 10h7a1 1 0 0 1 .78 1.63l-9.9 10.2a.5.5 0 0 1-.86-.46l1.92-6.02A1 1 0 0 0 11 14z"/></svg> Level Up!</div>
+</div>
+
+<!-- PART 5 -->
+<section class="section c-gold" data-anim>
+  <div class="section-header">
+    <div class="section-icon gold"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11.017 2.814a1 1 0 0 1 1.966 0l1.051 5.558a2 2 0 0 0 1.594 1.594l5.558 1.051a1 1 0 0 1 0 1.966l-5.558 1.051a2 2 0 0 0-1.594 1.594l-1.051 5.558a1 1 0 0 1-1.966 0l-1.051-5.558a2 2 0 0 0-1.594-1.594l-5.558-1.051a1 1 0 0 1 0-1.966l5.558-1.051a2 2 0 0 0 1.594-1.594z"/><path d="M20 2v4"/><path d="M22 4h-4"/><circle cx="4" cy="20" r="2"/></svg></div>
+    <div class="section-title"><h2>Part 5: Sentence Transformation</h2><span class="sub">Przekształcanie zdań</span></div>
+  </div>
+  <div class="instruction">Przepisz poniższe zdania, używając słowa w nawiasie tak, aby zachować to samo znaczenie.</div>
+  <div class="exercise"><div class="exercise-num gold">Zadanie 11</div><div class="prompt">I have a plan to visit my grandparents tomorrow. <span class="kw">(GOING)</span></div><p class="gap-row">I <input type="text" class="gap-input" data-check="11" placeholder="..."> visit my grandparents tomorrow.</p><div class="feedback" id="fb-11"></div></div>
+  <div class="exercise"><div class="exercise-num gold">Zadanie 12</div><div class="prompt">This room is too small for ten people. <span class="kw">(BIG)</span></div><p class="gap-row">This room <input type="text" class="gap-input" data-check="12" placeholder="..."> for ten people.</p><div class="feedback" id="fb-12"></div></div>
+  <div class="exercise"><div class="exercise-num gold">Zadanie 13</div><div class="prompt">It is not necessary for you to wait for me. <span class="kw">(HAVE)</span></div><p class="gap-row">You <input type="text" class="gap-input" data-check="13" placeholder="..."> to wait for me.</p><div class="feedback" id="fb-13"></div></div>
+</section>
+
+<!-- PART 6 -->
+<section class="section c-purple" data-anim>
+  <div class="section-header">
+    <div class="section-icon purple"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg></div>
+    <div class="section-title"><h2>Part 6: Verb Scramble &amp; Tenses</h2><span class="sub">Rozsypywanka czasownikowa</span></div>
+  </div>
+  <div class="instruction">Ułóż wyrazy w nawiasach w poprawnej formie i kolejności, aby uzupełnić luki.</div>
+  <div class="exercise"><div class="exercise-num purple">Zadanie 14</div><p class="gap-row">Look at those clouds! It <input type="text" class="gap-input" data-check="14" placeholder="..."> <span class="verb-hint">(is / rain / going / to)</span> in a minute.</p><div class="feedback" id="fb-14"></div></div>
+  <div class="exercise"><div class="exercise-num purple">Zadanie 15</div><p class="gap-row">My brother <input type="text" class="gap-input" data-check="15" placeholder="..."> <span class="verb-hint">(not / watch / usually / does)</span> TV in the morning.</p><div class="feedback" id="fb-15"></div></div>
+  <div class="exercise"><div class="exercise-num purple">Zadanie 16</div><p class="gap-row">While I was walking to school, I <input type="text" class="gap-input" data-check="16" placeholder="..."> <span class="verb-hint">(saw / cat / a / black)</span> climbing a tree.</p><div class="feedback" id="fb-16"></div></div>
+</section>
+
+<!-- PART 7 -->
+<section class="section c-teal" data-anim>
+  <div class="section-header">
+    <div class="section-icon teal"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2.992 16.342a2 2 0 0 1 .094 1.167l-1.065 3.29a1 1 0 0 0 1.236 1.168l3.413-.998a2 2 0 0 1 1.099.092 10 10 0 1 0-4.777-4.719"/></svg></div>
+    <div class="section-title"><h2>Part 7: Situation Response</h2><span class="sub">Reagowanie w sytuacjach</span></div>
+  </div>
+  <div class="instruction">Napisz, co powiesz w poniższych sytuacjach. Twoja odpowiedź musi mieć minimum 4 słowa.</div>
+  <div class="exercise"><div class="exercise-num teal">Zadanie 17</div><div class="prompt">Twoja koleżanka / kolega ma jutro bardzo ważny egzamin. Co powiesz, żeby życzyć powodzenia i dodać otuchy?</div><textarea class="answer-area" placeholder="Write what you would say..."></textarea></div>
+  <div class="exercise"><div class="exercise-num teal">Zadanie 18</div><div class="prompt">Jesteś w restauracji i chcesz zamówić sok pomarańczowy oraz zapytać o cenę.</div><textarea class="answer-area" placeholder="Write what you would say..."></textarea></div>
+</section>
+
+<!-- PART 8 -->
+<section class="section c-primary" data-anim>
+  <div class="section-header">
+    <div class="section-icon primary"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 18V5"/><path d="M15 13a4.17 4.17 0 0 1-3-4 4.17 4.17 0 0 1-3 4"/><path d="M17.598 6.5A3 3 0 1 0 12 5a3 3 0 1 0-5.598 1.5"/><path d="M17.997 5.125a4 4 0 0 1 2.526 5.77"/><path d="M18 18a4 4 0 0 0 2-7.464"/><path d="M19.967 17.483A4 4 0 1 1 12 18a4 4 0 1 1-7.967-.517"/><path d="M6 18a4 4 0 0 1-2-7.464"/><path d="M6.003 5.125a4 4 0 0 0-2.526 5.77"/></svg></div>
+    <div class="section-title"><h2>Part 8: Creative Description</h2><span class="sub">Opis obrazu wyobraźni</span></div>
+  </div>
+  <div class="instruction">Opisz poniższe sytuacje pełnymi zdaniami (minimum 2 zdania do każdego punktu).</div>
+  <div class="exercise"><div class="exercise-num primary">Zadanie 19</div><div class="prompt">Describe your dream bedroom. What things are there?</div><textarea class="answer-area" placeholder="Describe your dream bedroom..." style="min-height:100px"></textarea></div>
+  <div class="exercise"><div class="exercise-num primary">Zadanie 20</div><div class="prompt">Imagine you are on a desert island. What three things do you have with you and why?</div><textarea class="answer-area" placeholder="Write about your desert island..." style="min-height:100px"></textarea></div>
+</section>
+
+<!-- ANSWER KEY -->
+<div class="key-toggle" data-anim>
+  <button class="key-btn" onclick="toggleKey(this)">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m15.477 12.89 1.515 8.526a.5.5 0 0 1-.81.47l-3.58-2.687a1 1 0 0 0-1.197 0l-3.586 2.686a.5.5 0 0 1-.81-.469l1.514-8.526"/><circle cx="12" cy="8" r="6"/></svg>
+    Pokaż klucz odpowiedzi
+    <svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="6 9 12 15 18 9"/></svg>
+  </button>
+</div>
+<div class="key-panel" id="keyPanel">
+  <div class="key-inner">
+    <h3><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m15.477 12.89 1.515 8.526a.5.5 0 0 1-.81.47l-3.58-2.687a1 1 0 0 0-1.197 0l-3.586 2.686a.5.5 0 0 1-.81-.469l1.514-8.526"/><circle cx="12" cy="8" r="6"/></svg> Klucz odpowiedzi</h3>
+    <div class="key-group"><h4>Part 1: Word Scramble</h4>
+      <div class="key-item primary"><strong>1.</strong> I usually play board games on weekends.<span class="note">Dopuszczalne: On weekends I usually play board games.</span></div>
+      <div class="key-item primary"><strong>2.</strong> Are you listening to music right now?</div>
+      <div class="key-item primary"><strong>3.</strong> She didn't go to the park yesterday.<span class="note">Dopuszczalne: Yesterday she didn't go to the park.</span></div>
+    </div>
+    <div class="key-group"><h4>Part 2: Phrase Translation</h4>
+      <div class="key-item teal"><strong>4.</strong> very good at<span class="note">Przyimek "at" po "good".</span></div>
+      <div class="key-item teal"><strong>5.</strong> spending time<span class="note">Forma "-ing" po "enjoy".</span></div>
+      <div class="key-item teal"><strong>6.</strong> were too tired<span class="note">"To be" w przeszłości + "too".</span></div>
+    </div>
+    <div class="key-group"><h4>Part 3: Error Detective</h4>
+      <div class="key-item purple"><strong>7.</strong> My older sister <strong>doesn't</strong> like eating vegetables.<span class="note">3. os. l.poj. = doesn't.</span></div>
+      <div class="key-item purple"><strong>8.</strong> What did you <strong>do</strong> with your friends last weekend?<span class="note">Po "did" forma podstawowa.</span></div>
+    </div>
+    <div class="key-group"><h4>Part 4: Mini-Writing</h4>
+      <div class="key-item pink"><strong>9-10.</strong> Odpowiedzi otwarte.<span class="note">Sprawdź czasy: Past Simple + Present Continuous w zad. 10.</span></div>
+    </div>
+    <div class="key-group"><h4>Part 5: Sentence Transformation</h4>
+      <div class="key-item gold"><strong>11.</strong> am going to</div>
+      <div class="key-item gold"><strong>12.</strong> is not big enough<span class="note">Konstrukcja: adj + enough.</span></div>
+      <div class="key-item gold"><strong>13.</strong> don't have / do not have</div>
+    </div>
+    <div class="key-group"><h4>Part 6: Verb Scramble</h4>
+      <div class="key-item purple"><strong>14.</strong> is going to rain</div>
+      <div class="key-item purple"><strong>15.</strong> doesn't usually watch</div>
+      <div class="key-item purple"><strong>16.</strong> saw a black cat</div>
+    </div>
+    <div class="key-group"><h4>Part 7: Situation Response</h4>
+      <div class="key-item teal"><strong>17.</strong> np. Good luck with your exam, I am sure you will do great!</div>
+      <div class="key-item teal"><strong>18.</strong> np. I would like an orange juice, please. How much is it?</div>
+    </div>
+    <div class="key-group"><h4>Part 8: Creative Description</h4>
+      <div class="key-item primary"><strong>19-20.</strong> Odpowiedzi otwarte.<span class="note">Sprawdź: there is/are, przymiotniki (19); argumentacja (20).</span></div>
+    </div>
+  </div>
+</div>
+
+<!-- FOOTER -->
+<div class="footer" data-anim>
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21.42 10.922a1 1 0 0 0-.019-1.838L12.83 5.18a2 2 0 0 0-1.66 0L2.6 9.08a1 1 0 0 0 0 1.832l8.57 3.908a2 2 0 0 0 1.66 0z"/><path d="M22 10v6"/><path d="M6 12.5V16a6 3 0 0 0 12 0v-3.5"/></svg>
+  <p>Great job finishing the worksheet! Keep practicing every day.</p>
+</div>
+
+</div>
+
+<script>
+const ANSWERS={1:["i usually play board games on weekends","on weekends i usually play board games"],2:["are you listening to music right now?","are you listening to music right now"],3:["she didn't go to the park yesterday","she did not go to the park yesterday","yesterday she didn't go to the park","yesterday she did not go to the park","yesterday, she didn't go to the park"],4:["very good at"],5:["spending time"],6:["were too tired"],7:["my older sister doesn't like eating vegetables","my older sister does not like eating vegetables"],8:["what did you do with your friends last weekend?","what did you do with your friends last weekend"],11:["am going to"],12:["is not big enough","isn't big enough"],13:["don't have","do not have"],14:["is going to rain"],15:["doesn't usually watch","does not usually watch"],16:["saw a black cat"]};
+const DISPLAY={1:"I usually play board games on weekends.",2:"Are you listening to music right now?",3:"She didn't go to the park yesterday.",4:"very good at",5:"spending time",6:"were too tired",7:"My older sister doesn't like eating vegetables.",8:"What did you do with your friends last weekend?",11:"am going to",12:"is not big enough",13:"don't have",14:"is going to rain",15:"doesn't usually watch",16:"saw a black cat"};
+const OK='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg>';
+const NO='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>';
+let answered=new Set(),timers={};
+function norm(s){return s.trim().toLowerCase().replace(/[.,!?;:]+$/g,'').replace(/\s+/g,' ').replace(/['']/g,"'");}
+function check(id,val){const n=norm(val);if(!n)return null;const a=ANSWERS[id];if(!a)return null;return a.some(x=>norm(x)===n);}
+function updateScore(){document.getElementById('scoreNum').textContent=answered.size;document.getElementById('progressBar').style.width=Math.round(answered.size/Object.keys(ANSWERS).length*100)+'%';}
+document.querySelectorAll('[data-check]').forEach(inp=>{
+  const id=parseInt(inp.dataset.check);
+  inp.addEventListener('input',function(){
+    this.classList.remove('correct','incorrect');
+    const fb=document.getElementById('fb-'+id);
+    if(fb)fb.classList.remove('show');
+    clearTimeout(timers[id]);
+    timers[id]=setTimeout(()=>{
+      if(!this.value.trim())return;
+      const r=check(id,this.value);
+      if(r===null)return;
+      const fb=document.getElementById('fb-'+id);
+      if(r){
+        this.classList.add('correct');answered.add(id);
+        if(fb){fb.className='feedback show correct';fb.innerHTML=OK+' Brawo, poprawna odpowiedź!';}
+      }else{
+        this.classList.add('incorrect');answered.delete(id);
+        if(fb){fb.className='feedback show incorrect';fb.innerHTML=NO+' Spróbuj jeszcze raz. <span class="ca">Poprawnie: '+DISPLAY[id]+'</span>';}
+      }
+      updateScore();
+    },800);
+  });
+});
+const obs=new IntersectionObserver(e=>{e.forEach(x=>{if(x.isIntersecting)x.target.classList.add('visible');});},{threshold:0.12,rootMargin:'0px 0px -30px 0px'});
+document.querySelectorAll('[data-anim]').forEach(el=>obs.observe(el));
+function toggleKey(btn){
+  const p=document.getElementById('keyPanel'),o=p.classList.toggle('open');
+  btn.classList.toggle('open',o);
+  [...btn.childNodes].filter(n=>n.nodeType===3&&n.textContent.trim().length>2).forEach(t=>{t.textContent=o?' Ukryj klucz odpowiedzi ':' Pokaż klucz odpowiedzi ';});
+}
+</script>
+</body>
+</html>
