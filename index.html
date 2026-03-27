@@ -220,6 +220,17 @@
       line-height: 1.5;
     }
 
+    .details-link {
+      color: var(--text);
+      font-weight: 700;
+      text-decoration: underline;
+      transition: color 0.15s;
+    }
+
+    .details-link:hover {
+      color: var(--pink);
+    }
+
     /* PREPLY BUTTON */
     .btn-pink {
       display: inline-block;
@@ -349,6 +360,225 @@
       color: var(--text-muted);
     }
 
+    /* RECOMMENDED RESOURCES */
+    .recommended {
+      max-width: 900px;
+      margin: 0 auto;
+      padding: 48px 24px 64px;
+    }
+
+    .recommended-title {
+      font-size: 1.5rem;
+      font-weight: 800;
+      color: var(--text);
+      letter-spacing: -0.02em;
+      margin-bottom: 8px;
+    }
+
+    .recommended-sub {
+      font-size: 0.9rem;
+      color: var(--text-muted);
+      margin-bottom: 24px;
+    }
+
+    .rec-list {
+      border-top: 1px solid var(--border-light);
+    }
+
+    .rec-item {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      padding: 16px 12px;
+      border-bottom: 1px solid var(--border-light);
+      text-decoration: none;
+      color: inherit;
+      transition: background 0.15s;
+      border-radius: 0;
+    }
+
+    .rec-item:hover {
+      background: var(--bg-soft);
+    }
+
+    .rec-logo {
+      width: 44px;
+      height: 44px;
+      border-radius: var(--radius-sm);
+      object-fit: contain;
+      flex-shrink: 0;
+      border: 1px solid var(--border-light);
+      background: #fff;
+    }
+
+    .rec-content {
+      flex: 1;
+      min-width: 0;
+    }
+
+    .rec-name {
+      font-size: 0.9rem;
+      font-weight: 700;
+      color: var(--text);
+      margin-bottom: 2px;
+    }
+
+    .rec-desc {
+      font-size: 0.82rem;
+      color: var(--text-muted);
+      line-height: 1.45;
+    }
+
+    .rec-arrow {
+      flex-shrink: 0;
+      width: 16px;
+      height: 16px;
+      color: var(--text-muted);
+      opacity: 0;
+      transition: opacity 0.15s, transform 0.15s;
+    }
+
+    .rec-item:hover .rec-arrow {
+      opacity: 1;
+      transform: translateX(2px);
+    }
+
+    /* KONKRETNE MATERIAŁY (PICKS) */
+    .picks {
+      max-width: 900px;
+      margin: 0 auto;
+      padding: 48px 24px 64px;
+    }
+
+    .picks-title {
+      font-size: 1.5rem;
+      font-weight: 800;
+      color: var(--text);
+      letter-spacing: -0.02em;
+      margin-bottom: 8px;
+    }
+
+    .picks-sub {
+      font-size: 0.9rem;
+      color: var(--text-muted);
+      margin-bottom: 24px;
+    }
+
+    .picks-list {
+      border-top: 1px solid var(--border-light);
+    }
+
+    .pick-item {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      padding: 14px 12px;
+      border-bottom: 1px solid var(--border-light);
+      text-decoration: none;
+      color: inherit;
+      transition: background 0.15s;
+    }
+
+    .pick-item:hover {
+      background: var(--bg-soft);
+    }
+
+    .pick-icon {
+      width: 34px;
+      height: 34px;
+      border-radius: var(--radius-sm);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+
+    .pick-icon-yt {
+      background: #ff0000;
+    }
+
+    .pick-icon-article {
+      background: var(--bg-soft);
+      border: 1px solid var(--border-light);
+    }
+
+    .pick-content {
+      flex: 1;
+      min-width: 0;
+    }
+
+    .pick-name {
+      font-size: 0.88rem;
+      font-weight: 700;
+      color: var(--text);
+      margin-bottom: 2px;
+    }
+
+    .pick-meta {
+      font-size: 0.78rem;
+      color: var(--text-muted);
+    }
+
+    .pick-tags {
+      display: flex;
+      gap: 5px;
+      flex-shrink: 0;
+    }
+
+    .pick-tag {
+      font-size: 0.72rem;
+      font-weight: 600;
+      padding: 3px 10px;
+      border-radius: 20px;
+    }
+
+    .pick-tag-vocab { background: var(--blue-light); color: var(--blue); }
+    .pick-tag-grammar { background: #fff3cd; color: #856404; }
+    .pick-tag-speaking { background: var(--teal-light); color: var(--teal); }
+    .pick-tag-beginner { background: var(--pink-light); color: var(--pink-dark); }
+
+    .pick-arrow {
+      flex-shrink: 0;
+      width: 16px;
+      height: 16px;
+      color: var(--text-muted);
+      opacity: 0;
+      transition: opacity 0.15s, transform 0.15s;
+    }
+
+    .pick-item:hover .pick-arrow {
+      opacity: 1;
+      transform: translateX(2px);
+    }
+
+    /* COMING SOON */
+    .coming-soon {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 40px 16px;
+      text-align: center;
+      border-bottom: 1px solid var(--border-light);
+    }
+
+    .coming-soon-icon {
+      font-size: 2rem;
+      margin-bottom: 12px;
+    }
+
+    .coming-soon-text {
+      font-size: 0.95rem;
+      font-weight: 700;
+      color: var(--text);
+      margin-bottom: 4px;
+    }
+
+    .coming-soon-sub {
+      font-size: 0.82rem;
+      color: var(--text-muted);
+    }
+
     @media (max-width: 600px) {
       .profile-header { flex-direction: column; }
       .stats-row { gap: 20px; flex-wrap: wrap; }
@@ -404,7 +634,7 @@
       </div>
       <div class="section-text">
         <strong>Profesjonalny lektor</strong>
-        <p>Robert D. jest wysoko wykwalifikowanym lektorem z potwierdzonym dyplomem nauczycielskim.</p>
+        <p>Robert D. jest wysoko wykwalifikowanym lektorem z potwierdzonym dyplomem nauczycielskim. <a class="details-link" href="https://help.preply.com/pl/articles/9795272-what-is-a-professional-tutor" target="_blank">Szczegóły</a></p>
       </div>
     </div>
     <div class="section-row">
@@ -485,6 +715,67 @@
       <a class="card-btn" href="https://bertlingo-learning.github.io/Angielski/English-in-the-Shop-II.html">Otwórz materiał →</a>
     </div>
 
+  </div>
+</section>
+
+<!-- DIVIDER -->
+<div style="max-width:900px;margin:0 auto;padding:0 24px;">
+  <div class="section-divider" style="margin:0;"></div>
+</div>
+
+<!-- POLECANE MATERIAŁY -->
+<section class="recommended">
+  <h2 class="recommended-title">POLECANE MATERIAŁY</h2>
+  <p class="recommended-sub">Strony i narzędzia, które polecam do nauki angielskiego.</p>
+
+  <div class="rec-list">
+
+    <a class="rec-item" href="https://example.com" target="_blank">
+      <img class="rec-logo" src="https://bertlingo-learning.github.io/Angielski/Obrazki/logo-placeholder-1.png" alt="Nazwa strony 1">
+      <div class="rec-content">
+        <div class="rec-name">Nazwa strony 1</div>
+        <div class="rec-desc">Krótki opis strony — czego można się tu nauczyć lub dlaczego ją polecam.</div>
+      </div>
+      <svg class="rec-arrow" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
+    </a>
+
+    <a class="rec-item" href="https://example.com" target="_blank">
+      <img class="rec-logo" src="https://bertlingo-learning.github.io/Angielski/Obrazki/logo-placeholder-2.png" alt="Nazwa strony 2">
+      <div class="rec-content">
+        <div class="rec-name">Nazwa strony 2</div>
+        <div class="rec-desc">Krótki opis strony — czego można się tu nauczyć lub dlaczego ją polecam.</div>
+      </div>
+      <svg class="rec-arrow" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
+    </a>
+
+    <a class="rec-item" href="https://example.com" target="_blank">
+      <img class="rec-logo" src="https://bertlingo-learning.github.io/Angielski/Obrazki/logo-placeholder-3.png" alt="Nazwa strony 3">
+      <div class="rec-content">
+        <div class="rec-name">Nazwa strony 3</div>
+        <div class="rec-desc">Krótki opis strony — czego można się tu nauczyć lub dlaczego ją polecam.</div>
+      </div>
+      <svg class="rec-arrow" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
+    </a>
+
+  </div>
+</section>
+
+<!-- DIVIDER -->
+<div style="max-width:900px;margin:0 auto;padding:0 24px;">
+  <div class="section-divider" style="margin:0;"></div>
+</div>
+
+<!-- WYBRANE MATERIAŁY -->
+<section class="picks">
+  <h2 class="picks-title">WYBRANE MATERIAŁY</h2>
+  <p class="picks-sub">Konkretne filmiki, artykuły i posty, które warto zobaczyć.</p>
+
+  <div class="picks-list">
+    <div class="coming-soon">
+      <div class="coming-soon-icon">🎬</div>
+      <div class="coming-soon-text">Wkrótce!</div>
+      <div class="coming-soon-sub">Już niedługo pojawią się tutaj polecane filmiki, artykuły i inne materiały do nauki angielskiego.</div>
+    </div>
   </div>
 </section>
 
