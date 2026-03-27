@@ -233,19 +233,24 @@
 
     /* PREPLY BUTTON */
     .btn-pink {
-      display: inline-block;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 12px;
       background: var(--pink);
-      color: #fff;
-      font-weight: 700;
+      color: var(--text);
+      font-weight: 600;
       font-size: 0.9rem;
       padding: 12px 24px;
+      border: 2px solid var(--text);
       border-radius: 8px;
       text-decoration: none;
       transition: background 0.15s;
       margin-top: 20px;
+      box-sizing: border-box;
     }
 
-    .btn-pink:hover { background: var(--pink-dark); }
+    .btn-pink:hover { background: #fe9fc3; }
 
     /* MATERIALS SECTION */
     .materials {
@@ -319,18 +324,18 @@
       justify-content: center;
       gap: 6px;
       background: var(--pink);
-      color: #fff;
+      color: var(--text);
       font-size: 0.82rem;
-      font-weight: 700;
+      font-weight: 600;
       padding: 9px 16px;
       border-radius: var(--radius-sm);
       text-decoration: none;
-      border: 1.5px solid rgba(18,17,23,0.18);
+      border: 2px solid var(--text);
       cursor: pointer;
       transition: background 0.15s;
     }
 
-    .card-btn:hover { background: var(--pink-dark); }
+    .card-btn:hover { background: #fe9fc3; }
 
     /* DIVIDER */
     .section-divider {
@@ -402,13 +407,24 @@
     }
 
     .rec-logo {
-      width: 44px;
-      height: 44px;
+      width: 104px;
+      height: 104px;
       border-radius: var(--radius-sm);
       object-fit: contain;
       flex-shrink: 0;
       border: 1px solid var(--border-light);
       background: #fff;
+      padding: 8px;
+    }
+
+    .rec-logo-photo {
+      object-fit: cover;
+      padding: 0;
+    }
+
+    .rec-logo-dark {
+      background: #0b1a3b;
+      border-color: #0b1a3b;
     }
 
     .rec-content {
@@ -417,16 +433,16 @@
     }
 
     .rec-name {
-      font-size: 0.9rem;
+      font-size: 1.05rem;
       font-weight: 700;
       color: var(--text);
-      margin-bottom: 2px;
+      margin-bottom: 3px;
     }
 
     .rec-desc {
-      font-size: 0.82rem;
+      font-size: 0.9rem;
       color: var(--text-muted);
-      line-height: 1.45;
+      line-height: 1.5;
     }
 
     .rec-arrow {
@@ -704,7 +720,7 @@
     <div class="card">
       <div class="card-icon-wrap">🔤</div>
       <div class="card-title">Essential English</div>
-      <div class="card-desc">Formalne, kolokwialne, praktyczne — wszystko w jednym miejscu</div>
+      <div class="card-desc">Formalne, kolokwialne, praktyczne - wszystko w jednym miejscu</div>
       <a class="card-btn" href="https://bertlingo-learning.github.io/Angielski/Essential-English.html">Otwórz materiał →</a>
     </div>
     
@@ -730,29 +746,65 @@
 
   <div class="rec-list">
 
-    <a class="rec-item" href="https://example.com" target="_blank">
-      <img class="rec-logo" src="https://bertlingo-learning.github.io/Angielski/Obrazki/logo-placeholder-1.png" alt="Nazwa strony 1">
+    <a class="rec-item" href="https://www.youtube.com/@ArlenaWitt" target="_blank">
+      <img class="rec-logo rec-logo-photo" src="https://bertlingo-learning.github.io/Angielski/Obrazki/Arlena-Witt.jpeg" alt="Arlena Witt">
       <div class="rec-content">
-        <div class="rec-name">Nazwa strony 1</div>
-        <div class="rec-desc">Krótki opis strony — czego można się tu nauczyć lub dlaczego ją polecam.</div>
+        <div class="rec-name">Arlena Witt</div>
+        <div class="rec-desc">Kanał YouTube "Po Cudzemu", na którym Arlena uczy poprawnej wymowy angielskiej na przykładach z filmów, seriali i piosenek. Profesjonalnie, merytorycznie i z przymrużeniem oka.</div>
       </div>
       <svg class="rec-arrow" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
     </a>
 
-    <a class="rec-item" href="https://example.com" target="_blank">
-      <img class="rec-logo" src="https://bertlingo-learning.github.io/Angielski/Obrazki/logo-placeholder-2.png" alt="Nazwa strony 2">
+    <a class="rec-item" href="https://dictionary.cambridge.org/" target="_blank">
+      <img class="rec-logo rec-logo-dark" src="https://bertlingo-learning.github.io/Angielski/Obrazki/Cambridge-Dictionary-logo.svg" alt="Cambridge Dictionary">
       <div class="rec-content">
-        <div class="rec-name">Nazwa strony 2</div>
-        <div class="rec-desc">Krótki opis strony — czego można się tu nauczyć lub dlaczego ją polecam.</div>
+        <div class="rec-name">Cambridge Dictionary</div>
+        <div class="rec-desc">Jeden z najlepszych słowników angielskich online - definicje, wymowa i przykłady użycia.</div>
       </div>
       <svg class="rec-arrow" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
     </a>
 
-    <a class="rec-item" href="https://example.com" target="_blank">
-      <img class="rec-logo" src="https://bertlingo-learning.github.io/Angielski/Obrazki/logo-placeholder-3.png" alt="Nazwa strony 3">
+    <a class="rec-item" href="https://www.youtube.com/c/EnglishwithLucy" target="_blank">
+      <img class="rec-logo rec-logo-photo" src="https://bertlingo-learning.github.io/Angielski/Obrazki/English-with-Lucy-photo.jpg" alt="English with Lucy">
       <div class="rec-content">
-        <div class="rec-name">Nazwa strony 3</div>
-        <div class="rec-desc">Krótki opis strony — czego można się tu nauczyć lub dlaczego ją polecam.</div>
+        <div class="rec-name">English with Lucy</div>
+        <div class="rec-desc">Popularny kanał YouTube do nauki angielskiego - słownictwo, gramatyka i wymowa po angielsku.</div>
+      </div>
+      <svg class="rec-arrow" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
+    </a>
+
+    <a class="rec-item" href="https://www.diki.pl/" target="_blank">
+      <img class="rec-logo" src="https://bertlingo-learning.github.io/Angielski/Obrazki/diki_logo.svg" alt="Diki">
+      <div class="rec-content">
+        <div class="rec-name">Diki.pl</div>
+        <div class="rec-desc">Polsko-angielski słownik online z wymową, przykładami i odmianą wyrazów.</div>
+      </div>
+      <svg class="rec-arrow" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
+    </a>
+
+    <a class="rec-item" href="https://www.gamestolearnenglish.com/" target="_blank">
+      <img class="rec-logo" src="https://bertlingo-learning.github.io/Angielski/Obrazki/games-to-learn-english-logo.png" alt="Games to Learn English">
+      <div class="rec-content">
+        <div class="rec-name">Games to Learn English</div>
+        <div class="rec-desc">Nauka angielskiego przez gry - słownictwo, pisownia i gramatyka w formie zabawy.</div>
+      </div>
+      <svg class="rec-arrow" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
+    </a>
+
+    <a class="rec-item" href="https://kwadransnaangielski.pl/" target="_blank">
+      <img class="rec-logo" src="https://bertlingo-learning.github.io/Angielski/Obrazki/kna-logo.png" alt="Kwadrans na Angielski">
+      <div class="rec-content">
+        <div class="rec-name">Kwadrans na Angielski</div>
+        <div class="rec-desc">Krótkie, przystępne lekcje angielskiego po polsku - idealne na szybką naukę każdego dnia.</div>
+      </div>
+      <svg class="rec-arrow" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
+    </a>
+
+    <a class="rec-item" href="https://www.umiemyangielski.pl/" target="_blank">
+      <img class="rec-logo" src="https://bertlingo-learning.github.io/Angielski/Obrazki/umiemy-to-logo.svg" alt="Umiemy Angielski">
+      <div class="rec-content">
+        <div class="rec-name">Umiemy Angielski</div>
+        <div class="rec-desc">Polska platforma do nauki angielskiego z ćwiczeniami, testami i materiałami na różnych poziomach.</div>
       </div>
       <svg class="rec-arrow" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
     </a>
