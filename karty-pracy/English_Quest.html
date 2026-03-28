@@ -1,0 +1,854 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>English Quest 🎮</title>
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.4/dist/confetti.browser.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,600;12..96,700;12..96,800&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg: #0c0f1a;
+            --surface: #141827;
+            --surface2: #1a2035;
+            --border: #252d45;
+            --border-light: #2f3a58;
+            --text: #c4ccdd;
+            --text-dim: #6a7494;
+            --white: #eef1f8;
+            --green: #34d399;
+            --green-bg: rgba(52,211,153,0.1);
+            --green-border: rgba(52,211,153,0.3);
+            --red: #f87171;
+            --red-bg: rgba(248,113,113,0.08);
+            --red-border: rgba(248,113,113,0.3);
+            --orange: #fb923c;
+            --orange-bg: rgba(251,146,60,0.1);
+            --orange-border: rgba(251,146,60,0.3);
+            --purple: #a78bfa;
+            --purple-bg: rgba(167,139,250,0.1);
+            --purple-border: rgba(167,139,250,0.25);
+            --blue: #60a5fa;
+            --blue-bg: rgba(96,165,250,0.1);
+            --yellow: #fbbf24;
+            --yellow-bg: rgba(251,191,36,0.08);
+            --font: 'Outfit', sans-serif;
+            --font-display: 'Bricolage Grotesque', sans-serif;
+            --mono: 'JetBrains Mono', monospace;
+        }
+
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+        html { scroll-behavior: smooth; }
+
+        body {
+            font-family: var(--font);
+            background: var(--bg);
+            color: var(--text);
+            line-height: 1.6;
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        /* ===== BACKGROUND ===== */
+        .bg-pattern {
+            position: fixed; inset: 0; z-index: 0; pointer-events: none;
+            background:
+                radial-gradient(ellipse at 15% 20%, rgba(167,139,250,0.06) 0%, transparent 50%),
+                radial-gradient(ellipse at 85% 70%, rgba(52,211,153,0.04) 0%, transparent 50%),
+                radial-gradient(ellipse at 50% 50%, rgba(251,146,60,0.03) 0%, transparent 60%);
+        }
+        .pixel-grid {
+            position: fixed; inset: 0; z-index: 1; pointer-events: none; opacity: 0.015;
+            background-image:
+                linear-gradient(rgba(255,255,255,0.3) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(255,255,255,0.3) 1px, transparent 1px);
+            background-size: 40px 40px;
+        }
+
+        /* Particles — float upward slowly and fade out */
+        .particle-layer {
+            position: fixed; inset: 0; z-index: 2; pointer-events: none; overflow: hidden;
+        }
+        .particle {
+            position: absolute; opacity: 0;
+            animation: riseUp var(--dur) linear infinite;
+            animation-delay: var(--delay);
+        }
+        @keyframes riseUp {
+            0%   { transform: translateY(0) translateX(0); opacity: 0; }
+            8%   { opacity: 0.13; }
+            60%  { opacity: 0.07; }
+            100% { transform: translateY(-115vh) translateX(var(--drift)); opacity: 0; }
+        }
+
+        /* ===== APP SHELL ===== */
+        .app { position: relative; z-index: 10; max-width: 920px; margin: 0 auto; padding: 1.5rem; }
+
+        /* ===== HEADER ===== */
+        .header { text-align: center; padding: 2.5rem 0 1.8rem; animation: fadeIn 0.7s ease-out; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(-20px); } to { opacity: 1; transform: translateY(0); } }
+        .header-emojis { font-size: 2.5rem; margin-bottom: 0.6rem; letter-spacing: 0.3rem; }
+        .header h1 {
+            font-family: var(--font-display);
+            font-size: clamp(1.8rem, 5vw, 2.8rem);
+            font-weight: 800; color: var(--white);
+            letter-spacing: -0.02em; line-height: 1.15;
+        }
+        .header h1 .accent { color: var(--purple); }
+        .header .sub { font-size: 1rem; color: var(--text-dim); margin-top: 0.4rem; }
+
+        /* ===== XP BAR ===== */
+        .xp-bar-wrap {
+            background: var(--surface); border: 1px solid var(--border);
+            border-radius: 16px; padding: 1rem 1.25rem; margin-bottom: 2rem;
+        }
+        .xp-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem; }
+        .xp-label { font-family: var(--font-display); font-weight: 700; font-size: 0.9rem; color: var(--white); }
+        .xp-score { font-family: var(--mono); font-size: 0.85rem; color: var(--purple); }
+        .xp-track { height: 8px; background: rgba(255,255,255,0.05); border-radius: 10px; overflow: hidden; }
+        .xp-fill {
+            height: 100%; width: 0%; border-radius: 10px;
+            background: linear-gradient(90deg, var(--purple), #c084fc, var(--blue));
+            transition: width 0.8s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+
+        /* ===== SECTION CARDS ===== */
+        .section {
+            background: var(--surface); border: 1px solid var(--border);
+            border-radius: 20px; padding: 1.75rem; margin-bottom: 1.75rem;
+            transition: border-color 0.4s;
+        }
+        .section.done { border-color: var(--green-border); }
+        .sec-head { display: flex; align-items: center; gap: 0.75rem; margin-bottom: 0.25rem; }
+        .sec-icon {
+            width: 38px; height: 38px; border-radius: 11px;
+            display: flex; align-items: center; justify-content: center; font-size: 1.2rem; flex-shrink: 0;
+        }
+        .sec-title { font-family: var(--font-display); font-weight: 700; font-size: 1.3rem; color: var(--white); }
+        .sec-desc { font-size: 0.95rem; color: var(--text-dim); margin-bottom: 1.25rem; margin-left: calc(38px + 0.75rem); }
+
+        /* ===== FLASHCARDS ===== */
+        .flash-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 0.75rem; }
+        .flash-card-outer { perspective: 700px; cursor: pointer; height: 150px; }
+        .flash-card {
+            position: relative; width: 100%; height: 100%;
+            transition: transform 0.5s ease; transform-style: preserve-3d;
+        }
+        .flash-card.flipped { transform: rotateY(180deg); }
+        .flash-front, .flash-back {
+            position: absolute; inset: 0; backface-visibility: hidden;
+            border-radius: 14px; display: flex; flex-direction: column;
+            align-items: center; justify-content: center; padding: 1rem;
+            text-align: center; border: 1.5px solid var(--border);
+        }
+        .flash-front { background: var(--surface2); }
+        .flash-back { background: var(--surface2); transform: rotateY(180deg); }
+        .flash-lang {
+            font-size: 0.65rem; font-weight: 700; text-transform: uppercase;
+            letter-spacing: 0.12em; margin-bottom: 0.35rem; border-radius: 4px;
+            padding: 0.12rem 0.5rem;
+        }
+        .lang-en { color: var(--purple); background: var(--purple-bg); }
+        .lang-pl { color: var(--orange); background: var(--orange-bg); }
+        .flash-word {
+            font-family: var(--font-display); font-weight: 700;
+            font-size: 1.1rem; color: var(--white); line-height: 1.3;
+        }
+        .flash-hint { font-size: 0.75rem; color: var(--text-dim); margin-top: 0.3rem; font-style: italic; }
+        .flash-card-outer.revealed .flash-front { border-color: var(--green-border); }
+        .flash-card-outer.revealed .flash-back { border-color: var(--green-border); }
+        .flash-tap-hint {
+            text-align: center; font-size: 0.8rem; color: var(--text-dim);
+            margin-top: 0.6rem; font-style: italic;
+        }
+
+        /* ===== GAP FILL / GRAMMAR ===== */
+        .gram-card {
+            background: rgba(255,255,255,0.02); border: 1px solid var(--border);
+            border-radius: 14px; padding: 1.2rem; margin-bottom: 0.7rem;
+            transition: border-color 0.3s, background 0.3s;
+        }
+        .gram-card.g-correct { border-color: var(--green-border); background: var(--green-bg); }
+        .gram-card.g-wrong { animation: shake 0.45s ease-out; }
+        @keyframes shake { 0%,100%{transform:translateX(0)} 25%{transform:translateX(-5px)} 75%{transform:translateX(5px)} }
+        .gram-sentence { font-size: 1.1rem; color: var(--white); line-height: 1.7; margin-bottom: 0.15rem; }
+        .gram-sentence .gap {
+            display: inline-block; min-width: 120px; border-bottom: 2px dashed var(--purple);
+            padding: 0 4px; color: var(--purple); font-weight: 600; text-align: center;
+        }
+        .gram-sentence .gap.filled { border-color: var(--green); color: var(--green); }
+        .gram-context { font-size: 0.8rem; color: var(--text-dim); margin-bottom: 0.55rem; }
+        .gram-tag {
+            display: inline-block; font-size: 0.65rem; font-weight: 700; text-transform: uppercase;
+            letter-spacing: 0.08em; padding: 0.15rem 0.55rem; border-radius: 5px;
+            margin-bottom: 0.45rem;
+        }
+        .tag-tense { color: var(--blue); background: var(--blue-bg); }
+        .opts-row { display: flex; flex-wrap: wrap; gap: 0.45rem; }
+        .opt-btn {
+            padding: 0.45rem 0.95rem; border-radius: 9px;
+            border: 1.5px solid var(--border); background: transparent;
+            color: var(--white); font-family: var(--font); font-size: 0.95rem;
+            font-weight: 500; cursor: pointer; transition: all 0.2s;
+        }
+        .opt-btn:hover { border-color: var(--purple); background: var(--purple-bg); }
+        .opt-btn.o-correct { border-color: var(--green); background: var(--green-bg); color: var(--green); cursor: default; }
+        .opt-btn.o-wrong { border-color: var(--red); background: var(--red-bg); color: var(--red); cursor: default; }
+        .opt-btn:disabled { opacity: 0.35; cursor: default; }
+
+        /* ===== PREPOSITIONS ===== */
+        .prep-scene { display: grid; grid-template-columns: 1fr 1fr; gap: 0.7rem; }
+        .prep-card {
+            background: rgba(255,255,255,0.02); border: 1px solid var(--border);
+            border-radius: 14px; padding: 1.1rem; text-align: center;
+            transition: border-color 0.3s, background 0.3s;
+        }
+        .prep-card.p-correct { border-color: var(--green-border); background: var(--green-bg); }
+        .prep-card .prep-visual { font-size: 2.4rem; margin-bottom: 0.45rem; line-height: 1; }
+        .prep-card .prep-q { font-size: 1rem; color: var(--white); margin-bottom: 0.55rem; }
+        .prep-card .prep-q .p-gap {
+            display: inline-block; min-width: 70px; border-bottom: 2px dashed var(--orange);
+            color: var(--orange); font-weight: 600; padding: 0 3px;
+        }
+        .prep-card .prep-q .p-gap.p-filled { border-color: var(--green); color: var(--green); }
+
+        /* ===== SENTENCE BUILDER ===== */
+        .build-block { margin-bottom: 1.6rem; }
+        .build-prompt { font-size: 0.95rem; color: var(--text-dim); margin-bottom: 0.55rem; }
+        .build-prompt em { color: var(--text); font-style: normal; }
+        .word-bank {
+            display: flex; flex-wrap: wrap; gap: 0.45rem;
+            min-height: 44px; margin-bottom: 0.65rem;
+        }
+        .w-chip {
+            padding: 0.45rem 0.85rem; border-radius: 9px;
+            border: 1.5px solid var(--border); background: rgba(255,255,255,0.02);
+            color: var(--white); font-size: 0.95rem; font-weight: 500;
+            cursor: pointer; transition: all 0.2s; user-select: none;
+        }
+        .w-chip:hover { border-color: var(--purple); background: var(--purple-bg); transform: translateY(-2px); }
+        .w-chip.used { opacity: 0.25; cursor: default; transform: none; }
+        .build-area {
+            min-height: 54px; padding: 0.8rem; border-radius: 14px;
+            border: 2px dashed var(--border); background: rgba(255,255,255,0.015);
+            display: flex; flex-wrap: wrap; gap: 0.45rem; align-items: center;
+            margin-bottom: 0.55rem; transition: border-color 0.3s;
+        }
+        .build-area.has-words { border-color: rgba(167,139,250,0.25); }
+        .build-area.b-correct { border-color: var(--green); background: var(--green-bg); }
+        .build-area.b-wrong { animation: shake 0.45s ease-out; }
+        .placed {
+            padding: 0.4rem 0.75rem; border-radius: 8px;
+            background: var(--purple-bg); border: 1.5px solid var(--purple-border);
+            color: #c4b5fd; font-weight: 500; font-size: 0.95rem;
+            cursor: pointer; transition: all 0.2s; animation: popIn 0.25s ease-out;
+        }
+        .placed:hover { background: var(--red-bg); border-color: var(--red-border); }
+        @keyframes popIn { from{transform:scale(0.9);opacity:0}to{transform:scale(1);opacity:1} }
+        .build-ph { color: var(--text-dim); font-size: 0.85rem; font-style: italic; }
+
+        .check-btn {
+            display: inline-flex; align-items: center; gap: 0.45rem;
+            padding: 0.6rem 1.3rem; border-radius: 10px; border: none;
+            background: var(--purple); color: var(--bg);
+            font-family: var(--font-display); font-weight: 700; font-size: 0.95rem;
+            cursor: pointer; transition: all 0.25s;
+        }
+        .check-btn:hover { transform: translateY(-2px); box-shadow: 0 4px 16px rgba(167,139,250,0.3); }
+        .check-btn:disabled { opacity: 0.35; cursor: default; transform: none; box-shadow: none; }
+
+        /* ===== REVIEW ===== */
+        .review-card {
+            background: rgba(255,255,255,0.02); border: 1px solid var(--border);
+            border-radius: 14px; padding: 1.2rem; margin-bottom: 0.7rem;
+            transition: border-color 0.3s, background 0.3s;
+        }
+        .review-card.rv-correct { border-color: var(--green-border); background: var(--green-bg); }
+        .review-card.rv-wrong { animation: shake 0.45s ease-out; }
+        .review-word {
+            font-family: var(--font-display); font-weight: 700; font-size: 1.15rem;
+            color: var(--white); margin-bottom: 0.5rem;
+        }
+        .review-word .rv-answer { font-weight: 400; color: var(--green); display: none; }
+        .review-card.rv-correct .rv-answer { display: inline; }
+
+        /* ===== SPEAKING ===== */
+        .speak-prompt {
+            background: linear-gradient(135deg, var(--purple-bg), var(--orange-bg));
+            border: 1px solid var(--purple-border); border-radius: 14px;
+            padding: 1.3rem; margin-bottom: 0.9rem;
+        }
+        .speak-prompt .sp-label {
+            font-size: 0.7rem; font-weight: 700; text-transform: uppercase;
+            letter-spacing: 0.1em; color: var(--purple); margin-bottom: 0.4rem;
+        }
+        .speak-prompt p { font-size: 1.05rem; color: var(--white); }
+        .speak-tips { list-style: none; }
+        .speak-tips li {
+            padding: 0.4rem 0 0.4rem 1.5rem; position: relative;
+            font-size: 0.95rem; color: var(--text);
+        }
+        .speak-tips li::before { content: '💡'; position: absolute; left: 0; }
+        .ck-item {
+            display: flex; align-items: center; gap: 0.7rem;
+            padding: 0.5rem 0; cursor: pointer; user-select: none;
+        }
+        .ck-box {
+            width: 24px; height: 24px; border-radius: 7px;
+            border: 2px solid var(--border); display: flex;
+            align-items: center; justify-content: center;
+            transition: all 0.3s; flex-shrink: 0; font-size: 0.75rem; color: var(--bg);
+        }
+        .ck-item.checked .ck-box { background: var(--green); border-color: var(--green); }
+        .ck-item.checked .ck-text { color: var(--green); text-decoration: line-through; }
+        .ck-text { font-size: 0.95rem; }
+
+        /* ===== FUN FACTS ===== */
+        .fact-card {
+            background: rgba(255,255,255,0.02); border: 1px solid var(--border);
+            border-radius: 14px; padding: 1.1rem 1.2rem; margin-bottom: 0.65rem;
+            display: flex; align-items: flex-start; gap: 0.8rem;
+        }
+        .fact-emoji { font-size: 1.5rem; flex-shrink: 0; line-height: 1.3; }
+        .fact-text { font-size: 0.95rem; color: var(--text); line-height: 1.55; }
+        .fact-text strong { color: var(--white); }
+
+        /* ===== FEEDBACK ===== */
+        .fb {
+            margin-top: 0.65rem; padding: 0.65rem 1rem; border-radius: 10px;
+            font-size: 0.95rem; font-weight: 500; display: none;
+        }
+        .fb.show { display: block; animation: fadeUp 0.35s ease-out; }
+        .fb.fb-ok { background: var(--green-bg); color: var(--green); border: 1px solid var(--green-border); }
+        .fb.fb-no { background: var(--red-bg); color: var(--red); border: 1px solid var(--red-border); }
+        @keyframes fadeUp { from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)} }
+
+        /* ===== REWARD ===== */
+        .reward {
+            display: none; text-align: center; padding: 2rem;
+            background: linear-gradient(135deg, var(--green-bg), var(--purple-bg));
+            border: 2px solid var(--green); border-radius: 20px; margin-bottom: 1.75rem;
+        }
+        .reward.show { display: block; animation: fadeUp 0.8s ease-out; }
+        .reward .big { font-size: 3.5rem; }
+        .reward h2 { font-family: var(--font-display); font-size: 1.6rem; color: var(--white); margin-top: 0.3rem; }
+        .reward p { color: var(--text); font-size: 1rem; margin-top: 0.25rem; }
+        .finale-btn {
+            margin-top: 1rem; padding: 0.7rem 1.8rem; border-radius: 12px;
+            border: none; background: linear-gradient(135deg, var(--green), #2dd4bf);
+            color: var(--bg); font-family: var(--font-display); font-weight: 700;
+            font-size: 1rem; cursor: pointer; transition: all 0.3s;
+        }
+        .finale-btn:hover { transform: translateY(-2px); box-shadow: 0 6px 24px rgba(52,211,153,0.35); }
+        .redo-btn {
+            margin-top: 0.5rem; padding: 0.5rem 1rem; border-radius: 9px;
+            border: 1.5px solid var(--border); background: transparent;
+            color: var(--text); font-family: var(--font); font-weight: 500;
+            font-size: 0.85rem; cursor: pointer; transition: all 0.25s; display: inline-block;
+        }
+        .redo-btn:hover { border-color: var(--purple); color: var(--purple); }
+
+        .footer { text-align: center; padding: 2rem 0; font-size: 0.8rem; color: var(--text-dim); }
+
+        @media(max-width:600px){
+            .app { padding: 1rem; }
+            .section { padding: 1.2rem; border-radius: 16px; }
+            .flash-grid { grid-template-columns: 1fr 1fr; }
+            .prep-scene { grid-template-columns: 1fr; }
+            .sec-desc { margin-left: 0; }
+            .header h1 { font-size: 1.6rem; }
+            .sec-title { font-size: 1.1rem; }
+        }
+        @media(max-width:400px){
+            .flash-grid { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="bg-pattern"></div>
+<div class="pixel-grid"></div>
+<div class="particle-layer" id="particleLayer"></div>
+
+<div class="app">
+
+    <header class="header">
+        <div class="header-emojis">🦖 🍣 ✈️ ⛏️</div>
+        <h1>English <span class="accent">Quest</span></h1>
+        <p class="sub">Praktyczny angielski przez Twoje zainteresowania</p>
+    </header>
+
+    <!-- XP -->
+    <div class="xp-bar-wrap">
+        <div class="xp-top">
+            <span class="xp-label">⚡ Twój XP</span>
+            <span class="xp-score" id="xpDisplay">0 / 6 zadań</span>
+        </div>
+        <div class="xp-track"><div class="xp-fill" id="xpFill"></div></div>
+    </div>
+
+    <!-- REWARD -->
+    <div class="reward" id="reward">
+        <div class="big">🏆</div>
+        <h2>Quest Complete!</h2>
+        <p>Wszystkie zadania ukończone — super robota!</p>
+        <button class="finale-btn" onclick="bigFinale()">🎉 Celebrate!</button>
+        <br>
+        <button class="redo-btn" onclick="location.reload()">🔄 Jeszcze raz</button>
+    </div>
+
+    <!-- 1. FLASHCARDS -->
+    <div class="section" id="sec1">
+        <div class="sec-head">
+            <div class="sec-icon" style="background:var(--purple-bg)">🃏</div>
+            <div class="sec-title">Fiszki — Kliknij, żeby odsłonić</div>
+        </div>
+        <div class="sec-desc">Kliknij kartę, żeby zobaczyć tłumaczenie. Spróbuj najpierw zgadnąć w głowie!</div>
+        <div class="flash-grid" id="flashGrid"></div>
+        <p class="flash-tap-hint">👆 Kliknij kartę, żeby ją odwrócić · Odsłoń wszystkie, żeby ukończyć zadanie</p>
+        <div class="fb" id="fb1"></div>
+    </div>
+
+    <!-- 2. TENSES -->
+    <div class="section" id="sec2">
+        <div class="sec-head">
+            <div class="sec-icon" style="background:var(--blue-bg)">⏱️</div>
+            <div class="sec-title">Czasy — Simple, Continuous & Past</div>
+        </div>
+        <div class="sec-desc">Wybierz poprawną formę. Zwracaj uwagę na słowa-wskazówki! (usually, right now, yesterday...)</div>
+        <div id="grammarArea"></div>
+        <div class="fb" id="fb2"></div>
+    </div>
+
+    <!-- 3. PREPOSITIONS -->
+    <div class="section" id="sec3">
+        <div class="sec-head">
+            <div class="sec-icon" style="background:var(--orange-bg)">📍</div>
+            <div class="sec-title">Przyimki — in, on, at, to, from...</div>
+        </div>
+        <div class="sec-desc">Dobierz właściwy przyimek do każdej sytuacji.</div>
+        <div class="prep-scene" id="prepArea"></div>
+        <div class="fb" id="fb3"></div>
+    </div>
+
+    <!-- 4. SENTENCE BUILDER -->
+    <div class="section" id="sec4">
+        <div class="sec-head">
+            <div class="sec-icon" style="background:var(--green-bg)">🔧</div>
+            <div class="sec-title">Zbuduj zdanie</div>
+        </div>
+        <div class="sec-desc">Ułóż słowa w poprawne zdanie. Kliknij, żeby dodać — kliknij ponownie, żeby usunąć.</div>
+        <div id="buildArea"></div>
+    </div>
+
+    <!-- 5. REVIEW -->
+    <div class="section" id="sec5">
+        <div class="sec-head">
+            <div class="sec-icon" style="background:var(--yellow-bg)">🔁</div>
+            <div class="sec-title">Powtórka — słówka z poprzednich lekcji</div>
+        </div>
+        <div class="sec-desc">Dopasuj słowo do definicji. Pamiętasz te słówka?</div>
+        <div id="reviewArea"></div>
+        <div class="fb" id="fb5"></div>
+    </div>
+
+    <!-- 6. SPEAKING -->
+    <div class="section" id="sec6">
+        <div class="sec-head">
+            <div class="sec-icon" style="background:var(--purple-bg)">🎤</div>
+            <div class="sec-title">Mówienie — Przygotuj się na lekcję!</div>
+        </div>
+        <div class="sec-desc">To ćwiczenie zrobimy razem. Odznacz punkty, gdy się przygotujesz.</div>
+        <div class="speak-prompt">
+            <div class="sp-label">Temat rozmowy</div>
+            <p>Opowiedz mi o swoim idealnym dniu. Co <strong>zwykle</strong> robisz? Co robiłeś <strong>wczoraj</strong>? A co robisz <strong>teraz, w tej chwili</strong>?</p>
+        </div>
+        <ul class="speak-tips">
+            <li>Present Simple dla zwyczajów: <em>"I usually eat sushi on Fridays."</em></li>
+            <li>Past Simple dla wczoraj: <em>"Yesterday I played Minecraft for two hours."</em></li>
+            <li>Present Continuous dla teraz: <em>"Right now I am doing my English homework."</em></li>
+            <li>Spróbuj użyć min. 4 nowych słówek z dzisiejszych fiszek!</li>
+        </ul>
+        <div style="margin-top:0.8rem" id="speakCL"></div>
+        <div class="fb" id="fb6"></div>
+    </div>
+
+    <!-- 7. FUN FACTS -->
+    <div class="section" id="sec7">
+        <div class="sec-head">
+            <div class="sec-icon" style="background:var(--yellow-bg)">💡</div>
+            <div class="sec-title">Did You Know? — Ciekawostki</div>
+        </div>
+        <div class="sec-desc">A few fun facts in English. How many can you understand without translating?</div>
+        <div class="fun-facts">
+            <div class="fact-card">
+                <div class="fact-emoji">🦖</div>
+                <div class="fact-text">The word <strong>"dinosaur"</strong> comes from Greek and means <strong>"terrible lizard"</strong>. But most dinosaurs were actually more closely related to birds than to lizards!</div>
+            </div>
+            <div class="fact-card">
+                <div class="fact-emoji">🍣</div>
+                <div class="fact-text">Sushi doesn't mean <strong>"raw fish"</strong> — it actually refers to the <strong>vinegared rice</strong>. You can have sushi with vegetables, cooked egg, or even fruit!</div>
+            </div>
+            <div class="fact-card">
+                <div class="fact-emoji">✈️</div>
+                <div class="fact-text">A Boeing 747 has about <strong>6 million parts</strong>. Half of them are fasteners (bolts, rivets, screws). Imagine building that in Minecraft!</div>
+            </div>
+            <div class="fact-card">
+                <div class="fact-emoji">⛏️</div>
+                <div class="fact-text">Minecraft is the <strong>best-selling video game of all time</strong> with over 300 million copies sold. The entire surface area of a Minecraft world is about <strong>8 times the size of Earth</strong>.</div>
+            </div>
+            <div class="fact-card">
+                <div class="fact-emoji">🌍</div>
+                <div class="fact-text">There are about <strong>1.5 billion</strong> English speakers in the world, but only around <strong>400 million</strong> of them are native speakers. Most people learned it just like you!</div>
+            </div>
+        </div>
+    </div>
+
+    <footer class="footer">English Quest · 🦖🍣✈️⛏️</footer>
+</div>
+
+<script>
+// ===== PARTICLES =====
+(function spawnParticles(){
+    const layer = document.getElementById('particleLayer');
+    const emojis = ['🦖','🍣','✈️','⛏️','🎮','⭐','🌍','📚'];
+    for(let i = 0; i < 18; i++){
+        const p = document.createElement('div');
+        p.className = 'particle';
+        p.textContent = emojis[Math.floor(Math.random()*emojis.length)];
+        p.style.left = (Math.random()*100) + '%';
+        p.style.bottom = -(Math.random()*10) + '%';
+        p.style.setProperty('--dur', (14 + Math.random()*20) + 's');
+        p.style.setProperty('--delay', (Math.random()*18) + 's');
+        p.style.setProperty('--drift', (Math.random()*50-25) + 'px');
+        p.style.fontSize = (16 + Math.random()*12) + 'px';
+        layer.appendChild(p);
+    }
+})();
+
+// ===== STATE =====
+const TOTAL = 6;
+let done = new Set();
+
+function xp(){
+    const n = done.size;
+    document.getElementById('xpDisplay').textContent = `${n} / ${TOTAL} zadań`;
+    document.getElementById('xpFill').style.width = `${(n/TOTAL)*100}%`;
+    if(n===TOTAL){
+        document.getElementById('reward').classList.add('show');
+        document.getElementById('reward').scrollIntoView({behavior:'smooth',block:'center'});
+    }
+}
+function markDone(n){
+    if(!done.has(n)){
+        done.add(n);
+        document.getElementById(`sec${n}`).classList.add('done');
+        confetti({particleCount:65,spread:60,origin:{y:0.7},colors:['#a78bfa','#34d399','#fb923c','#fbbf24','#60a5fa']});
+        xp();
+    }
+}
+function showFb(id,ok,msg){const e=document.getElementById(id);e.className=`fb show fb-${ok?'ok':'no'}`;e.textContent=msg;}
+
+function bigFinale(){
+    const end = Date.now() + 3000;
+    const colors = ['#a78bfa','#34d399','#fb923c','#fbbf24','#60a5fa','#f87171','#c084fc'];
+    (function frame(){
+        confetti({particleCount:5,angle:60,spread:55,origin:{x:0},colors});
+        confetti({particleCount:5,angle:120,spread:55,origin:{x:1},colors});
+        confetti({particleCount:8,spread:100,origin:{y:Math.random()*0.4+0.4},colors});
+        if(Date.now()<end) requestAnimationFrame(frame);
+    })();
+}
+
+// ===== 1. FLASHCARDS =====
+const flashcards = [
+    {front:'delicious',frontLang:'en',back:'pyszny',backLang:'pl',hint:'🍣 What is good sushi?'},
+    {front:'to order',frontLang:'en',back:'zamawiać',backLang:'pl',hint:'🍽️ At a restaurant...'},
+    {front:'huge',frontLang:'en',back:'ogromny',backLang:'pl',hint:'🦖 A T-Rex was...'},
+    {front:'dangerous',frontLang:'en',back:'niebezpieczny',backLang:'pl',hint:'🦖 Dinosaurs were...'},
+    {front:'to build',frontLang:'en',back:'budować',backLang:'pl',hint:'⛏️ In Minecraft you...'},
+    {front:'passenger',frontLang:'en',back:'pasażer',backLang:'pl',hint:'✈️ A person on a plane'},
+    {front:'to survive',frontLang:'en',back:'przetrwać / przeżyć',backLang:'pl',hint:'⛏️🦖 Minecraft & dinos!'},
+    {front:'fast / quick',frontLang:'en',back:'szybki',backLang:'pl',hint:'✈️ A plane is very...'},
+    {front:'smacznego!',frontLang:'pl',back:'enjoy your meal!',backLang:'en',hint:'🍣 Przed jedzeniem...'},
+    {front:'podróż',frontLang:'pl',back:'journey / trip',backLang:'en',hint:'✈️ Z lekcji 1!'},
+    {front:'odkrywać',frontLang:'pl',back:'to discover / to explore',backLang:'en',hint:'🦖🌍 Nowe miejsca...'},
+    {front:'tworzyć',frontLang:'pl',back:'to create',backLang:'en',hint:'⛏️ W Minecraft...'},
+];
+
+let flipped = 0;
+(function buildFlash(){
+    const g = document.getElementById('flashGrid');
+    const shuffled = [...flashcards].sort(()=>Math.random()-0.5);
+    g.innerHTML = shuffled.map(c=>{
+        const fCls = c.frontLang==='en'?'lang-en':'lang-pl';
+        const bCls = c.backLang==='en'?'lang-en':'lang-pl';
+        const fLbl = c.frontLang==='en'?'English':'Polski';
+        const bLbl = c.backLang==='en'?'English':'Polski';
+        return `<div class="flash-card-outer" onclick="flipCard(this)">
+            <div class="flash-card">
+                <div class="flash-front">
+                    <span class="flash-lang ${fCls}">${fLbl}</span>
+                    <span class="flash-word">${c.front}</span>
+                    <span class="flash-hint">${c.hint}</span>
+                </div>
+                <div class="flash-back">
+                    <span class="flash-lang ${bCls}">${bLbl}</span>
+                    <span class="flash-word">${c.back}</span>
+                </div>
+            </div>
+        </div>`;
+    }).join('');
+})();
+
+function flipCard(outer){
+    if(outer.classList.contains('revealed')){
+        outer.querySelector('.flash-card').classList.toggle('flipped');
+        return;
+    }
+    outer.classList.add('revealed');
+    outer.querySelector('.flash-card').classList.add('flipped');
+    flipped++;
+    if(flipped===flashcards.length){
+        showFb('fb1',true,'🎉 Wszystkie fiszki odsłonięte! Ile udało Ci się zgadnąć?');
+        markDone(1);
+    }
+}
+
+// ===== 2. GRAMMAR =====
+const gramQ = [
+    {tense:'Present Simple',sentence:'John usually ___ Minecraft after school.',opts:['plays','is playing','played'],ans:0,clue:'"usually" → zwyczaj'},
+    {tense:'Present Continuous',sentence:'Look! The dinosaur ___ towards us right now!',opts:['runs','is running','ran'],ans:1,clue:'"right now" → teraz'},
+    {tense:'Past Simple',sentence:'Yesterday I ___ sushi with my family.',opts:['eat','am eating','ate'],ans:2,clue:'"yesterday" → przeszłość'},
+    {tense:'Present Simple',sentence:'Planes ___ faster than trains.',opts:['fly','are flying','flew'],ans:0,clue:'fakt ogólny → Simple'},
+    {tense:'Past Simple',sentence:'Dinosaurs ___ millions of years ago.',opts:['live','are living','lived'],ans:2,clue:'"millions of years ago" → przeszłość'},
+    {tense:'Present Continuous',sentence:'Shhh! I ___ a new house in Minecraft at this moment.',opts:['build','am building','built'],ans:1,clue:'"at this moment" → teraz'},
+];
+let gramDone = 0;
+
+(function buildGram(){
+    document.getElementById('grammarArea').innerHTML = gramQ.map((q,i)=>{
+        const parts = q.sentence.split('___');
+        return `<div class="gram-card" id="gq${i}">
+            <span class="gram-tag tag-tense">${q.tense}</span>
+            <div class="gram-sentence">${parts[0]}<span class="gap" id="gg${i}">❓</span>${parts[1]}</div>
+            <div class="gram-context">${q.clue}</div>
+            <div class="opts-row">${q.opts.map((o,j)=>`<button class="opt-btn" onclick="pickGram(${i},${j})">${o}</button>`).join('')}</div>
+        </div>`;
+    }).join('');
+})();
+
+function pickGram(qi,oi){
+    const card = document.getElementById(`gq${qi}`);
+    if(card.classList.contains('g-correct')) return;
+    const btns = card.querySelectorAll('.opt-btn');
+    const gap = document.getElementById(`gg${qi}`);
+    if(oi===gramQ[qi].ans){
+        card.classList.add('g-correct');
+        btns[oi].classList.add('o-correct');
+        btns.forEach(b=>b.disabled=true);
+        gap.textContent = gramQ[qi].opts[oi];
+        gap.classList.add('filled');
+        gramDone++;
+        if(gramDone===gramQ.length){showFb('fb2',true,'🎯 Brawo! Czasy opanowane!');markDone(2);}
+    } else {
+        card.classList.add('g-wrong');
+        btns[oi].classList.add('o-wrong');
+        setTimeout(()=>{card.classList.remove('g-wrong');btns[oi].classList.remove('o-wrong');},700);
+    }
+}
+
+// ===== 3. PREPOSITIONS =====
+const prepQ = [
+    {emoji:'🍣🍽️',sentence:'I am ___ a restaurant.',opts:['in','on','at'],ans:2},
+    {emoji:'✈️🛫',sentence:'The plane is flying ___ the city.',opts:['over','in','at'],ans:0},
+    {emoji:'⛏️🏠',sentence:'I built a house ___ Minecraft.',opts:['on','in','at'],ans:1},
+    {emoji:'🦖🌍',sentence:'Dinosaurs lived ___ Earth millions of years ago.',opts:['in','on','at'],ans:1},
+    {emoji:'🍣👨‍👩‍👦',sentence:'I went ___ a sushi bar with my family.',opts:['at','to','on'],ans:1},
+    {emoji:'✈️🗺️',sentence:'We traveled ___ Warsaw ___ Kraków.',opts:['from ... to','in ... at','at ... in'],ans:0},
+];
+let prepDone = 0;
+
+(function buildPrep(){
+    document.getElementById('prepArea').innerHTML = prepQ.map((q,i)=>{
+        const parts = q.sentence.split('___');
+        let sentHtml;
+        if(parts.length===3){
+            sentHtml = `${parts[0]}<span class="p-gap" id="pg${i}a">❓</span>${parts[1]}<span class="p-gap" id="pg${i}b">❓</span>${parts[2]}`;
+        } else {
+            sentHtml = `${parts[0]}<span class="p-gap" id="pg${i}">❓</span>${parts[1]}`;
+        }
+        return `<div class="prep-card" id="pc${i}">
+            <div class="prep-visual">${q.emoji}</div>
+            <div class="prep-q">${sentHtml}</div>
+            <div class="opts-row" style="justify-content:center">${q.opts.map((o,j)=>`<button class="opt-btn" onclick="pickPrep(${i},${j})">${o}</button>`).join('')}</div>
+        </div>`;
+    }).join('');
+})();
+
+function pickPrep(qi,oi){
+    const card = document.getElementById(`pc${qi}`);
+    if(card.classList.contains('p-correct')) return;
+    const btns = card.querySelectorAll('.opt-btn');
+    if(oi===prepQ[qi].ans){
+        card.classList.add('p-correct');
+        btns[oi].classList.add('o-correct');
+        btns.forEach(b=>b.disabled=true);
+        const gapA = document.getElementById(`pg${qi}a`);
+        const gapB = document.getElementById(`pg${qi}b`);
+        const gap = document.getElementById(`pg${qi}`);
+        const answer = prepQ[qi].opts[oi];
+        if(gapA&&gapB){
+            const tw=answer.split(' ... ');
+            gapA.textContent=tw[0];gapA.classList.add('p-filled');
+            gapB.textContent=tw[1];gapB.classList.add('p-filled');
+        } else if(gap){
+            gap.textContent=answer;gap.classList.add('p-filled');
+        }
+        prepDone++;
+        if(prepDone===prepQ.length){showFb('fb3',true,'📍 Super! Przyimki ogarnięte!');markDone(3);}
+    } else {
+        btns[oi].classList.add('o-wrong');
+        setTimeout(()=>btns[oi].classList.remove('o-wrong'),600);
+    }
+}
+
+// ===== 4. SENTENCE BUILDER =====
+const buildSentences = [
+    {words:['I','ate','delicious','sushi','yesterday','.'],pl:'Wczoraj zjadłem pyszne sushi.'},
+    {words:['She','is','building','a','huge','castle','right','now','.'],pl:'Ona właśnie buduje ogromny zamek.'},
+    {words:['Dinosaurs','lived','on','Earth','a','long','time','ago','.'],pl:'Dinozaury żyły na Ziemi dawno temu.'},
+];
+let buildDoneCount = 0;
+const buildStates = buildSentences.map(()=>[]);
+
+(function buildBuilder(){
+    document.getElementById('buildArea').innerHTML = buildSentences.map((s,i)=>{
+        const shuffled = [...s.words].sort(()=>Math.random()-0.5);
+        return `<div class="build-block" id="bb${i}">
+            <div class="build-prompt">📝 <em>${s.pl}</em></div>
+            <div class="word-bank" id="wb${i}">${shuffled.map((w,j)=>`<span class="w-chip" data-i="${i}" data-j="${j}" data-w="${w}" onclick="addW(${i},this)">${w}</span>`).join('')}</div>
+            <div class="build-area" id="ba${i}"><span class="build-ph">Kliknij słowa powyżej...</span></div>
+            <button class="check-btn" onclick="checkBuild(${i})">✓ Sprawdź</button>
+            <div class="fb" id="fbb${i}"></div>
+        </div>`;
+    }).join('');
+})();
+
+function addW(si,chip){
+    if(chip.classList.contains('used')) return;
+    const area = document.getElementById(`ba${si}`);
+    const ph = area.querySelector('.build-ph'); if(ph) ph.remove();
+    area.classList.add('has-words');
+    chip.classList.add('used');
+    buildStates[si].push({word:chip.dataset.w,chipEl:chip});
+    const p = document.createElement('span');
+    p.className='placed'; p.textContent=chip.dataset.w;
+    p.onclick = ()=>{
+        chip.classList.remove('used');
+        buildStates[si]=buildStates[si].filter(e=>e.chipEl!==chip);
+        p.remove();
+        if(!buildStates[si].length){
+            area.classList.remove('has-words');
+            area.innerHTML='<span class="build-ph">Kliknij słowa powyżej...</span>';
+        }
+    };
+    area.appendChild(p);
+}
+function checkBuild(si){
+    const built = buildStates[si].map(e=>e.word);
+    const correct = buildSentences[si].words;
+    const area = document.getElementById(`ba${si}`);
+    if(built.length<correct.length){showFb(`fbb${si}`,false,'Dodaj brakujące słowa!');return;}
+    if(built.join(' ')===correct.join(' ')){
+        showFb(`fbb${si}`,true,'✅ Poprawnie!');
+        area.classList.add('b-correct');
+        document.getElementById(`bb${si}`).querySelectorAll('.w-chip,.placed,.check-btn').forEach(el=>el.style.pointerEvents='none');
+        buildDoneCount++;
+        if(buildDoneCount===buildSentences.length){markDone(4);}
+    } else {
+        showFb(`fbb${si}`,false,'❌ Spróbuj innej kolejności!');
+        area.classList.add('b-wrong');
+        setTimeout(()=>area.classList.remove('b-wrong'),500);
+    }
+}
+
+// ===== 5. REVIEW =====
+const reviewQ = [
+    {word:'confidence',opts:['pewność siebie','powtarzanie','podróż','obawy'],ans:0},
+    {word:'concerns',opts:['granice','trudności','obawy, troski','skupiać się'],ans:2},
+    {word:'repetition',opts:['reputacja','podróż','powtarzanie','zastosowanie'],ans:2},
+    {word:'journey',opts:['podróż','zgadywać','trudności','rosnąć'],ans:0},
+    {word:'growing',opts:['rysować','trzymać','rosnąć','budować'],ans:2},
+    {word:'focus',opts:['obawy','skupiać się','granice','oceniać'],ans:1},
+];
+let revDone = 0;
+
+(function buildReview(){
+    document.getElementById('reviewArea').innerHTML = reviewQ.map((q,i)=>
+        `<div class="review-card" id="rv${i}">
+            <div class="review-word">${q.word} <span class="rv-answer">= ${q.opts[q.ans]}</span></div>
+            <div class="opts-row">${q.opts.map((o,j)=>`<button class="opt-btn" onclick="pickRev(${i},${j})">${o}</button>`).join('')}</div>
+        </div>`
+    ).join('');
+})();
+
+function pickRev(qi,oi){
+    const card = document.getElementById(`rv${qi}`);
+    if(card.classList.contains('rv-correct')) return;
+    const btns = card.querySelectorAll('.opt-btn');
+    if(oi===reviewQ[qi].ans){
+        card.classList.add('rv-correct');
+        btns[oi].classList.add('o-correct');
+        btns.forEach(b=>b.disabled=true);
+        revDone++;
+        if(revDone===reviewQ.length){showFb('fb5',true,'🔁 Pamiętasz wszystko! Super pamięć!');markDone(5);}
+    } else {
+        card.classList.add('rv-wrong');
+        btns[oi].classList.add('o-wrong');
+        setTimeout(()=>{card.classList.remove('rv-wrong');btns[oi].classList.remove('o-wrong');},600);
+    }
+}
+
+// ===== 6. SPEAKING =====
+const checklistItems = [
+    'Przeczytałem temat i wiem o czym mówić',
+    'Przygotowałem 2 zdania w Present Simple (zwyczaje)',
+    'Przygotowałem 2 zdania w Past Simple (wczoraj)',
+    'Przygotowałem 2 zdania w Present Continuous (teraz)',
+    'Użyłem min. 4 nowych słówek z dzisiejszych zadań',
+];
+let ckCount = 0;
+
+(function buildCL(){
+    document.getElementById('speakCL').innerHTML = checklistItems.map(t=>
+        `<div class="ck-item" onclick="toggleCk(this)"><div class="ck-box"></div><span class="ck-text">${t}</span></div>`
+    ).join('');
+})();
+
+function toggleCk(item){
+    const box = item.querySelector('.ck-box');
+    item.classList.toggle('checked');
+    if(item.classList.contains('checked')){box.textContent='✓';ckCount++;}
+    else{box.textContent='';ckCount--;}
+    if(ckCount>=checklistItems.length&&!done.has(6)){
+        showFb('fb6',true,'🎤 Gotowy na rozmowę! Do zobaczenia na lekcji!');
+        markDone(6);
+    }
+}
+
+// ===== SCROLL REVEAL =====
+const obs = new IntersectionObserver(entries=>{
+    entries.forEach(e=>{
+        if(e.isIntersecting){e.target.style.opacity=1;e.target.style.transform='translateY(0)';}
+    });
+},{threshold:0.08});
+document.querySelectorAll('.section').forEach((el,i)=>{
+    el.style.opacity=0;el.style.transform='translateY(20px)';
+    el.style.transition=`opacity 0.5s ease ${i*0.08}s, transform 0.5s ease ${i*0.08}s`;
+    obs.observe(el);
+});
+</script>
+
+</body>
+</html>
