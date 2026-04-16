@@ -1,0 +1,1038 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>My Favourite Things - Interactive Worksheet</title>
+<script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.4/dist/confetti.browser.min.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,700;0,9..144,900;1,9..144,400&family=Merriweather+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{
+  --bg:#faf6f1;
+  --surface:#ffffff;
+  --warm:#f0e6d6;
+  --warm2:#e8d8c2;
+  --coral:#e07860;
+  --coral-soft:rgba(224,120,96,0.12);
+  --teal:#2a9d8f;
+  --teal-soft:rgba(42,157,143,0.10);
+  --gold:#d4a843;
+  --gold-soft:rgba(212,168,67,0.12);
+  --plum:#7c5295;
+  --plum-soft:rgba(124,82,149,0.10);
+  --sky:#4a90d9;
+  --sky-soft:rgba(74,144,217,0.10);
+  --ink:#2a2218;
+  --ink-mid:#5a5040;
+  --ink-light:#8a8070;
+  --correct:#2a9d8f;
+  --correct-soft:rgba(42,157,143,0.12);
+  --wrong:#d44;
+  --wrong-soft:rgba(221,68,68,0.10);
+  --radius:16px;
+  --shadow-sm:0 2px 12px rgba(42,34,24,0.06);
+  --shadow-md:0 6px 32px rgba(42,34,24,0.08);
+  --shadow-lg:0 12px 48px rgba(42,34,24,0.12);
+  --font-display:'Fraunces',Georgia,serif;
+  --font-body:'Merriweather Sans',sans-serif;
+}
+html{scroll-behavior:smooth}
+body{font-family:var(--font-body);background:var(--bg);color:var(--ink);line-height:1.65;min-height:100vh;overflow-x:hidden}
+
+/* === DECORATIVE BG === */
+.bg-wash{position:fixed;inset:0;pointer-events:none;z-index:0;overflow:hidden}
+.bg-wash .orb{position:absolute;border-radius:50%;filter:blur(100px);opacity:0.25}
+.orb-1{width:500px;height:500px;background:var(--coral);top:-150px;right:-100px;animation:orbDrift 30s ease-in-out infinite}
+.orb-2{width:400px;height:400px;background:var(--teal);bottom:-100px;left:-80px;animation:orbDrift 25s ease-in-out infinite reverse}
+.orb-3{width:350px;height:350px;background:var(--gold);top:40%;left:50%;animation:orbDrift 35s ease-in-out infinite 5s}
+@keyframes orbDrift{0%,100%{transform:translate(0,0)}25%{transform:translate(30px,-20px)}50%{transform:translate(-20px,30px)}75%{transform:translate(20px,20px)}}
+
+/* === LAYOUT === */
+.container{position:relative;z-index:1;max-width:960px;margin:0 auto;padding:2rem 1.5rem 6rem}
+
+/* === HERO === */
+.hero{text-align:center;padding:3rem 1rem 2.5rem;animation:fadeSlide 0.8s ease-out}
+@keyframes fadeSlide{from{opacity:0;transform:translateY(-24px)}to{opacity:1;transform:translateY(0)}}
+.hero-tag{display:inline-block;background:var(--ink);color:var(--bg);font-size:0.72rem;font-weight:700;letter-spacing:0.14em;text-transform:uppercase;padding:6px 16px;border-radius:99px;margin-bottom:1rem}
+.hero h1{font-family:var(--font-display);font-size:clamp(2.4rem,6vw,3.8rem);font-weight:900;line-height:1.1;letter-spacing:-0.02em;margin-bottom:0.5rem}
+.hero h1 em{font-style:italic;color:var(--coral)}
+.hero-sub{font-size:1rem;color:var(--ink-light);font-weight:400;max-width:500px;margin:0 auto}
+
+/* === DUMMY IMAGE === */
+.dummy-img{background:linear-gradient(135deg,var(--warm) 0%,var(--warm2) 100%);border-radius:var(--radius);display:flex;align-items:center;justify-content:center;flex-direction:column;gap:0.5rem;color:var(--ink-light);font-size:0.85rem;font-weight:500;overflow:hidden;position:relative}
+.dummy-img .icon{font-size:2.2rem;opacity:0.5}
+.dummy-img .label{font-size:0.7rem;text-transform:uppercase;letter-spacing:0.1em;opacity:0.6}
+
+/* === SECTION === */
+.section{margin-bottom:2.5rem;opacity:0;transform:translateY(24px);transition:opacity 0.6s ease,transform 0.6s ease}
+.section.visible{opacity:1;transform:translateY(0)}
+.sec-inner{background:var(--surface);border-radius:20px;padding:2rem 2.25rem;box-shadow:var(--shadow-md)}
+.sec-head{display:flex;align-items:center;gap:1rem;margin-bottom:0.35rem}
+.sec-num{font-family:var(--font-display);font-size:2.2rem;font-weight:900;line-height:1;opacity:0.15}
+.sec-title{font-family:var(--font-display);font-size:1.4rem;font-weight:700;color:var(--ink)}
+.sec-desc{font-size:0.9rem;color:var(--ink-light);margin-bottom:1.5rem;margin-left:calc(2.2rem + 1rem)}
+.sec-accent{width:40px;height:4px;border-radius:2px;margin-bottom:1.25rem}
+
+/* === BUTTONS === */
+.btn{font-family:var(--font-body);font-weight:600;border:none;border-radius:10px;padding:0.6rem 1.4rem;cursor:pointer;font-size:0.88rem;transition:all 0.2s}
+.btn:active{transform:scale(0.97)}
+.btn-coral{background:var(--coral);color:#fff}
+.btn-coral:hover{filter:brightness(1.08);transform:translateY(-1px)}
+.btn-teal{background:var(--teal);color:#fff}
+.btn-teal:hover{filter:brightness(1.08);transform:translateY(-1px)}
+.btn-gold{background:var(--gold);color:#fff}
+.btn-gold:hover{filter:brightness(1.08);transform:translateY(-1px)}
+.btn-outline{background:transparent;border:2px solid var(--warm2);color:var(--ink-mid)}
+.btn-outline:hover{border-color:var(--ink-light);color:var(--ink)}
+.btn-ghost{background:var(--coral-soft);color:var(--coral);font-size:0.8rem;padding:0.45rem 1rem;border-radius:8px}
+.btn-ghost:hover{background:var(--coral);color:#fff}
+.btn-solve{background:var(--plum-soft);color:var(--plum);font-size:0.8rem;padding:0.45rem 1rem;border-radius:8px}
+.btn-solve:hover{background:var(--plum);color:#fff}
+.sec-actions{display:flex;gap:0.5rem;flex-wrap:wrap;margin-top:1.25rem}
+
+/* === FEEDBACK === */
+.fb{display:none;padding:0.6rem 1rem;border-radius:10px;font-size:0.88rem;font-weight:500;margin-top:0.8rem}
+.fb.show{display:block;animation:popIn 0.3s ease}
+.fb-ok{background:var(--correct-soft);color:var(--correct)}
+.fb-no{background:var(--wrong-soft);color:var(--wrong)}
+@keyframes popIn{from{opacity:0;transform:scale(0.95)}to{opacity:1;transform:scale(1)}}
+
+/* === 1. FLIP CARDS === */
+.flip-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:1rem}
+.flip-outer{perspective:800px;cursor:pointer;height:180px}
+.flip-card{position:relative;width:100%;height:100%;transition:transform 0.55s ease;transform-style:preserve-3d}
+.flip-outer.flipped .flip-card{transform:rotateY(180deg)}
+.flip-front,.flip-back{position:absolute;inset:0;backface-visibility:hidden;border-radius:14px;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:1.2rem;text-align:center}
+.flip-front{background:var(--surface);box-shadow:var(--shadow-sm)}
+.flip-front .flip-emoji{font-size:2.2rem;margin-bottom:0.5rem}
+.flip-front .flip-word{font-family:var(--font-display);font-size:1.15rem;font-weight:700;color:var(--ink)}
+.flip-front .flip-pron{font-size:0.78rem;color:var(--ink-light);margin-top:0.2rem}
+.flip-back{transform:rotateY(180deg);color:#fff;padding:1rem}
+.flip-back .flip-word-back{font-family:var(--font-display);font-size:0.95rem;font-weight:700;opacity:0.7;margin-bottom:0.3rem}
+.flip-back .flip-pl{font-size:1.1rem;font-weight:600}
+.flip-back .flip-example{font-size:0.78rem;opacity:0.8;margin-top:0.4rem;font-style:italic}
+.flip-outer:nth-child(6n+1) .flip-back{background:linear-gradient(135deg,var(--coral),#c85a48)}
+.flip-outer:nth-child(6n+2) .flip-back{background:linear-gradient(135deg,var(--teal),#1e7a6f)}
+.flip-outer:nth-child(6n+3) .flip-back{background:linear-gradient(135deg,var(--gold),#b8920a)}
+.flip-outer:nth-child(6n+4) .flip-back{background:linear-gradient(135deg,var(--plum),#5c3a75)}
+.flip-outer:nth-child(6n+5) .flip-back{background:linear-gradient(135deg,var(--sky),#2a6ab0)}
+.flip-outer:nth-child(6n+6) .flip-back{background:linear-gradient(135deg,#e07860,#d4a843)}
+.flip-outer:hover .flip-front{box-shadow:var(--shadow-md)}
+
+/* === 2. MATCHING === */
+.match-area{display:grid;grid-template-columns:1fr 1fr;gap:2rem}
+.match-col-label{font-size:0.7rem;font-weight:700;letter-spacing:0.12em;text-transform:uppercase;color:var(--ink-light);margin-bottom:0.75rem}
+.match-item{padding:0.85rem 1.1rem;background:var(--bg);border-radius:12px;margin-bottom:0.6rem;cursor:pointer;font-size:0.95rem;font-weight:500;transition:all 0.2s;user-select:none;position:relative}
+.match-item:hover:not(.m-matched){background:var(--warm);transform:translateX(3px)}
+.match-item.m-selected{background:var(--coral);color:#fff;transform:scale(1.02)}
+.match-item.m-matched{cursor:default}
+.match-item.m-matched::after{content:'✓';position:absolute;right:0.8rem;top:50%;transform:translateY(-50%);font-weight:700;font-size:0.85rem}
+.match-item.m-wrong{animation:shake 0.4s ease}
+@keyframes shake{0%,100%{transform:translateX(0)}25%{transform:translateX(-6px)}75%{transform:translateX(6px)}}
+.match-pair-num{display:inline-block;width:22px;height:22px;border-radius:50%;font-size:0.7rem;font-weight:700;line-height:22px;text-align:center;margin-right:0.5rem;color:#fff}
+
+/* === 3. FILL GAPS === */
+.gap-item{padding:1rem 0;display:flex;flex-wrap:wrap;align-items:center;gap:0.4rem;font-size:1.05rem;line-height:2}
+.gap-item+.gap-item{border-top:1px solid var(--warm)}
+.gap-num{font-family:var(--font-display);font-weight:700;color:var(--gold);min-width:1.8rem;font-size:1.1rem}
+.gap-input{border:none;border-bottom:2.5px solid var(--warm2);background:transparent;font-family:var(--font-body);font-size:1rem;color:var(--ink);padding:2px 6px;min-width:130px;outline:none;transition:border-color 0.2s;text-align:center;border-radius:3px 3px 0 0}
+.gap-input:focus{border-color:var(--teal)}
+.gap-input.g-correct{border-color:var(--correct);color:var(--correct);background:var(--correct-soft)}
+.gap-input.g-wrong{border-color:var(--wrong);color:var(--wrong);background:var(--wrong-soft)}
+.gap-hint-btn{font-size:0.75rem;color:var(--gold);cursor:pointer;background:var(--gold-soft);border:none;border-radius:6px;padding:0.25rem 0.6rem;font-family:var(--font-body);font-weight:600;margin-left:0.3rem}
+.gap-hint-btn:hover{background:var(--gold);color:#fff}
+.gap-hint-text{font-size:0.78rem;color:var(--ink-light);font-style:italic;display:none;width:100%;margin-top:0.2rem;padding-left:1.8rem}
+.gap-hint-text.show{display:block}
+
+/* === 4. ABOUT ME (OPEN QUESTIONS) === */
+.about-grid{display:grid;grid-template-columns:1fr 1fr;gap:1rem}
+@media(max-width:640px){.about-grid{grid-template-columns:1fr}}
+.about-card{background:var(--bg);border-radius:14px;padding:1.25rem;position:relative;overflow:hidden}
+.about-card::before{content:'';position:absolute;top:0;left:0;width:100%;height:4px}
+.about-card:nth-child(4n+1)::before{background:var(--coral)}
+.about-card:nth-child(4n+2)::before{background:var(--teal)}
+.about-card:nth-child(4n+3)::before{background:var(--gold)}
+.about-card:nth-child(4n+4)::before{background:var(--plum)}
+.about-emoji{font-size:1.6rem;margin-bottom:0.5rem}
+.about-q{font-weight:600;font-size:0.95rem;margin-bottom:0.6rem}
+.about-textarea{width:100%;border:2px solid var(--warm2);border-radius:10px;padding:0.7rem;font-family:var(--font-body);font-size:0.9rem;color:var(--ink);resize:vertical;min-height:70px;outline:none;transition:border-color 0.2s;background:var(--surface)}
+.about-textarea:focus{border-color:var(--coral)}
+.about-hint{font-size:0.75rem;color:var(--ink-light);margin-top:0.4rem;cursor:pointer}
+.about-hint:hover{color:var(--coral)}
+
+/* === 5. MULTIPLE CHOICE === */
+.mc-item{margin-bottom:1.5rem;padding-bottom:1.5rem;border-bottom:1px solid var(--warm)}
+.mc-item:last-child{border-bottom:none;margin-bottom:0;padding-bottom:0}
+.mc-q{font-size:1.05rem;font-weight:600;margin-bottom:0.75rem;display:flex;gap:0.6rem}
+.mc-q-num{font-family:var(--font-display);font-weight:900;color:var(--sky);font-size:1.1rem}
+.mc-opts{display:flex;flex-wrap:wrap;gap:0.5rem}
+.mc-btn{padding:0.55rem 1.2rem;border:2px solid var(--warm2);border-radius:99px;background:transparent;font-family:var(--font-body);font-size:0.9rem;font-weight:500;cursor:pointer;color:var(--ink);transition:all 0.2s}
+.mc-btn:hover:not(:disabled){border-color:var(--sky);color:var(--sky);transform:scale(1.03)}
+.mc-btn.mc-correct{background:var(--correct-soft);border-color:var(--correct);color:var(--correct);font-weight:700}
+.mc-btn.mc-wrong{background:var(--wrong-soft);border-color:var(--wrong);color:var(--wrong)}
+.mc-btn:disabled{cursor:default;opacity:0.7}
+.mc-fb{margin-top:0.5rem;font-size:0.82rem;font-weight:500;opacity:0;transition:opacity 0.3s}
+.mc-fb.show{opacity:1}
+.mc-fb.ok{color:var(--correct)}
+.mc-fb.no{color:var(--wrong)}
+
+/* === 6. SENTENCE BUILDER === */
+.build-block{margin-bottom:1.75rem}
+.build-prompt{font-size:0.95rem;color:var(--ink-mid);margin-bottom:0.5rem}
+.build-prompt em{color:var(--ink);font-style:normal;font-weight:600}
+.word-bank{display:flex;flex-wrap:wrap;gap:0.45rem;margin-bottom:0.6rem;text-align:left}
+.w-chip{padding:0.45rem 0.9rem;border-radius:9px;background:var(--plum-soft);color:var(--plum);font-size:0.92rem;font-weight:600;cursor:pointer;transition:all 0.2s;user-select:none}
+.w-chip:hover:not(.w-used){transform:translateY(-2px);background:var(--plum);color:#fff}
+.w-chip.w-used{opacity:0.25;cursor:default;transform:none}
+.build-area{min-height:52px;padding:0.75rem;border-radius:14px;border:2px solid var(--warm2);background:rgba(255,255,255,0.5);display:flex;flex-wrap:wrap;gap:0.45rem;align-items:center;margin-bottom:0.5rem;transition:border-color 0.3s}
+.build-area.has-words{border-color:rgba(124,82,149,0.3)}
+.build-area.b-correct{border-color:var(--correct);background:var(--correct-soft)}
+.build-area.b-wrong{animation:shake 0.4s ease}
+.build-ph{color:var(--ink-light);font-size:0.85rem;font-style:italic}
+.placed{padding:0.4rem 0.75rem;border-radius:8px;background:var(--plum-soft);border:1.5px solid rgba(124,82,149,0.3);color:var(--plum);font-weight:600;font-size:0.92rem;cursor:pointer;transition:all 0.2s;animation:popIn 0.25s ease}
+.placed:hover{background:var(--wrong-soft);border-color:var(--wrong)}
+.build-fb{margin-top:0.4rem;font-size:0.85rem;font-weight:500;min-height:1.2rem}
+
+/* === 7. TRUE/FALSE === */
+.tf-item{display:flex;align-items:center;justify-content:space-between;gap:1rem;padding:1rem 1.2rem;background:var(--bg);border-radius:12px;margin-bottom:0.6rem;flex-wrap:wrap}
+.tf-text{font-size:0.95rem;flex:1;min-width:200px}
+.tf-btns{display:flex;gap:0.5rem;flex-shrink:0}
+.tf-btn{padding:0.45rem 1.2rem;border:2px solid;border-radius:99px;font-family:var(--font-body);font-size:0.85rem;font-weight:700;cursor:pointer;background:transparent;transition:all 0.2s}
+.tf-btn:hover:not(:disabled){transform:scale(1.06)}
+.tf-t{border-color:var(--correct);color:var(--correct)}
+.tf-f{border-color:var(--wrong);color:var(--wrong)}
+.tf-btn.tf-sel-correct{background:var(--correct);color:#fff}
+.tf-btn.tf-sel-wrong{background:var(--wrong);color:#fff}
+.tf-btn:disabled{cursor:default}
+.tf-fb-inline{font-size:0.78rem;font-weight:600;width:100%;margin-top:0.3rem;min-height:1em}
+
+/* === 8. TRANSLATION === */
+.trans-item{margin-bottom:1rem}
+.trans-pl{font-size:0.95rem;font-weight:600;margin-bottom:0.4rem;display:flex;align-items:center;gap:0.5rem}
+.trans-pl .t-num{font-family:var(--font-display);color:var(--coral);font-weight:900;font-size:1.05rem}
+.trans-input{width:100%;border:2px solid var(--warm2);border-radius:10px;padding:0.65rem 0.9rem;font-family:var(--font-body);font-size:0.95rem;color:var(--ink);outline:none;transition:border-color 0.2s;background:var(--surface)}
+.trans-input:focus{border-color:var(--coral)}
+.trans-input.t-correct{border-color:var(--correct);background:var(--correct-soft)}
+.trans-input.t-wrong{border-color:var(--wrong);background:var(--wrong-soft)}
+.trans-answer{font-size:0.82rem;color:var(--correct);display:none;margin-top:0.3rem;font-weight:500;cursor:pointer}
+.trans-answer.show{display:block}
+
+/* === CELEBRATE === */
+.celebrate-section{text-align:center;padding:3rem 2rem;background:var(--surface);border-radius:24px;box-shadow:var(--shadow-lg);position:relative;overflow:hidden}
+.celebrate-section::before{content:'';position:absolute;inset:0;background:linear-gradient(135deg,var(--coral-soft),var(--teal-soft),var(--gold-soft));pointer-events:none}
+.celebrate-section h2{font-family:var(--font-display);font-size:2rem;font-weight:900;position:relative;margin-bottom:0.5rem}
+.celebrate-section p{color:var(--ink-mid);position:relative;margin-bottom:1.5rem}
+.celebrate-btn{position:relative;display:inline-block;font-family:var(--font-display);font-size:1.3rem;font-weight:900;color:#fff;background:linear-gradient(135deg,var(--coral),var(--gold));border:none;border-radius:99px;padding:1rem 3rem;cursor:pointer;box-shadow:0 8px 32px rgba(224,120,96,0.35);transition:all 0.25s;letter-spacing:0.01em}
+.celebrate-btn:hover{transform:translateY(-3px) scale(1.03);box-shadow:0 12px 40px rgba(224,120,96,0.45)}
+.celebrate-btn:active{transform:scale(0.97)}
+
+/* === SAVE/RESET BAR === */
+.save-bar{display:flex;justify-content:center;gap:0.75rem;margin-top:1.5rem;flex-wrap:wrap}
+.save-bar .btn{font-size:0.85rem;padding:0.55rem 1.5rem}
+
+/* === RESPONSIVE === */
+@media(max-width:640px){
+  .container{padding:1rem}
+  .sec-inner{padding:1.25rem}
+  .flip-grid{grid-template-columns:1fr 1fr}
+  .match-area{grid-template-columns:1fr}
+  .hero h1{font-size:2rem}
+  .sec-desc{margin-left:0}
+}
+</style>
+</head>
+<body>
+
+<div class="bg-wash">
+  <div class="orb orb-1"></div>
+  <div class="orb orb-2"></div>
+  <div class="orb orb-3"></div>
+</div>
+
+<div class="container">
+
+<!-- HERO -->
+<div class="hero">
+  <div class="hero-tag">Interactive English Worksheet</div>
+  <h1>My Favourite <em>Things</em></h1>
+  <p class="hero-sub">Talk about what you love, practise useful vocabulary, and have fun!</p>
+  <div class="dummy-img" style="width:100%;max-width:600px;height:200px;margin:1.5rem auto 0;border-radius:20px">
+    <span class="icon">📸</span>
+    <span class="label">Hero image placeholder</span>
+  </div>
+</div>
+
+<!-- 1. VOCABULARY FLIP CARDS -->
+<div class="section" id="sec1">
+  <div class="sec-inner">
+    <div class="sec-head"><span class="sec-num">01</span><span class="sec-title">Key Vocabulary</span></div>
+    <div class="sec-desc">Click a card to flip it. Try to guess the meaning first!</div>
+    <div class="sec-accent" style="background:var(--coral)"></div>
+    <div class="flip-grid" id="flipGrid"></div>
+    <div class="sec-actions">
+      <button class="btn btn-solve" onclick="solveFlip()">Show all</button>
+    </div>
+    <div class="fb" id="fb1"></div>
+  </div>
+</div>
+
+<!-- 2. MATCHING -->
+<div class="section" id="sec2">
+  <div class="sec-inner">
+    <div class="sec-head"><span class="sec-num">02</span><span class="sec-title">Match the Expressions</span></div>
+    <div class="sec-desc">Click a phrase on the left, then its meaning on the right.</div>
+    <div class="sec-accent" style="background:var(--teal)"></div>
+    <div class="match-area" id="matchArea">
+      <div>
+        <div class="match-col-label">English</div>
+        <div id="matchLeft"></div>
+      </div>
+      <div>
+        <div class="match-col-label">Polski</div>
+        <div id="matchRight"></div>
+      </div>
+    </div>
+    <div class="sec-actions">
+      <button class="btn btn-solve" onclick="solveMatch()">Solve</button>
+    </div>
+    <div class="fb" id="fb2"></div>
+  </div>
+</div>
+
+<!-- 3. FILL IN THE GAPS -->
+<div class="section" id="sec3">
+  <div class="sec-inner">
+    <div class="sec-head"><span class="sec-num">03</span><span class="sec-title">Fill in the Gaps</span></div>
+    <div class="sec-desc">Complete each sentence with the correct word. Press Enter to check.</div>
+    <div class="sec-accent" style="background:var(--gold)"></div>
+    <div id="gapArea"></div>
+    <div class="sec-actions">
+      <button class="btn btn-solve" onclick="solveGaps()">Solve</button>
+    </div>
+    <div class="fb" id="fb3"></div>
+  </div>
+</div>
+
+<!-- 4. ABOUT YOU (SPEAKING/WRITING) -->
+<div class="section" id="sec4">
+  <div class="sec-inner">
+    <div class="sec-head"><span class="sec-num">04</span><span class="sec-title">About You</span></div>
+    <div class="sec-desc">Answer the questions in English. Even one sentence is great!</div>
+    <div class="sec-accent" style="background:var(--coral)"></div>
+    <div class="about-grid" id="aboutGrid"></div>
+    <div class="sec-actions">
+      <button class="btn btn-coral" onclick="checkAbout()">Done!</button>
+    </div>
+    <div class="fb" id="fb4"></div>
+  </div>
+</div>
+
+<!-- DUMMY IMAGE BREAK -->
+<div class="dummy-img" style="width:100%;height:160px;margin:0 0 2.5rem;border-radius:20px">
+  <span class="icon">🖼️</span>
+  <span class="label">Decorative image placeholder</span>
+</div>
+
+<!-- 5. MULTIPLE CHOICE -->
+<div class="section" id="sec5">
+  <div class="sec-inner">
+    <div class="sec-head"><span class="sec-num">05</span><span class="sec-title">Choose the Best Answer</span></div>
+    <div class="sec-desc">Pick the most natural response or correct word.</div>
+    <div class="sec-accent" style="background:var(--sky)"></div>
+    <div id="mcArea"></div>
+    <div class="sec-actions">
+      <button class="btn btn-solve" onclick="solveMC()">Solve</button>
+    </div>
+    <div class="fb" id="fb5"></div>
+  </div>
+</div>
+
+<!-- 6. SENTENCE BUILDER -->
+<div class="section" id="sec6">
+  <div class="sec-inner">
+    <div class="sec-head"><span class="sec-num">06</span><span class="sec-title">Build the Sentence</span></div>
+    <div class="sec-desc">Click words in the correct order. Click a placed word to remove it.</div>
+    <div class="sec-accent" style="background:var(--plum)"></div>
+    <div id="buildArea"></div>
+    <div class="sec-actions">
+      <button class="btn btn-solve" onclick="solveBuild()">Solve</button>
+    </div>
+  </div>
+</div>
+
+<!-- 7. TRUE OR FALSE -->
+<div class="section" id="sec7">
+  <div class="sec-inner">
+    <div class="sec-head"><span class="sec-num">07</span><span class="sec-title">True or False?</span></div>
+    <div class="sec-desc">Read each sentence about English and decide!</div>
+    <div class="sec-accent" style="background:var(--teal)"></div>
+    <div id="tfArea"></div>
+    <div class="sec-actions">
+      <button class="btn btn-solve" onclick="solveTF()">Solve</button>
+    </div>
+    <div class="fb" id="fb7"></div>
+  </div>
+</div>
+
+<!-- 8. TRANSLATION CHALLENGE -->
+<div class="section" id="sec8">
+  <div class="sec-inner">
+    <div class="sec-head"><span class="sec-num">08</span><span class="sec-title">Translation Challenge</span></div>
+    <div class="sec-desc">Translate the Polish sentences into English. Press Enter to check.</div>
+    <div class="sec-accent" style="background:var(--coral)"></div>
+    <div id="transArea"></div>
+    <div class="sec-actions">
+      <button class="btn btn-solve" onclick="solveTrans()">Solve</button>
+    </div>
+    <div class="fb" id="fb8"></div>
+  </div>
+</div>
+
+<!-- CELEBRATE -->
+<div class="section" id="secCelebrate">
+  <div class="celebrate-section">
+    <h2>Well done!</h2>
+    <p>Finished? Time to celebrate!</p>
+    <button class="celebrate-btn" onclick="celebrate()">🎉 Celebrate!</button>
+  </div>
+</div>
+
+<!-- SAVE BAR -->
+<div class="save-bar">
+  <button class="btn btn-teal" onclick="saveProgress()">💾 Save progress</button>
+  <button class="btn btn-outline" onclick="resetProgress()">↺ Reset</button>
+</div>
+
+</div><!-- /container -->
+
+<script>
+// ============================================================
+//  DATA
+// ============================================================
+const flipData = [
+  {emoji:'❤️',en:'favourite',pron:'/ˈfeɪ.vər.ɪt/',pl:'ulubiony',ex:'"Pizza is my favourite food."'},
+  {emoji:'🎵',en:'catchy',pron:'/ˈkætʃ.i/',pl:'chwytliwy, wpadający w ucho',ex:'"That song is really catchy!"'},
+  {emoji:'😌',en:'relaxing',pron:'/rɪˈlæk.sɪŋ/',pl:'relaksujący',ex:'"I find reading very relaxing."'},
+  {emoji:'🤩',en:'amazing',pron:'/əˈmeɪ.zɪŋ/',pl:'niesamowity',ex:'"The view was absolutely amazing."'},
+  {emoji:'🍽️',en:'delicious',pron:'/dɪˈlɪʃ.əs/',pl:'pyszny',ex:'"This cake is delicious!"'},
+  {emoji:'🏃',en:'exciting',pron:'/ɪkˈsaɪ.tɪŋ/',pl:'ekscytujący',ex:'"The match was really exciting."'},
+  {emoji:'💤',en:'boring',pron:'/ˈbɔː.rɪŋ/',pl:'nudny',ex:'"The film was so boring I fell asleep."'},
+  {emoji:'🧠',en:'useful',pron:'/ˈjuːs.fəl/',pl:'przydatny, użyteczny',ex:'"English is a useful language."'},
+  {emoji:'🌍',en:'popular',pron:'/ˈpɒp.jə.lər/',pl:'popularny',ex:'"K-pop is popular all over the world."'},
+  {emoji:'😂',en:'hilarious',pron:'/hɪˈleə.ri.əs/',pl:'przezabawny',ex:'"That comedy show was hilarious."'},
+  {emoji:'💪',en:'to recommend',pron:'/ˌrek.əˈmend/',pl:'polecać',ex:'"I recommend this book."'},
+  {emoji:'🎯',en:'to prefer',pron:'/prɪˈfɜːr/',pl:'preferować, wolieć',ex:'"I prefer tea to coffee."'},
+];
+
+const matchData = [
+  {en:'I\'m really into...',pl:'Bardzo lubię / Kręci mnie...'},
+  {en:'I can\'t stand...',pl:'Nie znoszę...'},
+  {en:'It\'s not really my thing.',pl:'To nie jest moja bajka.'},
+  {en:'I\'m a huge fan of...',pl:'Jestem wielkim fanem/fanką...'},
+  {en:'I don\'t mind it.',pl:'Nie przeszkadza mi to.'},
+  {en:'It drives me crazy.',pl:'To doprowadza mnie do szału.'},
+];
+
+const gapData = [
+  {before:'I\'m really',after:'horror films. I watch them every weekend.',answer:'into',hint:'i_t_'},
+  {before:'She',after:'reading to watching TV.',answer:'prefers',hint:'pre____'},
+  {before:'What kind of music are you',after:'?',answer:'into',hint:'i__o'},
+  {before:'I can\'t',after:'spicy food. It\'s terrible!',answer:'stand',hint:'st___'},
+  {before:'He\'s a',after:'fan of Marvel films.',answer:'huge',hint:'h__e'},
+  {before:'This song is so',after:'! I can\'t stop singing it.',answer:'catchy',hint:'ca___y'},
+];
+
+const aboutData = [
+  {emoji:'🎵',q:'What kind of music do you like? Name a song or artist you love.',hint:'I really like... / My favourite artist is... / I\'m into...'},
+  {emoji:'🍕',q:'What is your favourite food? Why do you like it?',hint:'My favourite food is... because... / I love it because...'},
+  {emoji:'🎬',q:'What was the last film or series you watched? Did you enjoy it?',hint:'I watched... / It was really... / I would recommend it because...'},
+  {emoji:'🌴',q:'If you could go anywhere in the world, where would you go?',hint:'I would go to... because... / I\'ve always wanted to visit...'},
+  {emoji:'📱',q:'What do you do in your free time?',hint:'In my free time I usually... / I spend a lot of time...'},
+  {emoji:'🎁',q:'Describe the best gift you have ever received.',hint:'The best gift I ever got was... / I received it from... / I loved it because...'},
+];
+
+const mcData = [
+  {q:'How do you say "Nie znoszę poniedziałków"?',opts:['I don\'t stand Mondays.','I can\'t stand Mondays.','I\'m not standing Mondays.','I don\'t like stand Mondays.'],correct:1,explain:'"can\'t stand" = nie znosić'},
+  {q:'"This book is really worth ___." Choose the correct form.',opts:['to read','reading','read','for reading'],correct:1,explain:'worth + -ing'},
+  {q:'Which sentence is correct?',opts:['I very like chocolate.','I like chocolate very much.','I much like chocolate.','I like very chocolate.'],correct:1,explain:'like + object + very much (na końcu)'},
+  {q:'"I\'m a huge ___ of Italian food."',opts:['fan','fun','friend','fandom'],correct:0,explain:'a huge fan of = wielki fan czegoś'},
+  {q:'Someone asks: "What are you into?" You answer:',opts:['I\'m into cooking and hiking.','I\'m in cooking and hiking.','I\'m for cooking and hiking.','I into cooking and hiking.'],correct:0,explain:'be into = interesować się czymś'},
+  {q:'"That horror film was ___! I couldn\'t sleep all night."',opts:['relaxing','boring','terrifying','catchy'],correct:2,explain:'terrifying = przerażający'},
+];
+
+const buildData = [
+  {words:['I','really','enjoy','listening','to','music','.'],pl:'Bardzo lubię słuchać muzyki.'},
+  {words:['She','prefers','cooking','at','home','to','eating','out','.'],pl:'Ona woli gotować w domu niż jeść na mieście.'},
+  {words:['What','kind','of','films','are','you','into','?'],pl:'W jakie filmy się kręcisz? / Jakie filmy lubisz?'},
+];
+
+const tfData = [
+  {text:'"I very like pizza" is correct English.',answer:false,explain:'Correct: "I really like pizza" or "I like pizza very much."'},
+  {text:'"I\'m into cooking" means you enjoy cooking.',answer:true,explain:'"be into" = enjoy / be interested in'},
+  {text:'"Catchy" describes something boring and forgettable.',answer:false,explain:'"Catchy" means easy to remember (like a song you can\'t stop humming).'},
+  {text:'"I prefer tea to coffee" means tea is your favourite.',answer:true,explain:'"prefer X to Y" = like X more than Y'},
+  {text:'"Hilarious" means very sad.',answer:false,explain:'"Hilarious" means extremely funny.'},
+  {text:'You can say "I\'m a big fan of..." to express strong interest.',answer:true,explain:'"a big/huge fan of" = wielki fan'},
+];
+
+const transData = [
+  {pl:'Bardzo lubię słuchać muzyki.',en:'I really enjoy listening to music.',alts:['i really like listening to music','i love listening to music']},
+  {pl:'Jaki jest twój ulubiony film?',en:'What is your favourite film?',alts:['what\'s your favourite film','what is your favorite movie','what\'s your favorite film']},
+  {pl:'Nie znoszę wstawać wcześnie rano.',en:'I can\'t stand getting up early in the morning.',alts:['i can\'t stand waking up early in the morning','i can\'t stand getting up early']},
+  {pl:'Polecam tę książkę. Jest niesamowita.',en:'I recommend this book. It\'s amazing.',alts:['i recommend this book it is amazing','i recommend this book. it is amazing']},
+];
+
+// ============================================================
+//  PALETTE COLORS FOR MATCH PAIRS
+// ============================================================
+const pairColors = ['#e07860','#2a9d8f','#d4a843','#7c5295','#4a90d9','#c85a88'];
+
+// ============================================================
+//  STATE
+// ============================================================
+const SECTIONS = 8;
+let done = new Set();
+let flipCount = 0;
+let matchSel = null;
+let matchCount = 0;
+let gapChecked = {};
+let mcDone = {};
+let mcCorrect = 0;
+let buildStates, buildDoneCount = 0;
+let tfDone = {};
+let tfCorrect = 0;
+let transChecked = {};
+
+function sectionDone(n, msg) {
+  if (done.has(n)) return;
+  done.add(n);
+  sectionConfetti();
+  if (msg) showFb('fb'+n, true, msg);
+}
+function showFb(id, ok, msg) {
+  const el = document.getElementById(id);
+  if (!el) return;
+  el.className = 'fb show ' + (ok ? 'fb-ok' : 'fb-no');
+  el.textContent = msg;
+}
+function sectionConfetti() {
+  const colors = ['#e07860','#2a9d8f','#d4a843','#7c5295','#4a90d9'];
+  confetti({particleCount:70, spread:70, origin:{y:0.7}, colors});
+}
+function celebrate() {
+  const colors = ['#e07860','#2a9d8f','#d4a843','#7c5295','#4a90d9','#c85a88'];
+  // realistic burst
+  const defaults = {origin:{y:0.7}};
+  confetti(Object.assign({},defaults,{spread:26,startVelocity:55,particleCount:50,colors}));
+  confetti(Object.assign({},defaults,{spread:60,particleCount:40,colors}));
+  confetti(Object.assign({},defaults,{spread:100,decay:0.91,scalar:0.8,particleCount:70,colors}));
+  // side fireworks
+  const end = Date.now() + 3000;
+  (function frame(){
+    confetti({particleCount:3,angle:60,spread:55,origin:{x:0},colors});
+    confetti({particleCount:3,angle:120,spread:55,origin:{x:1},colors});
+    if(Date.now()<end) requestAnimationFrame(frame);
+  })();
+  // emoji burst after 500ms
+  setTimeout(()=>{
+    const scalar=2;
+    const shapes = ['🎉','⭐','❤️','🔥'].map(t=>confetti.shapeFromText({text:t,scalar}));
+    confetti({particleCount:30,spread:120,origin:{y:0.6},shapes,scalar,ticks:200});
+  },500);
+}
+
+// ============================================================
+//  1. FLIP CARDS
+// ============================================================
+function buildFlip(){
+  const g = document.getElementById('flipGrid');
+  g.innerHTML = flipData.map((c,i)=>`
+    <div class="flip-outer" data-idx="${i}" onclick="flipCard(this)">
+      <div class="flip-card">
+        <div class="flip-front">
+          <span class="flip-emoji">${c.emoji}</span>
+          <span class="flip-word">${c.en}</span>
+          <span class="flip-pron">${c.pron}</span>
+        </div>
+        <div class="flip-back">
+          <span class="flip-word-back">${c.en}</span>
+          <span class="flip-pl">${c.pl}</span>
+          <span class="flip-example">${c.ex}</span>
+        </div>
+      </div>
+    </div>
+  `).join('');
+}
+function flipCard(outer){
+  outer.classList.toggle('flipped');
+  if(outer.classList.contains('flipped') && !outer.dataset.counted){
+    outer.dataset.counted='1';
+    flipCount++;
+    if(flipCount>=flipData.length) sectionDone(1,'All cards flipped!');
+  }
+}
+function solveFlip(){
+  document.querySelectorAll('.flip-outer').forEach(o=>{
+    o.classList.add('flipped');
+    o.dataset.counted='1';
+  });
+  flipCount=flipData.length;
+  sectionDone(1,'All cards revealed!');
+}
+
+// ============================================================
+//  2. MATCHING
+// ============================================================
+function buildMatch(){
+  const shuffledRight = [...matchData].sort(()=>Math.random()-0.5);
+  document.getElementById('matchLeft').innerHTML = matchData.map((m,i)=>
+    `<div class="match-item" data-side="left" data-id="${i}" onclick="matchClick(this)">${m.en}</div>`
+  ).join('');
+  document.getElementById('matchRight').innerHTML = shuffledRight.map(m=>{
+    const origIdx = matchData.indexOf(m);
+    return `<div class="match-item" data-side="right" data-id="${origIdx}" onclick="matchClick(this)">${m.pl}</div>`;
+  }).join('');
+}
+function matchClick(el){
+  if(el.classList.contains('m-matched')) return;
+  const side = el.dataset.side;
+  if(!matchSel){
+    document.querySelectorAll('.match-item:not(.m-matched)').forEach(e=>e.classList.remove('m-selected'));
+    matchSel = el;
+    el.classList.add('m-selected');
+  } else {
+    if(matchSel.dataset.side === side){
+      document.querySelectorAll('.match-item:not(.m-matched)').forEach(e=>e.classList.remove('m-selected'));
+      matchSel = el;
+      el.classList.add('m-selected');
+      return;
+    }
+    const id1 = matchSel.dataset.id, id2 = el.dataset.id;
+    if(id1 === id2){
+      const color = pairColors[matchCount % pairColors.length];
+      matchSel.classList.remove('m-selected');
+      [matchSel, el].forEach(e=>{
+        e.classList.add('m-matched');
+        e.style.background = color+'18';
+        e.style.borderLeft = '4px solid '+color;
+        e.style.color = color;
+        const num = document.createElement('span');
+        num.className='match-pair-num';
+        num.style.background=color;
+        num.textContent=matchCount+1;
+        e.prepend(num);
+      });
+      matchCount++;
+      if(matchCount>=matchData.length) sectionDone(2,'All matched!');
+    } else {
+      matchSel.classList.add('m-wrong');
+      el.classList.add('m-wrong');
+      setTimeout(()=>{
+        matchSel.classList.remove('m-wrong','m-selected');
+        el.classList.remove('m-wrong');
+        matchSel=null;
+      },500);
+      return;
+    }
+    matchSel=null;
+  }
+}
+function solveMatch(){
+  matchData.forEach((m,i)=>{
+    const left = document.querySelector(`.match-item[data-side="left"][data-id="${i}"]`);
+    const right = document.querySelector(`.match-item[data-side="right"][data-id="${i}"]`);
+    if(left && right && !left.classList.contains('m-matched')){
+      const color = pairColors[matchCount % pairColors.length];
+      [left,right].forEach(e=>{
+        e.classList.remove('m-selected');
+        e.classList.add('m-matched');
+        e.style.background = color+'18';
+        e.style.borderLeft = '4px solid '+color;
+        e.style.color = color;
+        const num = document.createElement('span');
+        num.className='match-pair-num';
+        num.style.background=color;
+        num.textContent=matchCount+1;
+        e.prepend(num);
+      });
+      matchCount++;
+    }
+  });
+  sectionDone(2,'All matched!');
+}
+
+// ============================================================
+//  3. FILL GAPS
+// ============================================================
+function buildGaps(){
+  document.getElementById('gapArea').innerHTML = gapData.map((g,i)=>`
+    <div class="gap-item">
+      <span class="gap-num">${i+1}.</span>
+      <span>${g.before}</span>
+      <input class="gap-input" id="gap${i}" data-answer="${g.answer}" placeholder="..." onkeydown="if(event.key==='Enter')checkGap(${i})">
+      <button class="gap-hint-btn" onclick="showGapHint(${i})">💡</button>
+      <span>${g.after}</span>
+      <div class="gap-hint-text" id="gapHint${i}">${g.hint}</div>
+    </div>
+  `).join('');
+}
+function checkGap(i){
+  const inp = document.getElementById('gap'+i);
+  const correct = inp.dataset.answer.toLowerCase().trim();
+  const val = inp.value.toLowerCase().trim();
+  inp.classList.remove('g-correct','g-wrong');
+  if(val===correct){
+    inp.classList.add('g-correct');
+    gapChecked[i]=true;
+  } else {
+    inp.classList.add('g-wrong');
+    gapChecked[i]=false;
+  }
+  if(Object.keys(gapChecked).length>=gapData.length && Object.values(gapChecked).every(v=>v)){
+    sectionDone(3,'All gaps filled correctly!');
+  }
+}
+function showGapHint(i){
+  document.getElementById('gapHint'+i).classList.toggle('show');
+}
+function solveGaps(){
+  gapData.forEach((g,i)=>{
+    const inp = document.getElementById('gap'+i);
+    inp.value = g.answer;
+    inp.classList.remove('g-wrong');
+    inp.classList.add('g-correct');
+    gapChecked[i]=true;
+  });
+  sectionDone(3,'All gaps solved!');
+}
+
+// ============================================================
+//  4. ABOUT YOU
+// ============================================================
+function buildAbout(){
+  document.getElementById('aboutGrid').innerHTML = aboutData.map((a,i)=>`
+    <div class="about-card">
+      <div class="about-emoji">${a.emoji}</div>
+      <div class="about-q">${a.q}</div>
+      <textarea class="about-textarea" id="about${i}" placeholder="Write in English..."></textarea>
+      <div class="about-hint" data-hint-idx="${i}" onclick="showAboutHint(this)">💡 Show hint</div>
+    </div>
+  `).join('');
+}
+function showAboutHint(el){
+  const idx = parseInt(el.dataset.hintIdx);
+  if(el.dataset.revealed === '1'){
+    el.textContent = '💡 Show hint';
+    el.dataset.revealed = '0';
+  } else {
+    el.textContent = '💡 ' + aboutData[idx].hint;
+    el.dataset.revealed = '1';
+  }
+}
+function checkAbout(){
+  let filled = 0;
+  aboutData.forEach((a,i)=>{
+    if(document.getElementById('about'+i).value.trim().length>3) filled++;
+  });
+  if(filled>=aboutData.length){
+    sectionDone(4,'Great job sharing about yourself!');
+  } else if(filled>0){
+    showFb('fb4',true,`${filled}/${aboutData.length} answered. Keep going!`);
+  } else {
+    showFb('fb4',false,'Write at least a sentence for each question!');
+  }
+}
+
+// ============================================================
+//  5. MULTIPLE CHOICE
+// ============================================================
+function buildMC(){
+  document.getElementById('mcArea').innerHTML = mcData.map((q,i)=>`
+    <div class="mc-item" id="mc${i}">
+      <div class="mc-q"><span class="mc-q-num">${i+1}.</span><span>${q.q}</span></div>
+      <div class="mc-opts">${q.opts.map((o,j)=>
+        `<button class="mc-btn" onclick="pickMC(${i},${j})">${o}</button>`
+      ).join('')}</div>
+      <div class="mc-fb" id="mcfb${i}"></div>
+    </div>
+  `).join('');
+}
+function pickMC(qi,oi){
+  if(mcDone[qi]) return;
+  mcDone[qi]=true;
+  const item = document.getElementById('mc'+qi);
+  const btns = item.querySelectorAll('.mc-btn');
+  const fb = document.getElementById('mcfb'+qi);
+  btns.forEach((b,j)=>{
+    b.disabled=true;
+    if(j===mcData[qi].correct) b.classList.add('mc-correct');
+  });
+  if(oi===mcData[qi].correct){
+    mcCorrect++;
+    fb.textContent='✓ '+mcData[qi].explain;
+    fb.className='mc-fb show ok';
+  } else {
+    btns[oi].classList.add('mc-wrong');
+    fb.textContent='✗ '+mcData[qi].explain;
+    fb.className='mc-fb show no';
+  }
+  if(Object.keys(mcDone).length>=mcData.length){
+    sectionDone(5,`Quiz done! ${mcCorrect}/${mcData.length} correct.`);
+  }
+}
+function solveMC(){
+  mcData.forEach((q,i)=>{
+    if(mcDone[i]) return;
+    mcDone[i]=true;
+    mcCorrect++;
+    const item = document.getElementById('mc'+i);
+    const btns = item.querySelectorAll('.mc-btn');
+    const fb = document.getElementById('mcfb'+i);
+    btns.forEach((b,j)=>{b.disabled=true;if(j===q.correct)b.classList.add('mc-correct')});
+    fb.textContent='✓ '+q.explain;
+    fb.className='mc-fb show ok';
+  });
+  sectionDone(5,`Quiz solved! ${mcCorrect}/${mcData.length} correct.`);
+}
+
+// ============================================================
+//  6. SENTENCE BUILDER
+// ============================================================
+function buildBuilder(){
+  buildStates = buildData.map(()=>[]);
+  document.getElementById('buildArea').innerHTML = buildData.map((s,i)=>{
+    const shuffled = [...s.words].sort(()=>Math.random()-0.5);
+    return `<div class="build-block" id="bb${i}">
+      <div class="build-prompt">📝 <em>${s.pl}</em></div>
+      <div class="word-bank" id="wb${i}">${shuffled.map((w,j)=>
+        `<span class="w-chip" data-si="${i}" data-wi="${j}" data-w="${w}" onclick="addWord(${i},this)">${w}</span>`
+      ).join('')}</div>
+      <div class="build-area" id="ba${i}"><span class="build-ph">Click words above...</span></div>
+      <div style="display:flex;gap:0.5rem;flex-wrap:wrap">
+        <button class="btn btn-ghost" onclick="checkBuild(${i})">Check ✓</button>
+        <button class="btn btn-outline" onclick="resetBuild(${i})" style="font-size:0.8rem;padding:0.45rem 1rem">↺ Reset</button>
+      </div>
+      <div class="build-fb" id="bfb${i}"></div>
+    </div>`;
+  }).join('');
+}
+function addWord(si,chip){
+  if(chip.classList.contains('w-used')) return;
+  const area = document.getElementById('ba'+si);
+  const ph = area.querySelector('.build-ph'); if(ph) ph.remove();
+  area.classList.add('has-words');
+  chip.classList.add('w-used');
+  buildStates[si].push({word:chip.dataset.w,chipEl:chip});
+  const p = document.createElement('span');
+  p.className='placed';p.textContent=chip.dataset.w;
+  p.onclick=()=>{
+    chip.classList.remove('w-used');
+    buildStates[si]=buildStates[si].filter(e=>e.chipEl!==chip);
+    p.remove();
+    if(!buildStates[si].length){
+      area.classList.remove('has-words');
+      area.innerHTML='<span class="build-ph">Click words above...</span>';
+    }
+  };
+  area.appendChild(p);
+}
+function checkBuild(si){
+  const built = buildStates[si].map(e=>e.word).join(' ');
+  const correct = buildData[si].words.join(' ');
+  const area = document.getElementById('ba'+si);
+  const fb = document.getElementById('bfb'+si);
+  if(built===correct){
+    area.classList.add('b-correct');
+    fb.style.color='var(--correct)';fb.textContent='✓ Correct!';
+    if(!area.dataset.done){area.dataset.done='1';buildDoneCount++;
+      if(buildDoneCount>=buildData.length) sectionDone(6,'All sentences built!');
+    }
+  } else {
+    area.classList.add('b-wrong');
+    fb.style.color='var(--wrong)';fb.textContent='✗ Not quite. Try again!';
+    setTimeout(()=>area.classList.remove('b-wrong'),500);
+  }
+}
+function resetBuild(si){
+  buildStates[si]=[];
+  document.querySelectorAll(`[data-si="${si}"]`).forEach(c=>c.classList.remove('w-used'));
+  const area = document.getElementById('ba'+si);
+  area.innerHTML='<span class="build-ph">Click words above...</span>';
+  area.classList.remove('has-words','b-correct','b-wrong');
+  area.dataset.done='';
+  document.getElementById('bfb'+si).textContent='';
+}
+function solveBuild(){
+  buildData.forEach((s,i)=>{
+    resetBuild(i);
+    const chips = document.querySelectorAll(`[data-si="${i}"]`);
+    s.words.forEach(w=>{
+      const chip = [...chips].find(c=>c.dataset.w===w&&!c.classList.contains('w-used'));
+      if(chip) addWord(i,chip);
+    });
+    const area = document.getElementById('ba'+i);
+    area.classList.add('b-correct');
+    area.dataset.done='1';
+    document.getElementById('bfb'+i).style.color='var(--correct)';
+    document.getElementById('bfb'+i).textContent='✓ Solved!';
+  });
+  buildDoneCount=buildData.length;
+  sectionDone(6,'All sentences solved!');
+}
+
+// ============================================================
+//  7. TRUE/FALSE
+// ============================================================
+function buildTF(){
+  document.getElementById('tfArea').innerHTML = tfData.map((t,i)=>`
+    <div class="tf-item" id="tf${i}">
+      <span class="tf-text">${t.text}</span>
+      <div class="tf-btns">
+        <button class="tf-btn tf-t" onclick="pickTF(${i},true)">True</button>
+        <button class="tf-btn tf-f" onclick="pickTF(${i},false)">False</button>
+      </div>
+      <div class="tf-fb-inline" id="tffb${i}"></div>
+    </div>
+  `).join('');
+}
+function pickTF(i,val){
+  if(tfDone[i]) return;
+  tfDone[i]=true;
+  const item = document.getElementById('tf'+i);
+  const btns = item.querySelectorAll('.tf-btn');
+  btns.forEach(b=>b.disabled=true);
+  const correct = tfData[i].answer;
+  const fb = document.getElementById('tffb'+i);
+  if(val===correct){
+    tfCorrect++;
+    btns.forEach(b=>{if((b.classList.contains('tf-t')&&correct)||(b.classList.contains('tf-f')&&!correct))b.classList.add('tf-sel-correct')});
+    fb.style.color='var(--correct)';fb.textContent='✓ '+tfData[i].explain;
+  } else {
+    btns.forEach(b=>{
+      if((b.classList.contains('tf-t')&&val)||(b.classList.contains('tf-f')&&!val))b.classList.add('tf-sel-wrong');
+      if((b.classList.contains('tf-t')&&correct)||(b.classList.contains('tf-f')&&!correct))b.classList.add('tf-sel-correct');
+    });
+    fb.style.color='var(--wrong)';fb.textContent='✗ '+tfData[i].explain;
+  }
+  if(Object.keys(tfDone).length>=tfData.length) sectionDone(7,`True/False done! ${tfCorrect}/${tfData.length} correct.`);
+}
+function solveTF(){
+  tfData.forEach((t,i)=>{
+    if(tfDone[i]) return;
+    tfDone[i]=true;tfCorrect++;
+    const btns = document.getElementById('tf'+i).querySelectorAll('.tf-btn');
+    btns.forEach(b=>{b.disabled=true;if((b.classList.contains('tf-t')&&t.answer)||(b.classList.contains('tf-f')&&!t.answer))b.classList.add('tf-sel-correct')});
+    document.getElementById('tffb'+i).style.color='var(--correct)';
+    document.getElementById('tffb'+i).textContent='✓ '+t.explain;
+  });
+  sectionDone(7,`True/False solved!`);
+}
+
+// ============================================================
+//  8. TRANSLATION
+// ============================================================
+function buildTrans(){
+  document.getElementById('transArea').innerHTML = transData.map((t,i)=>`
+    <div class="trans-item">
+      <div class="trans-pl"><span class="t-num">${i+1}.</span> ${t.pl}</div>
+      <input class="trans-input" id="trans${i}" placeholder="Type your translation..." onkeydown="if(event.key==='Enter')checkTrans(${i})">
+      <div class="trans-answer" id="transa${i}" onclick="this.classList.remove('show')">✓ ${t.en}</div>
+    </div>
+  `).join('');
+}
+function normalize(s){return s.toLowerCase().trim().replace(/[.,!?'"]/g,'').replace(/\s+/g,' ');}
+function checkTrans(i){
+  const inp = document.getElementById('trans'+i);
+  const val = normalize(inp.value);
+  const correct = normalize(transData[i].en);
+  const alts = transData[i].alts.map(normalize);
+  inp.classList.remove('t-correct','t-wrong');
+  if(val===correct || alts.includes(val)){
+    inp.classList.add('t-correct');
+    transChecked[i]=true;
+  } else {
+    inp.classList.add('t-wrong');
+    document.getElementById('transa'+i).classList.add('show');
+    transChecked[i]=false;
+  }
+  if(Object.keys(transChecked).length>=transData.length && Object.values(transChecked).every(v=>v)){
+    sectionDone(8,'All translations correct!');
+  }
+}
+function solveTrans(){
+  transData.forEach((t,i)=>{
+    const inp = document.getElementById('trans'+i);
+    inp.value = t.en;
+    inp.classList.remove('t-wrong');
+    inp.classList.add('t-correct');
+    transChecked[i]=true;
+  });
+  sectionDone(8,'All translations solved!');
+}
+
+// ============================================================
+//  SCROLL REVEAL
+// ============================================================
+const obs = new IntersectionObserver(entries=>{
+  entries.forEach(e=>{if(e.isIntersecting)e.target.classList.add('visible')});
+},{threshold:0.08});
+function initScrollReveal(){
+  document.querySelectorAll('.section').forEach(s=>obs.observe(s));
+}
+
+// ============================================================
+//  SAVE / RESET
+// ============================================================
+function saveProgress(){
+  const state = {
+    flipStates: [...document.querySelectorAll('.flip-outer')].map(o=>o.classList.contains('flipped')),
+    gapValues: gapData.map((g,i)=>document.getElementById('gap'+i).value),
+    aboutValues: aboutData.map((a,i)=>document.getElementById('about'+i).value),
+    transValues: transData.map((t,i)=>document.getElementById('trans'+i).value),
+    done: [...done],
+  };
+  localStorage.setItem('ws_my_fav_things', JSON.stringify(state));
+  showFb('fb1',true,'Progress saved!');
+  setTimeout(()=>{const f=document.getElementById('fb1');if(f)f.classList.remove('show')},2000);
+}
+function loadProgress(){
+  const raw = localStorage.getItem('ws_my_fav_things');
+  if(!raw) return;
+  try{
+    const state = JSON.parse(raw);
+    if(state.flipStates) state.flipStates.forEach((flipped,i)=>{
+      if(flipped){
+        const outer = document.querySelectorAll('.flip-outer')[i];
+        if(outer){outer.classList.add('flipped');outer.dataset.counted='1';flipCount++;}
+      }
+    });
+    if(state.gapValues) state.gapValues.forEach((v,i)=>{const inp=document.getElementById('gap'+i);if(inp&&v)inp.value=v;});
+    if(state.aboutValues) state.aboutValues.forEach((v,i)=>{const ta=document.getElementById('about'+i);if(ta&&v)ta.value=v;});
+    if(state.transValues) state.transValues.forEach((v,i)=>{const inp=document.getElementById('trans'+i);if(inp&&v)inp.value=v;});
+  }catch(e){}
+}
+function resetProgress(){
+  if(!confirm('Reset all progress? This cannot be undone.')) return;
+  localStorage.removeItem('ws_my_fav_things');
+  location.reload();
+}
+
+// ============================================================
+//  INIT
+// ============================================================
+document.addEventListener('DOMContentLoaded',()=>{
+  buildFlip();
+  buildMatch();
+  buildGaps();
+  buildAbout();
+  buildMC();
+  buildBuilder();
+  buildTF();
+  buildTrans();
+  initScrollReveal();
+  loadProgress();
+});
+</script>
+</body>
+</html>
