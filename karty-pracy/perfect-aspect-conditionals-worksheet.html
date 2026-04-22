@@ -1,0 +1,2013 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Perfect Aspect &amp; Conditionals — Worksheet</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,700;0,9..144,900;1,9..144,700&family=Montserrat:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.4/dist/confetti.browser.min.js"></script>
+<style>
+    :root {
+        --bg: #fbf7f2;
+        --bg-alt: #fff;
+        --ink: #121212;
+        --ink-soft: #3a3a3a;
+        --magenta: #ff2e88;
+        --cyan: #00d4c8;
+        --lime: #d4ff3a;
+        --purple: #7c3aed;
+        --orange: #ff8a2a;
+        --ok: #16a34a;
+        --bad: #dc2626;
+        --border: #121212;
+        --shadow: 6px 6px 0 #121212;
+        --shadow-sm: 3px 3px 0 #121212;
+    }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+        font-family: 'Montserrat', sans-serif;
+        background: var(--bg);
+        background-image:
+            radial-gradient(circle at 12% 8%, rgba(255,46,136,0.09), transparent 35%),
+            radial-gradient(circle at 88% 92%, rgba(0,212,200,0.10), transparent 40%),
+            radial-gradient(circle at 50% 45%, rgba(212,255,58,0.06), transparent 50%);
+        color: var(--ink);
+        line-height: 1.6;
+        min-height: 100vh;
+        padding: 2rem 1rem 5rem;
+    }
+    .wrap { max-width: 1080px; margin: 0 auto; }
+
+    /* HEADER */
+    header {
+        background: var(--ink);
+        color: var(--bg);
+        border: 3px solid var(--ink);
+        border-radius: 18px;
+        padding: 2.75rem 2.5rem;
+        margin-bottom: 2rem;
+        box-shadow: var(--shadow);
+        position: relative;
+        overflow: hidden;
+    }
+    header::before {
+        content: '';
+        position: absolute;
+        top: -40px; right: -40px;
+        width: 180px; height: 180px;
+        background: var(--magenta);
+        border-radius: 50%;
+        opacity: 0.9;
+    }
+    header::after {
+        content: '';
+        position: absolute;
+        bottom: -30px; right: 100px;
+        width: 100px; height: 100px;
+        background: var(--cyan);
+        border-radius: 50%;
+        opacity: 0.85;
+    }
+    .eyebrow {
+        font-family: 'Montserrat', sans-serif;
+        font-weight: 700;
+        font-size: 0.8rem;
+        letter-spacing: 0.2em;
+        text-transform: uppercase;
+        color: var(--lime);
+        margin-bottom: 0.6rem;
+        position: relative; z-index: 2;
+    }
+    h1 {
+        font-family: 'Fraunces', serif;
+        font-weight: 900;
+        font-size: clamp(2.2rem, 5vw, 3.6rem);
+        line-height: 1.05;
+        letter-spacing: -0.02em;
+        position: relative; z-index: 2;
+        max-width: 720px;
+    }
+    h1 .hl {
+        background: var(--lime);
+        color: var(--ink);
+        padding: 0 0.3em;
+        display: inline-block;
+        transform: rotate(-1.5deg);
+    }
+    .subtitle {
+        margin-top: 1rem;
+        font-size: 1.05rem;
+        color: #e5e5e5;
+        max-width: 620px;
+        position: relative; z-index: 2;
+    }
+
+    /* PROGRESS + CONTROLS */
+    .controls {
+        display: flex;
+        gap: 0.9rem;
+        align-items: center;
+        flex-wrap: wrap;
+        margin-bottom: 2.2rem;
+        background: var(--bg-alt);
+        border: 3px solid var(--ink);
+        border-radius: 14px;
+        padding: 1rem 1.2rem;
+        box-shadow: var(--shadow-sm);
+    }
+    .progress-wrap { flex: 1; min-width: 220px; }
+    .progress-top {
+        display: flex; justify-content: space-between; align-items: center;
+        margin-bottom: 0.5rem;
+        font-weight: 700;
+        font-size: 0.9rem;
+    }
+    .progress-bar {
+        height: 14px;
+        background: #ececec;
+        border: 2px solid var(--ink);
+        border-radius: 10px;
+        overflow: hidden;
+        position: relative;
+    }
+    .progress-fill {
+        height: 100%;
+        width: 0%;
+        background: linear-gradient(90deg, var(--magenta), var(--purple), var(--cyan));
+        transition: width 0.45s cubic-bezier(.2,.8,.2,1);
+    }
+    .btn {
+        font-family: 'Montserrat', sans-serif;
+        font-weight: 700;
+        font-size: 0.88rem;
+        padding: 0.65rem 1.1rem;
+        border: 2.5px solid var(--ink);
+        background: var(--bg-alt);
+        color: var(--ink);
+        border-radius: 10px;
+        cursor: pointer;
+        transition: transform 0.15s, box-shadow 0.15s, background 0.15s;
+        box-shadow: 3px 3px 0 var(--ink);
+        letter-spacing: 0.02em;
+    }
+    .btn:hover { transform: translate(-1px, -1px); box-shadow: 4px 4px 0 var(--ink); background: var(--lime); }
+    .btn:active { transform: translate(2px, 2px); box-shadow: 1px 1px 0 var(--ink); }
+    .btn.primary { background: var(--magenta); color: #fff; }
+    .btn.primary:hover { background: var(--magenta); color: #fff; filter: brightness(1.1); }
+    .btn.ghost { background: transparent; }
+
+    /* SECTIONS */
+    section.part {
+        background: var(--bg-alt);
+        border: 3px solid var(--ink);
+        border-radius: 18px;
+        padding: 2rem 2rem 2.2rem;
+        margin-bottom: 2rem;
+        box-shadow: var(--shadow);
+        position: relative;
+    }
+    .part-head {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        margin-bottom: 0.4rem;
+        flex-wrap: wrap;
+    }
+    .part-num {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        min-width: 2.6rem;
+        height: 2.6rem;
+        padding: 0 0.7rem;
+        background: var(--ink);
+        color: var(--lime);
+        font-family: 'Fraunces', serif;
+        font-weight: 900;
+        font-size: 1.2rem;
+        border-radius: 10px;
+    }
+    .part-title {
+        font-family: 'Fraunces', serif;
+        font-weight: 900;
+        font-size: clamp(1.5rem, 3vw, 2.05rem);
+        letter-spacing: -0.015em;
+        line-height: 1.15;
+        flex: 1;
+        min-width: 240px;
+    }
+    .part-desc {
+        font-size: 0.98rem;
+        color: var(--ink-soft);
+        margin-bottom: 1.6rem;
+        max-width: 780px;
+    }
+    .part-desc strong { background: var(--lime); padding: 0 0.25em; }
+
+    /* PART 1 – grammar table with flipcards */
+    .tense-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
+        gap: 1rem;
+        margin-bottom: 1rem;
+    }
+    .flipcard {
+        perspective: 1200px;
+        height: 210px;
+        cursor: pointer;
+    }
+    .flipcard-inner {
+        position: relative;
+        width: 100%; height: 100%;
+        transition: transform 0.6s cubic-bezier(.2,.8,.2,1);
+        transform-style: preserve-3d;
+    }
+    .flipcard.flipped .flipcard-inner { transform: rotateY(180deg); }
+    .flipcard-face {
+        position: absolute;
+        inset: 0;
+        backface-visibility: hidden;
+        border: 3px solid var(--ink);
+        border-radius: 14px;
+        padding: 1.1rem 1.1rem 1rem;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+        box-shadow: var(--shadow-sm);
+    }
+    .flipcard-front { background: var(--magenta); color: #fff; }
+    .flipcard:nth-child(2) .flipcard-front { background: var(--cyan); color: var(--ink); }
+    .flipcard:nth-child(3) .flipcard-front { background: var(--purple); color: #fff; }
+    .flipcard:nth-child(4) .flipcard-front { background: var(--orange); color: var(--ink); }
+    .flipcard-back { background: #fff4e6; color: var(--ink); transform: rotateY(180deg); }
+    .flipcard:nth-child(2) .flipcard-back { background: #e6fbf9; }
+    .flipcard:nth-child(3) .flipcard-back { background: #f1eafe; }
+    .flipcard:nth-child(4) .flipcard-back { background: #fff0de; }
+    .tense-name {
+        font-family: 'Fraunces', serif;
+        font-weight: 900;
+        font-size: 1.1rem;
+        line-height: 1.15;
+    }
+    .tense-struct {
+        font-family: 'Montserrat', sans-serif;
+        font-weight: 700;
+        font-size: 0.85rem;
+        opacity: 0.92;
+    }
+    .back-label {
+        font-size: 0.72rem;
+        font-weight: 700;
+        letter-spacing: 0.1em;
+        text-transform: uppercase;
+        color: var(--ink-soft);
+    }
+    .tense-example {
+        font-family: 'Fraunces', serif;
+        font-style: italic;
+        font-weight: 700;
+        font-size: 1rem;
+        line-height: 1.3;
+    }
+    .flip-hint { font-size: 0.72rem; font-weight: 700; letter-spacing: 0.08em; opacity: 0.85; }
+
+    /* PART 2 – paired explanations */
+    .pair {
+        background: #fff;
+        border: 2.5px solid var(--ink);
+        border-radius: 14px;
+        padding: 1.2rem 1.3rem;
+        margin-bottom: 1rem;
+        box-shadow: var(--shadow-sm);
+    }
+    .pair-title {
+        font-family: 'Fraunces', serif;
+        font-weight: 900;
+        font-size: 1.1rem;
+        margin-bottom: 0.7rem;
+        display: flex;
+        align-items: center;
+        gap: 0.6rem;
+    }
+    .pair-badge {
+        background: var(--lime);
+        color: var(--ink);
+        font-family: 'Montserrat', sans-serif;
+        font-weight: 700;
+        font-size: 0.75rem;
+        padding: 0.15rem 0.6rem;
+        border-radius: 6px;
+        border: 2px solid var(--ink);
+    }
+    .pair-sents {
+        display: grid;
+        grid-template-columns: 1fr;
+        gap: 0.5rem;
+        margin-bottom: 0.9rem;
+    }
+    .pair-sent {
+        background: #fafafa;
+        border: 2px solid var(--ink);
+        border-radius: 8px;
+        padding: 0.6rem 0.9rem;
+        font-family: 'Fraunces', serif;
+        font-size: 1rem;
+        font-weight: 700;
+    }
+    .pair-sent .lab {
+        display: inline-block;
+        background: var(--magenta);
+        color: #fff;
+        font-family: 'Montserrat', sans-serif;
+        font-weight: 700;
+        font-size: 0.72rem;
+        padding: 0 0.45rem;
+        border-radius: 5px;
+        margin-right: 0.5rem;
+        vertical-align: 1px;
+    }
+    .pair-sent:nth-child(2) .lab { background: var(--cyan); color: var(--ink); }
+    .reveal-btn {
+        font-family: 'Montserrat', sans-serif;
+        font-weight: 700;
+        font-size: 0.8rem;
+        padding: 0.45rem 0.85rem;
+        border: 2px solid var(--ink);
+        background: var(--bg-alt);
+        border-radius: 8px;
+        cursor: pointer;
+        transition: background 0.15s;
+    }
+    .reveal-btn:hover { background: var(--lime); }
+    .reveal-btn.active { background: var(--ink); color: var(--lime); }
+    .explanation {
+        margin-top: 0.8rem;
+        padding: 0.9rem 1.1rem;
+        background: #fffbe6;
+        border-left: 5px solid var(--magenta);
+        border-radius: 8px;
+        font-size: 0.95rem;
+        display: none;
+    }
+    .explanation.show { display: block; }
+    .explanation p { margin-bottom: 0.4rem; }
+    .explanation p:last-child { margin-bottom: 0; }
+    .explanation strong { background: var(--lime); padding: 0 0.2em; }
+    .explanation .sent-label {
+        display: inline-block;
+        background: var(--magenta);
+        color: #fff;
+        font-family: 'Montserrat', sans-serif;
+        font-weight: 800;
+        font-size: 0.72rem;
+        padding: 0.1rem 0.45rem;
+        border-radius: 5px;
+        margin-right: 0.4rem;
+        vertical-align: 1px;
+    }
+    .explanation .sent-label.b { background: var(--cyan); color: var(--ink); }
+    .explanation .subnote {
+        margin-top: 0.9rem;
+        padding: 0.7rem 0.95rem;
+        background: #fff;
+        border: 2px solid var(--ink);
+        border-radius: 8px;
+        font-size: 0.92rem;
+    }
+    .explanation .subnote-title {
+        font-family: 'Fraunces', serif;
+        font-weight: 900;
+        font-size: 0.95rem;
+        margin-bottom: 0.4rem;
+        display: flex;
+        align-items: center;
+        gap: 0.4rem;
+    }
+    .explanation .subnote ul {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+    }
+    .explanation .subnote li {
+        padding: 0.25rem 0;
+        line-height: 1.5;
+    }
+    .explanation .subnote li + li {
+        border-top: 1px dashed #d4d4d4;
+        margin-top: 0.25rem;
+        padding-top: 0.45rem;
+    }
+    .explanation .subnote code {
+        background: var(--ink);
+        color: var(--lime);
+        font-family: 'Montserrat', monospace;
+        font-size: 0.82rem;
+        font-weight: 700;
+        padding: 0.05rem 0.4rem;
+        border-radius: 4px;
+    }
+    .explanation .arrow {
+        color: var(--magenta);
+        font-weight: 900;
+        margin: 0 0.3em;
+    }
+
+    /* PART 3 – translations */
+    .translate-item {
+        background: #fff;
+        border: 2.5px solid var(--ink);
+        border-radius: 14px;
+        padding: 1.1rem 1.3rem;
+        margin-bottom: 1rem;
+        box-shadow: var(--shadow-sm);
+    }
+    .pl-sent {
+        font-family: 'Fraunces', serif;
+        font-weight: 700;
+        font-size: 1.05rem;
+        margin-bottom: 0.7rem;
+    }
+    .pl-sent .num {
+        color: var(--magenta);
+        font-weight: 900;
+        margin-right: 0.4rem;
+    }
+    .translate-textarea {
+        width: 100%;
+        min-height: 52px;
+        border: 2px solid var(--ink);
+        border-radius: 8px;
+        padding: 0.6rem 0.8rem;
+        font-family: 'Fraunces', serif;
+        font-size: 1rem;
+        background: #fafafa;
+        resize: vertical;
+        transition: border-color 0.15s;
+    }
+    .translate-textarea:focus { outline: none; border-color: var(--magenta); background: #fff; }
+    .translate-actions {
+        display: flex; gap: 0.5rem; flex-wrap: wrap;
+        margin-top: 0.7rem;
+    }
+    .hint-box {
+        margin-top: 0.7rem;
+        padding: 0.6rem 0.9rem;
+        background: #e6fbf9;
+        border: 2px dashed var(--cyan);
+        border-radius: 8px;
+        font-size: 0.92rem;
+        display: none;
+    }
+    .hint-box.show { display: block; }
+    .hint-box strong { color: var(--purple); }
+    .answer-box {
+        margin-top: 0.7rem;
+        padding: 0.9rem 1.1rem;
+        background: #f1eafe;
+        border: 2px solid var(--purple);
+        border-radius: 8px;
+        font-size: 0.98rem;
+        display: none;
+    }
+    .answer-box.show { display: block; }
+    .answer-box .correct {
+        font-family: 'Fraunces', serif;
+        font-weight: 700;
+        font-size: 1.05rem;
+        margin-bottom: 0.4rem;
+        color: var(--purple);
+    }
+    .answer-box .reason {
+        font-size: 0.9rem;
+        color: var(--ink-soft);
+    }
+    .answer-box .reason strong { background: var(--lime); padding: 0 0.2em; color: var(--ink); }
+
+    /* PART 4 – error hunt */
+    .error-item {
+        background: #fff;
+        border: 2.5px solid var(--ink);
+        border-radius: 14px;
+        padding: 1.1rem 1.3rem;
+        margin-bottom: 1rem;
+        box-shadow: var(--shadow-sm);
+    }
+    .error-sent {
+        font-family: 'Fraunces', serif;
+        font-weight: 700;
+        font-size: 1.05rem;
+        margin-bottom: 0.7rem;
+        color: var(--ink);
+    }
+    .error-sent .num {
+        color: var(--magenta);
+        font-weight: 900;
+        margin-right: 0.4rem;
+    }
+    .error-sent em {
+        font-style: normal;
+        transition: background 0.3s, color 0.3s, text-decoration-color 0.3s;
+    }
+    .error-item.solved .error-sent em {
+        font-style: italic;
+        background: #f5f5f5;
+        color: var(--ink-soft);
+        padding: 0 0.2em;
+        border-radius: 3px;
+        text-decoration: line-through;
+        text-decoration-color: var(--bad);
+        text-decoration-thickness: 2px;
+    }
+
+    /* PART 5 – conditionals gap fill */
+    .cond-item {
+        background: #fff;
+        border: 2.5px solid var(--ink);
+        border-radius: 14px;
+        padding: 1.1rem 1.3rem;
+        margin-bottom: 1rem;
+        box-shadow: var(--shadow-sm);
+    }
+    .cond-sent {
+        font-family: 'Fraunces', serif;
+        font-size: 1.08rem;
+        font-weight: 500;
+        line-height: 2.3;
+    }
+    .cond-sent .num {
+        color: var(--magenta);
+        font-weight: 900;
+        font-family: 'Fraunces', serif;
+        margin-right: 0.4rem;
+    }
+    .gap {
+        display: inline-block;
+        min-width: 140px;
+        border: none;
+        border-bottom: 3px solid var(--ink);
+        background: transparent;
+        font-family: 'Fraunces', serif;
+        font-size: 1.05rem;
+        font-weight: 700;
+        padding: 0.1rem 0.3rem;
+        text-align: center;
+        color: var(--ink);
+        transition: background 0.2s, border-color 0.2s;
+    }
+    .gap:focus { outline: none; background: #fff9d9; border-bottom-color: var(--magenta); }
+    .gap.correct { background: #d4f7dd; border-bottom-color: var(--ok); color: var(--ok); }
+    .gap.incorrect { background: #fde0e0; border-bottom-color: var(--bad); color: var(--bad); }
+    .cond-hint {
+        font-size: 0.82rem;
+        color: var(--ink-soft);
+        font-style: normal;
+        font-weight: 600;
+        margin-left: 0.4rem;
+    }
+    .cond-type-badge {
+        display: inline-block;
+        background: #f1eafe;
+        color: var(--purple);
+        border: 2px solid var(--purple);
+        font-family: 'Montserrat', sans-serif;
+        font-weight: 700;
+        font-size: 0.72rem;
+        padding: 0.1rem 0.55rem;
+        border-radius: 6px;
+        margin-top: 0.7rem;
+        opacity: 0;
+        transition: opacity 0.3s;
+    }
+    .cond-type-badge.show { opacity: 1; }
+
+    /* PART 6 – multiple choice */
+    .mc-item {
+        background: #fff;
+        border: 2.5px solid var(--ink);
+        border-radius: 14px;
+        padding: 1.1rem 1.3rem;
+        margin-bottom: 1rem;
+        box-shadow: var(--shadow-sm);
+    }
+    .mc-q {
+        font-family: 'Fraunces', serif;
+        font-weight: 700;
+        font-size: 1.05rem;
+        margin-bottom: 0.8rem;
+        line-height: 1.5;
+    }
+    .mc-q .num {
+        color: var(--magenta);
+        font-weight: 900;
+        margin-right: 0.4rem;
+    }
+    .mc-q .blank {
+        display: inline-block;
+        min-width: 90px;
+        border-bottom: 3px dotted var(--ink);
+        padding: 0 0.3rem;
+        text-align: center;
+        color: var(--ink-soft);
+        font-style: italic;
+    }
+    .mc-q .blank.filled {
+        color: var(--ok);
+        font-style: normal;
+        font-weight: 800;
+        border-bottom-style: solid;
+        border-bottom-color: var(--ok);
+    }
+    .mc-options {
+        display: flex;
+        gap: 0.6rem;
+        flex-wrap: wrap;
+        margin-bottom: 0.7rem;
+    }
+    .mc-opt {
+        font-family: 'Fraunces', serif;
+        font-weight: 700;
+        font-size: 0.98rem;
+        padding: 0.55rem 1rem;
+        border: 2.5px solid var(--ink);
+        background: #fafafa;
+        border-radius: 10px;
+        cursor: pointer;
+        transition: all 0.15s;
+    }
+    .mc-opt:hover:not(.locked) { background: var(--lime); transform: translate(-1px,-1px); }
+    .mc-opt.correct { background: #c8f5d2; border-color: var(--ok); color: var(--ok); pointer-events: none; }
+    .mc-opt.incorrect { background: #fecaca; border-color: var(--bad); color: var(--bad); }
+    .mc-opt.locked { pointer-events: none; opacity: 0.55; }
+    .mc-explain {
+        margin-top: 0.5rem;
+        padding: 0.7rem 0.95rem;
+        background: #fffbe6;
+        border: 2px solid var(--ink);
+        border-radius: 8px;
+        font-size: 0.92rem;
+        display: none;
+    }
+    .mc-explain.show { display: block; }
+
+    /* SECTION ACTIONS */
+    .section-actions {
+        display: flex;
+        gap: 0.7rem;
+        flex-wrap: wrap;
+        margin-top: 1.2rem;
+        padding-top: 1.2rem;
+        border-top: 2px dashed var(--ink);
+    }
+
+    /* END — celebrate */
+    .celebrate-block {
+        background: var(--ink);
+        color: #fff;
+        border: 3px solid var(--ink);
+        border-radius: 18px;
+        padding: 3rem 2rem;
+        text-align: center;
+        box-shadow: var(--shadow);
+        position: relative;
+        overflow: hidden;
+    }
+    .celebrate-block h2 {
+        font-family: 'Fraunces', serif;
+        font-weight: 900;
+        font-size: clamp(1.8rem, 4vw, 2.6rem);
+        margin-bottom: 0.6rem;
+        letter-spacing: -0.01em;
+    }
+    .celebrate-block h2 .hl {
+        background: var(--lime);
+        color: var(--ink);
+        padding: 0 0.25em;
+        display: inline-block;
+        transform: rotate(-1deg);
+    }
+    .celebrate-block p {
+        color: #d4d4d4;
+        margin-bottom: 1.6rem;
+        max-width: 560px;
+        margin-left: auto;
+        margin-right: auto;
+    }
+    .celebrate-btn {
+        font-family: 'Fraunces', serif;
+        font-weight: 900;
+        font-size: 1.3rem;
+        padding: 1.1rem 2.5rem;
+        background: var(--magenta);
+        color: #fff;
+        border: 3px solid #fff;
+        border-radius: 14px;
+        cursor: pointer;
+        transition: transform 0.15s, box-shadow 0.15s;
+        letter-spacing: 0.01em;
+        box-shadow: 5px 5px 0 var(--lime);
+    }
+    .celebrate-btn:hover { transform: translate(-2px,-2px); box-shadow: 7px 7px 0 var(--lime); }
+    .celebrate-btn:active { transform: translate(2px,2px); box-shadow: 1px 1px 0 var(--lime); }
+
+    /* Quick reference box */
+    .quickref {
+        background: var(--lime);
+        border: 3px solid var(--ink);
+        border-radius: 14px;
+        padding: 1.1rem 1.3rem;
+        margin-bottom: 1.4rem;
+        box-shadow: var(--shadow-sm);
+    }
+    .quickref h3 {
+        font-family: 'Fraunces', serif;
+        font-weight: 900;
+        font-size: 1.05rem;
+        margin-bottom: 0.5rem;
+    }
+    .quickref ul {
+        list-style: none;
+        padding: 0;
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+        gap: 0.35rem 1.2rem;
+        font-size: 0.92rem;
+        font-weight: 500;
+    }
+    .quickref li::before {
+        content: '→ ';
+        color: var(--magenta);
+        font-weight: 900;
+    }
+    .quickref code {
+        background: var(--ink);
+        color: var(--lime);
+        padding: 0.05rem 0.4rem;
+        border-radius: 4px;
+        font-family: 'Montserrat', monospace;
+        font-size: 0.82rem;
+        font-weight: 700;
+    }
+
+    /* Grammar notes box (Cornell style) */
+    .grammar-notes {
+        background: #fff;
+        border: 3px solid var(--ink);
+        border-radius: 14px;
+        padding: 1.2rem 1.4rem;
+        margin-bottom: 1.4rem;
+        box-shadow: var(--shadow-sm);
+    }
+    .grammar-notes h3 {
+        font-family: 'Fraunces', serif;
+        font-weight: 900;
+        font-size: 1.1rem;
+        margin-bottom: 0.8rem;
+        display: flex;
+        align-items: center;
+        gap: 0.6rem;
+    }
+    .grammar-notes h3::before {
+        content: '📋';
+        font-size: 1.3rem;
+    }
+    .grammar-table {
+        display: grid;
+        grid-template-columns: minmax(150px, 1fr) 2fr;
+        gap: 0.5rem 1rem;
+        font-size: 0.95rem;
+    }
+    .gt-key {
+        font-weight: 700;
+        color: var(--purple);
+        padding: 0.35rem 0;
+        border-right: 2px dotted var(--ink);
+        padding-right: 0.8rem;
+    }
+    .gt-val {
+        padding: 0.35rem 0;
+        position: relative;
+    }
+    .gt-val code {
+        background: #f1eafe;
+        color: var(--purple);
+        padding: 0.05rem 0.35rem;
+        border-radius: 4px;
+        font-family: 'Montserrat', monospace;
+        font-size: 0.88rem;
+        font-weight: 700;
+    }
+    .gt-cover {
+        position: absolute;
+        inset: 0.15rem 0 0.15rem 0;
+        background: var(--ink);
+        background-image:
+            repeating-linear-gradient(
+                45deg,
+                transparent,
+                transparent 8px,
+                rgba(212,255,58,0.12) 8px,
+                rgba(212,255,58,0.12) 16px
+            );
+        border: 2px solid var(--ink);
+        border-radius: 8px;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: var(--lime);
+        font-family: 'Montserrat', sans-serif;
+        font-weight: 700;
+        font-size: 0.8rem;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+        transition: transform 0.15s, background 0.15s;
+        z-index: 2;
+        user-select: none;
+    }
+    .gt-cover:hover {
+        background-color: #222;
+        transform: scale(0.985);
+    }
+    .gt-cover::before {
+        content: '🔒 Reveal';
+    }
+    .gt-cover.revealed {
+        display: none;
+    }
+
+    /* Feedback toast */
+    .toast {
+        position: fixed;
+        bottom: 2rem;
+        left: 50%;
+        transform: translateX(-50%) translateY(120%);
+        background: var(--ink);
+        color: var(--lime);
+        font-family: 'Montserrat', sans-serif;
+        font-weight: 700;
+        font-size: 0.95rem;
+        padding: 0.9rem 1.4rem;
+        border-radius: 10px;
+        border: 2px solid var(--ink);
+        box-shadow: var(--shadow-sm);
+        z-index: 1000;
+        transition: transform 0.35s cubic-bezier(.2,.8,.2,1);
+    }
+    .toast.show { transform: translateX(-50%) translateY(0); }
+
+    @media (max-width: 680px) {
+        body { padding: 1rem 0.7rem 4rem; }
+        header { padding: 2rem 1.5rem; }
+        section.part { padding: 1.5rem 1.2rem; }
+        .cond-sent { line-height: 2.5; }
+        .gap { min-width: 110px; font-size: 1rem; }
+    }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<!-- HEADER -->
+<header>
+    <div class="eyebrow">Advanced Grammar Worksheet</div>
+    <h1>The <span class="hl">Perfect</span> Aspect<br>&amp; Conditionals</h1>
+    <p class="subtitle">Perfect jako łącznik między przeszłością a teraz. Conditionals jako rozmowa z alternatywną rzeczywistością. Jedno i drugie w jednym arkuszu.</p>
+</header>
+
+<!-- CONTROLS -->
+<div class="controls">
+    <div class="progress-wrap">
+        <div class="progress-top">
+            <span>Progress</span>
+            <span id="progress-text">0 / 30</span>
+        </div>
+        <div class="progress-bar"><div class="progress-fill" id="progress-fill"></div></div>
+    </div>
+    <button class="btn" id="btn-save">💾 Save</button>
+    <button class="btn ghost" id="btn-reset">↺ Reset</button>
+</div>
+
+<!-- PART 1 -->
+<section class="part" id="part1">
+    <div class="part-head">
+        <span class="part-num">1</span>
+        <h2 class="part-title">The Perfect Aspect — What Does It Mean?</h2>
+    </div>
+    <p class="part-desc">Perfect = <strong>łącznik</strong> między przeszłością a teraz (lub innym punktem odniesienia). Skupiamy się nie na tym, <em>kiedy</em> coś się stało, ale na tym, że <em>skutek jest odczuwalny</em>. Kliknij każdą kartę, żeby zobaczyć przykład.</p>
+
+    <div class="tense-grid" id="flipcards">
+        <div class="flipcard" data-idx="0">
+            <div class="flipcard-inner">
+                <div class="flipcard-face flipcard-front">
+                    <div>
+                        <div class="tense-name">Present Perfect</div>
+                        <div class="tense-struct" style="margin-top:0.4rem;">have / has + past participle</div>
+                    </div>
+                    <div class="flip-hint">↻ FLIP FOR EXAMPLE</div>
+                </div>
+                <div class="flipcard-face flipcard-back">
+                    <div>
+                        <div class="back-label">Present Perfect</div>
+                        <div class="tense-example" style="margin-top:0.5rem;">I have visited Italy twice.</div>
+                    </div>
+                    <div class="flip-hint" style="color:var(--ink-soft);">↻ FLIP BACK</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="flipcard" data-idx="1">
+            <div class="flipcard-inner">
+                <div class="flipcard-face flipcard-front">
+                    <div>
+                        <div class="tense-name">Past Perfect</div>
+                        <div class="tense-struct" style="margin-top:0.4rem;">had + past participle</div>
+                    </div>
+                    <div class="flip-hint">↻ FLIP FOR EXAMPLE</div>
+                </div>
+                <div class="flipcard-face flipcard-back">
+                    <div>
+                        <div class="back-label">Past Perfect</div>
+                        <div class="tense-example" style="margin-top:0.5rem;">She had left before I arrived.</div>
+                    </div>
+                    <div class="flip-hint" style="color:var(--ink-soft);">↻ FLIP BACK</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="flipcard" data-idx="2">
+            <div class="flipcard-inner">
+                <div class="flipcard-face flipcard-front">
+                    <div>
+                        <div class="tense-name">Present Perfect Continuous</div>
+                        <div class="tense-struct" style="margin-top:0.4rem;">have / has + been + -ing</div>
+                    </div>
+                    <div class="flip-hint">↻ FLIP FOR EXAMPLE</div>
+                </div>
+                <div class="flipcard-face flipcard-back">
+                    <div>
+                        <div class="back-label">Present Perfect Continuous</div>
+                        <div class="tense-example" style="margin-top:0.5rem;">I have been learning English for a year.</div>
+                    </div>
+                    <div class="flip-hint" style="color:var(--ink-soft);">↻ FLIP BACK</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="flipcard" data-idx="3">
+            <div class="flipcard-inner">
+                <div class="flipcard-face flipcard-front">
+                    <div>
+                        <div class="tense-name">Past Perfect Continuous</div>
+                        <div class="tense-struct" style="margin-top:0.4rem;">had + been + -ing</div>
+                    </div>
+                    <div class="flip-hint">↻ FLIP FOR EXAMPLE</div>
+                </div>
+                <div class="flipcard-face flipcard-back">
+                    <div>
+                        <div class="back-label">Past Perfect Continuous</div>
+                        <div class="tense-example" style="margin-top:0.5rem;">He had been working all day when she called.</div>
+                    </div>
+                    <div class="flip-hint" style="color:var(--ink-soft);">↻ FLIP BACK</div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- PART 2 -->
+<section class="part" id="part2">
+    <div class="part-head">
+        <span class="part-num">2</span>
+        <h2 class="part-title">Perfect vs. Perfect Continuous — Feel the Difference</h2>
+    </div>
+    <p class="part-desc">Oba zdania w każdej parze są poprawne, ale znaczą <strong>coś innego</strong>. Podpowiedź: które zdanie sugeruje, że czynność nadal trwa? Które skupia się na rezultacie? Kliknij <em>Show difference</em>, żeby sprawdzić swoje myślenie.</p>
+
+    <div class="pair">
+        <div class="pair-title"><span class="pair-badge">PAIR 1</span> Read vs. been reading</div>
+        <div class="pair-sents">
+            <div class="pair-sent"><span class="lab">A</span>I have read that book.</div>
+            <div class="pair-sent"><span class="lab">B</span>I have been reading that book.</div>
+        </div>
+        <button class="reveal-btn" data-target="exp-1">Show difference</button>
+        <div class="explanation" id="exp-1">
+            <p><span class="sent-label">A</span><strong>Skupia się na rezultacie.</strong> Książka jest przeczytana, gotowa. Nieważne kiedy, nieważne jak długo.</p>
+            <p><span class="sent-label b">B</span><strong>Skupia się na trwaniu czynności.</strong> Czytam ją od jakiegoś czasu, być może jeszcze nie skończyłam.</p>
+        </div>
+    </div>
+
+    <div class="pair">
+        <div class="pair-title"><span class="pair-badge">PAIR 2</span> Had waited vs. had been waiting</div>
+        <div class="pair-sents">
+            <div class="pair-sent"><span class="lab">A</span>She had waited for an hour before he finally arrived.</div>
+            <div class="pair-sent"><span class="lab">B</span>She had been waiting for an hour before he finally arrived.</div>
+        </div>
+        <button class="reveal-btn" data-target="exp-2">Show difference</button>
+        <div class="explanation" id="exp-2">
+            <p><span class="sent-label">A</span><strong>Czekanie przedstawione jako fakt,</strong> zdarzenie poprzedzające przybycie. Neutralne, rzeczowe.</p>
+            <p><span class="sent-label b">B</span><strong>Podkreślenie długości i ciągłości czekania.</strong> Często niesie emocję: frustrację, zmęczenie, zniecierpliwienie.</p>
+        </div>
+    </div>
+
+    <div class="pair">
+        <div class="pair-title"><span class="pair-badge">PAIR 3</span> Has lived vs. has been living</div>
+        <div class="pair-sents">
+            <div class="pair-sent"><span class="lab">A</span>He has lived in Warsaw.</div>
+            <div class="pair-sent"><span class="lab">B</span>He has been living in Warsaw for three years.</div>
+        </div>
+        <button class="reveal-btn" data-target="exp-3">Show difference</button>
+        <div class="explanation" id="exp-3">
+            <p><span class="sent-label">A</span><em>He has lived in Warsaw.</em> — bez <em>for / since</em> to zdanie o <strong>doświadczeniu życiowym</strong>, które jest jego częścią <strong>teraz</strong>. Nie mówimy "kiedyś mieszkał" (to byłby Past Simple), tylko "ma w swoim życiorysie fakt mieszkania w Warszawie". To doświadczenie należy do niego jako osoby i jest aktualne w momencie mówienia. Zwykle sugeruje, że już tam nie mieszka, ale ten epizod go ukształtował lub jest dziś istotny.</p>
+            <p><span class="sent-label b">B</span><em>He has been living in Warsaw for three years.</em> — sama <strong>czynność mieszkania</strong> zaczęła się w przeszłości i wciąż trwa. Nacisk na ciągłość i długość trwania.</p>
+
+            <div class="subnote">
+                <div class="subnote-title">💡 Różnica z Past Simple</div>
+                <ul>
+                    <li><em>He lived in Warsaw.</em> <span class="arrow">→</span> zamknięty epizod, opowieść o przeszłości. Traktujemy to jako fakt <strong>odcięty od teraźniejszości</strong> (np. w biografii, narracji, wspomnieniu).</li>
+                    <li><em>He has lived in Warsaw.</em> <span class="arrow">→</span> przeszłość <strong>połączona z teraźniejszością</strong>. Nie opowiadamy o przeszłości, tylko o tym, co z niej wynika i co ona znaczy dziś.</li>
+                </ul>
+            </div>
+
+            <div class="subnote">
+                <div class="subnote-title">💡 Klasyczny przykład skutku</div>
+                <ul>
+                    <li><em>I have broken my leg.</em> <span class="arrow">→</span> noga jest <strong>złamana teraz</strong>.</li>
+                    <li><em>I broke my leg.</em> <span class="arrow">→</span> złamałem kiedyś, być może dawno zrosła.</li>
+                </ul>
+                <p style="margin-top: 0.5rem; font-size: 0.9rem;">Tak samo: <code>has lived</code> mówi "to doświadczenie jest częścią niego dziś", <code>lived</code> mówi "to był epizod w przeszłości".</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- PART 3 -->
+<section class="part" id="part3">
+    <div class="part-head">
+        <span class="part-num">3</span>
+        <h2 class="part-title">Translate and Identify</h2>
+    </div>
+    <p class="part-desc">Przetłumacz na angielski. Użyj przycisku <em>Hint</em>, jeśli potrzebujesz małej podpowiedzi, i <em>Show answer</em>, żeby zobaczyć gotowe rozwiązanie z uzasadnieniem.</p>
+
+    <div class="translate-item" data-tid="t1">
+        <div class="pl-sent"><span class="num">1.</span> Byłam bardzo zmęczona, bo całą noc nie spałam.</div>
+        <textarea class="translate-textarea" placeholder="Your translation..."></textarea>
+        <div class="translate-actions">
+            <button class="reveal-btn hint-btn" data-target="hint-t1">💡 Hint</button>
+            <button class="reveal-btn ans-btn" data-target="ans-t1">Show answer</button>
+        </div>
+        <div class="hint-box" id="hint-t1">
+            <strong>Hint:</strong> dwie przeszłe czynności — zmęczenie i brak snu. Która wydarzyła się wcześniej? Zacznij od: <em>I was very tired because I…</em>
+        </div>
+        <div class="answer-box" id="ans-t1">
+            <div class="correct">I was very tired because I hadn't slept all night.</div>
+            <div class="reason"><strong>Past Perfect</strong> — brak snu wydarzył się przed zmęczeniem; to wcześniejsza z dwóch przeszłych czynności.</div>
+        </div>
+    </div>
+
+    <div class="translate-item" data-tid="t2">
+        <div class="pl-sent"><span class="num">2.</span> Nigdy wcześniej nie widziałam takiego krajobrazu.</div>
+        <textarea class="translate-textarea" placeholder="Your translation..."></textarea>
+        <div class="translate-actions">
+            <button class="reveal-btn hint-btn" data-target="hint-t2">💡 Hint</button>
+            <button class="reveal-btn ans-btn" data-target="ans-t2">Show answer</button>
+        </div>
+        <div class="hint-box" id="hint-t2">
+            <strong>Hint:</strong> słowo "wcześniej" wskazuje na punkt odniesienia w przeszłości. Zacznij: <em>I had never…</em>
+        </div>
+        <div class="answer-box" id="ans-t2">
+            <div class="correct">I had never seen such a landscape before.</div>
+            <div class="reason"><strong>Past Perfect</strong> — słowo "wcześniej" wskazuje na punkt odniesienia w przeszłości, względem którego ta czynność nigdy nie miała miejsca.</div>
+        </div>
+    </div>
+
+    <div class="translate-item" data-tid="t3">
+        <div class="pl-sent"><span class="num">3.</span> Uczę się angielskiego od ponad roku.</div>
+        <textarea class="translate-textarea" placeholder="Your translation..."></textarea>
+        <div class="translate-actions">
+            <button class="reveal-btn hint-btn" data-target="hint-t3">💡 Hint</button>
+            <button class="reveal-btn ans-btn" data-target="ans-t3">Show answer</button>
+        </div>
+        <div class="hint-box" id="hint-t3">
+            <strong>Hint:</strong> czynność zaczęła się w przeszłości i trwa do teraz, z okresem czasu. Forma: <em>have been + ___ + for…</em>
+        </div>
+        <div class="answer-box" id="ans-t3">
+            <div class="correct">I have been learning English for over a year.</div>
+            <div class="reason"><strong>Present Perfect Continuous</strong> — czynność zaczęła się w przeszłości i trwa do teraz; <em>for + okres czasu</em>.</div>
+        </div>
+    </div>
+
+    <div class="translate-item" data-tid="t4">
+        <div class="pl-sent"><span class="num">4.</span> Zanim zadzwoniłam do lekarza, czekałam już dwie godziny.</div>
+        <textarea class="translate-textarea" placeholder="Your translation..."></textarea>
+        <div class="translate-actions">
+            <button class="reveal-btn hint-btn" data-target="hint-t4">💡 Hint</button>
+            <button class="reveal-btn ans-btn" data-target="ans-t4">Show answer</button>
+        </div>
+        <div class="hint-box" id="hint-t4">
+            <strong>Hint:</strong> czekanie trwało nieprzerwanie przez określony czas przed inną przeszłą czynnością. Zacznij: <em>By the time I called the doctor, I had been…</em>
+        </div>
+        <div class="answer-box" id="ans-t4">
+            <div class="correct">By the time I called the doctor, I had been waiting for two hours.</div>
+            <div class="reason"><strong>Past Perfect Continuous</strong> — czekanie trwało nieprzerwanie przez określony czas przed inną przeszłą czynnością (dzwonieniem).</div>
+        </div>
+    </div>
+
+    <div class="translate-item" data-tid="t5">
+        <div class="pl-sent"><span class="num">5.</span> Wyglądasz, jakbyś płakała. Wszystko w porządku?</div>
+        <textarea class="translate-textarea" placeholder="Your translation..."></textarea>
+        <div class="translate-actions">
+            <button class="reveal-btn hint-btn" data-target="hint-t5">💡 Hint</button>
+            <button class="reveal-btn ans-btn" data-target="ans-t5">Show answer</button>
+        </div>
+        <div class="hint-box" id="hint-t5">
+            <strong>Hint:</strong> widoczny ślad niedawno zakończonej czynności (zaczerwienione oczy). Zacznij: <em>You look like you have been…</em>
+        </div>
+        <div class="answer-box" id="ans-t5">
+            <div class="correct">You look like you have been crying. Is everything okay?</div>
+            <div class="reason"><strong>Present Perfect Continuous</strong> — widoczny ślad niedawno zakończonej czynności. Klasyczne użycie.</div>
+        </div>
+    </div>
+
+    <div class="section-actions">
+        <button class="btn" id="solve-part3">✨ Solve section</button>
+    </div>
+</section>
+
+<!-- PART 4 -->
+<section class="part" id="part4">
+    <div class="part-head">
+        <span class="part-num">4</span>
+        <h2 class="part-title">Error Hunt</h2>
+    </div>
+    <p class="part-desc">Każde zdanie zawiera błąd związany z aspektem Perfect. Znajdź go, wpisz poprawioną wersję w polu, a potem kliknij <em>Check</em> (lub naciśnij Enter). Nie musisz pisać idealnie — sprawdzany jest kluczowy fragment.</p>
+
+    <div class="error-item" data-eid="e1" data-check="saw">
+        <div class="error-sent"><span class="num">1.</span> I <em>have seen</em> that film last Tuesday.</div>
+        <textarea class="translate-textarea" placeholder="Your correction..."></textarea>
+        <div class="translate-actions">
+            <button class="reveal-btn check-btn">Check</button>
+            <button class="reveal-btn ans-btn" data-target="err-ans-1">Show answer</button>
+        </div>
+        <div class="answer-box" id="err-ans-1">
+            <div class="correct">I saw that film last Tuesday.</div>
+            <div class="reason"><strong>Present Perfect</strong> nie może współistnieć z konkretnym punktem czasu w przeszłości (<em>last Tuesday</em>). Z <em>last / yesterday / ago</em> zawsze używamy <strong>Past Simple</strong>.</div>
+        </div>
+    </div>
+
+    <div class="error-item" data-eid="e2" data-check="had already eaten">
+        <div class="error-sent"><span class="num">2.</span> By the time she called, I <em>already ate</em> dinner.</div>
+        <textarea class="translate-textarea" placeholder="Your correction..."></textarea>
+        <div class="translate-actions">
+            <button class="reveal-btn check-btn">Check</button>
+            <button class="reveal-btn ans-btn" data-target="err-ans-2">Show answer</button>
+        </div>
+        <div class="answer-box" id="err-ans-2">
+            <div class="correct">By the time she called, I had already eaten dinner.</div>
+            <div class="reason"><em>By the time + przeszłość</em> wymaga <strong>Past Perfect</strong> dla czynności wcześniejszej. <em>Already</em> samo w sobie błędu nie robi, ale potrzebuje właściwego czasu.</div>
+        </div>
+    </div>
+
+    <div class="error-item" data-eid="e3" data-check="has been living">
+        <div class="error-sent"><span class="num">3.</span> He <em>has been lived</em> here since 2010.</div>
+        <textarea class="translate-textarea" placeholder="Your correction..."></textarea>
+        <div class="translate-actions">
+            <button class="reveal-btn check-btn">Check</button>
+            <button class="reveal-btn ans-btn" data-target="err-ans-3">Show answer</button>
+        </div>
+        <div class="answer-box" id="err-ans-3">
+            <div class="correct">He has been living here since 2010.</div>
+            <div class="reason">W <strong>Present Perfect Continuous</strong> po <em>been</em> stawiamy formę <em>-ing</em>, nie past participle.</div>
+        </div>
+    </div>
+
+    <div class="error-item" data-eid="e4" data-check="had been working">
+        <div class="error-sent"><span class="num">4.</span> I <em>was working</em> in that clinic for five years before I quit.</div>
+        <textarea class="translate-textarea" placeholder="Your correction..."></textarea>
+        <div class="translate-actions">
+            <button class="reveal-btn check-btn">Check</button>
+            <button class="reveal-btn ans-btn" data-target="err-ans-4">Show answer</button>
+        </div>
+        <div class="answer-box" id="err-ans-4">
+            <div class="correct">I had been working in that clinic for five years before I quit.</div>
+            <div class="reason">Dwie przeszłe czynności, jedna poprzedza drugą i trwała przez określony czas. Potrzebne <strong>Past Perfect Continuous</strong>, nie Past Continuous.</div>
+        </div>
+    </div>
+
+    <div class="error-item" data-eid="e5" data-check="for two hours">
+        <div class="error-sent"><span class="num">5.</span> She had been waiting <em>since two hours</em> when the doctor finally arrived.</div>
+        <textarea class="translate-textarea" placeholder="Your correction..."></textarea>
+        <div class="translate-actions">
+            <button class="reveal-btn check-btn">Check</button>
+            <button class="reveal-btn ans-btn" data-target="err-ans-5">Show answer</button>
+        </div>
+        <div class="answer-box" id="err-ans-5">
+            <div class="correct">She had been waiting for two hours when the doctor finally arrived.</div>
+            <div class="reason"><em>Since</em> używamy z konkretnym punktem w czasie (<em>since Monday, since 2020</em>). Z okresem czasu (<em>two hours, a long time</em>) używamy <strong>for</strong>.</div>
+        </div>
+    </div>
+
+    <div class="section-actions">
+        <button class="btn" id="solve-part4">✨ Solve section</button>
+    </div>
+</section>
+
+<!-- GRAMMAR NOTES (Cornell style) -->
+<section class="part" id="grammar-notes">
+    <div class="part-head">
+        <span class="part-num">📋</span>
+        <h2 class="part-title">Grammar Notes — Conditionals (Cornell Style)</h2>
+    </div>
+    <p class="part-desc">Zanim przejdziesz do Part 5, przejrzyj skrótową notatkę. Tutaj nic nie wpisujesz — to szybka powtórka.</p>
+
+    <div class="grammar-notes">
+        <h3>Second &amp; Third Conditional at a glance</h3>
+        <div class="grammar-table">
+            <div class="gt-key">Co to jest 2nd conditional?</div>
+            <div class="gt-val">Sytuacja wyobrażona, <strong>nierealna w teraźniejszości lub przyszłości</strong>. Wiemy lub zakładamy, że tak nie jest.<span class="gt-cover" data-cover="gc1"></span></div>
+
+            <div class="gt-key">Budowa 2nd conditional</div>
+            <div class="gt-val"><code>If + past simple, would + infinitive</code><span class="gt-cover" data-cover="gc2"></span></div>
+
+            <div class="gt-key">Przykład (2nd)</div>
+            <div class="gt-val"><em>If I had more time, I would travel more.</em> (Ale nie mam — to nierealne.)<span class="gt-cover" data-cover="gc3"></span></div>
+
+            <div class="gt-key">"were" czy "was"?</div>
+            <div class="gt-val">Po <em>if</em> formalnie używamy <strong>were</strong> dla wszystkich osób: <em>If I were you…</em>. W mowie potocznej <em>was</em> też jest akceptowane.<span class="gt-cover" data-cover="gc4"></span></div>
+
+            <div class="gt-key">Co to jest 3rd conditional?</div>
+            <div class="gt-val">Sytuacja w <strong>przeszłości</strong>, która się nie wydarzyła. Rozważamy, co by było, gdyby było inaczej.<span class="gt-cover" data-cover="gc5"></span></div>
+
+            <div class="gt-key">Budowa 3rd conditional</div>
+            <div class="gt-val"><code>If + past perfect, would have + past participle</code><span class="gt-cover" data-cover="gc6"></span></div>
+
+            <div class="gt-key">Przykład (3rd)</div>
+            <div class="gt-val"><em>If she had studied harder, she would have passed the exam.</em> (Ale nie uczyła się — i nie zdała.)<span class="gt-cover" data-cover="gc7"></span></div>
+
+            <div class="gt-key">Kluczowa różnica</div>
+            <div class="gt-val"><strong>2nd</strong> = wyobraźnia o teraz / przyszłości. <strong>3rd</strong> = wyobraźnia o przeszłości.<span class="gt-cover" data-cover="gc8"></span></div>
+        </div>
+        <div class="section-actions" style="margin-top: 1rem; padding-top: 1rem;">
+            <button class="btn" id="reveal-all-notes">👁 Reveal all</button>
+            <button class="btn ghost" id="cover-all-notes">🔒 Cover again</button>
+        </div>
+    </div>
+</section>
+
+<!-- PART 5 -->
+<section class="part" id="part5">
+    <div class="part-head">
+        <span class="part-num">5</span>
+        <h2 class="part-title">Conditionals — Second and Third</h2>
+    </div>
+    <p class="part-desc">Uzupełnij zdania poprawnymi formami. Naciśnij <em>Enter</em> w polu, żeby sprawdzić odpowiedź. Po poprawnym rozwiązaniu pokaże się typ warunka: <em>2nd</em> lub <em>3rd conditional</em>.</p>
+
+    <div class="cond-item" data-cid="c1">
+        <div class="cond-sent">
+            <span class="num">1.</span>
+            If I
+            <input class="gap" data-answers="had" data-slot="c1-1" size="10" autocomplete="off">
+            <span class="cond-hint">(have)</span>
+            more energy, I
+            <input class="gap" data-answers="would go" data-slot="c1-2" size="12" autocomplete="off">
+            <span class="cond-hint">(go)</span>
+            to the gym every day.
+        </div>
+        <div class="cond-type-badge" data-type="2nd conditional">2nd conditional</div>
+    </div>
+
+    <div class="cond-item" data-cid="c2">
+        <div class="cond-sent">
+            <span class="num">2.</span>
+            If she
+            <input class="gap" data-answers="had studied" data-slot="c2-1" size="14" autocomplete="off">
+            <span class="cond-hint">(study)</span>
+            harder last year, she
+            <input class="gap" data-answers="would have passed" data-slot="c2-2" size="18" autocomplete="off">
+            <span class="cond-hint">(pass)</span>
+            the exam.
+        </div>
+        <div class="cond-type-badge" data-type="3rd conditional">3rd conditional</div>
+    </div>
+
+    <div class="cond-item" data-cid="c3">
+        <div class="cond-sent">
+            <span class="num">3.</span>
+            I
+            <input class="gap" data-answers="would not have made|wouldn't have made" data-slot="c3-1" size="20" autocomplete="off">
+            <span class="cond-hint">(not / make)</span>
+            that mistake if I
+            <input class="gap" data-answers="had listened" data-slot="c3-2" size="14" autocomplete="off">
+            <span class="cond-hint">(listen)</span>
+            more carefully.
+        </div>
+        <div class="cond-type-badge" data-type="3rd conditional">3rd conditional</div>
+    </div>
+
+    <div class="cond-item" data-cid="c4">
+        <div class="cond-sent">
+            <span class="num">4.</span>
+            If the weather
+            <input class="gap" data-answers="were|was" data-slot="c4-1" size="8" autocomplete="off">
+            <span class="cond-hint">(be)</span>
+            warmer, we
+            <input class="gap" data-answers="would go" data-slot="c4-2" size="12" autocomplete="off">
+            <span class="cond-hint">(go)</span>
+            for a long walk this weekend.
+        </div>
+        <div class="cond-type-badge" data-type="2nd conditional">2nd conditional</div>
+    </div>
+
+    <div class="cond-item" data-cid="c5">
+        <div class="cond-sent">
+            <span class="num">5.</span>
+            He
+            <input class="gap" data-answers="would have become" data-slot="c5-1" size="18" autocomplete="off">
+            <span class="cond-hint">(become)</span>
+            a doctor if he
+            <input class="gap" data-answers="hadn't given up|had not given up" data-slot="c5-2" size="18" autocomplete="off">
+            <span class="cond-hint">(not / give up)</span>
+            medicine.
+        </div>
+        <div class="cond-type-badge" data-type="3rd conditional">3rd conditional</div>
+    </div>
+
+    <div class="section-actions">
+        <button class="btn" id="solve-part5">✨ Solve section</button>
+    </div>
+</section>
+
+<!-- PART 6 -->
+<section class="part" id="part6">
+    <div class="part-head">
+        <span class="part-num">6</span>
+        <h2 class="part-title">"time" — Three Ways to Use It</h2>
+    </div>
+
+    <div class="quickref">
+        <h3>Quick reference</h3>
+        <ul>
+            <li><code>for + okres</code> → <em>for three hours / for a long time</em></li>
+            <li><code>since + punkt</code> → <em>since Monday / since 2020</em></li>
+            <li><code>Perfect Continuous + for/since</code> → podkreśla trwanie</li>
+        </ul>
+    </div>
+
+    <p class="part-desc">Wybierz poprawną opcję. Feedback pojawi się natychmiast po kliknięciu.</p>
+
+    <div class="mc-item" data-mcid="m1">
+        <div class="mc-q"><span class="num">1.</span> I don't have <span class="blank" data-slot="m1">___</span> for this right now.</div>
+        <div class="mc-options">
+            <button class="mc-opt" data-correct="false" data-val="a time">a time</button>
+            <button class="mc-opt" data-correct="true" data-val="time">time</button>
+        </div>
+        <div class="mc-explain"><strong>time</strong> jako zasób (niepoliczalne) — nie używamy <em>a</em>.</div>
+    </div>
+
+    <div class="mc-item" data-mcid="m2">
+        <div class="mc-q"><span class="num">2.</span> We had <span class="blank" data-slot="m2">___</span> in Rome last summer.</div>
+        <div class="mc-options">
+            <button class="mc-opt" data-correct="true" data-val="an amazing time">an amazing time</button>
+            <button class="mc-opt" data-correct="false" data-val="amazing time">amazing time</button>
+        </div>
+        <div class="mc-explain"><em>a/an time</em> = chwila, przeżycie. <em>Have a great / amazing time</em> to stałe wyrażenie.</div>
+    </div>
+
+    <div class="mc-item" data-mcid="m3">
+        <div class="mc-q"><span class="num">3.</span> I've asked her <span class="blank" data-slot="m3">___</span>.</div>
+        <div class="mc-options">
+            <button class="mc-opt" data-correct="false" data-val="three time">three time</button>
+            <button class="mc-opt" data-correct="true" data-val="three times">three times</button>
+        </div>
+        <div class="mc-explain">Liczba mnoga od <em>a time</em> w znaczeniu "raz, okazja" — policzalne.</div>
+    </div>
+
+    <div class="mc-item" data-mcid="m4">
+        <div class="mc-q"><span class="num">4.</span> It was <span class="blank" data-slot="m4">___</span> I had ever tried sushi.</div>
+        <div class="mc-options">
+            <button class="mc-opt" data-correct="true" data-val="the first time">the first time</button>
+            <button class="mc-opt" data-correct="false" data-val="a first time">a first time</button>
+        </div>
+        <div class="mc-explain">Konkretna, pierwsza w życiu okazja — <em>the + first time + Past Perfect</em> to klasyczna konstrukcja.</div>
+    </div>
+
+    <div class="mc-item" data-mcid="m5">
+        <div class="mc-q"><span class="num">5.</span> How <span class="blank" data-slot="m5">___</span> did you spend preparing for the appointment?</div>
+        <div class="mc-options">
+            <button class="mc-opt" data-correct="true" data-val="much time">much time</button>
+            <button class="mc-opt" data-correct="false" data-val="many times">many times</button>
+        </div>
+        <div class="mc-explain"><em>Time</em> jako zasób = niepoliczalne, pytamy <strong>how much</strong>, nie <em>how many</em>.</div>
+    </div>
+
+    <div class="section-actions">
+        <button class="btn" id="solve-part6">✨ Solve section</button>
+    </div>
+</section>
+
+<!-- CELEBRATE -->
+<div class="celebrate-block">
+    <h2>You've reached the <span class="hl">end</span> of the worksheet!</h2>
+    <p>Jeśli wszystko zrobione lub prawie wszystko — zasługujesz na show. Kliknij, żeby uruchomić fajerwerki.</p>
+    <button class="celebrate-btn" id="celebrate-btn">🎉 Celebrate!</button>
+</div>
+
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+(function() {
+    'use strict';
+
+    const STORAGE_KEY = 'perfect-conditionals-worksheet-v1';
+    const PALETTE = ['#ff2e88', '#00d4c8', '#d4ff3a', '#7c3aed', '#ff8a2a'];
+
+    // ========== PROGRESS TRACKING ==========
+    const progressItems = new Set();
+    // Total items to count:
+    //  Part 1: 4 flipcards
+    //  Part 3: 5 translations (answer shown)
+    //  Part 4: 5 error hunt (correct or answer shown)
+    //  Part 5: 10 gaps (correct or solved)
+    //  Part 6: 5 MC (correct click)
+    //  Part 2: 3 pair reveals
+    //  Total: 32... but per controls shows /30. Let's make it accurate: use real total.
+    const TOTAL_ITEMS = 4 + 3 + 5 + 5 + 10 + 5; // 32
+    document.getElementById('progress-text').textContent = `0 / ${TOTAL_ITEMS}`;
+
+    function updateProgress() {
+        const count = progressItems.size;
+        const pct = (count / TOTAL_ITEMS) * 100;
+        document.getElementById('progress-fill').style.width = pct + '%';
+        document.getElementById('progress-text').textContent = `${count} / ${TOTAL_ITEMS}`;
+    }
+
+    function mark(id) {
+        if (!progressItems.has(id)) {
+            progressItems.add(id);
+            updateProgress();
+        }
+    }
+
+    // ========== TOAST ==========
+    const toast = document.getElementById('toast');
+    let toastTimer;
+    function showToast(msg) {
+        toast.textContent = msg;
+        toast.classList.add('show');
+        clearTimeout(toastTimer);
+        toastTimer = setTimeout(() => toast.classList.remove('show'), 2200);
+    }
+
+    // ========== CONFETTI HELPERS ==========
+    function confettiBurst() {
+        if (typeof confetti === 'undefined') return;
+        confetti({
+            particleCount: 60,
+            spread: 65,
+            origin: { y: 0.7 },
+            colors: PALETTE,
+            scalar: 0.9
+        });
+    }
+
+    function confettiMini() {
+        if (typeof confetti === 'undefined') return;
+        confetti({
+            particleCount: 25,
+            spread: 45,
+            origin: { y: 0.8 },
+            colors: PALETTE,
+            scalar: 0.7,
+            ticks: 120
+        });
+    }
+
+    function celebrateBig() {
+        if (typeof confetti === 'undefined') return;
+        const duration = 3500;
+        const end = Date.now() + duration;
+        const colors = PALETTE;
+
+        (function frame() {
+            confetti({
+                particleCount: 4,
+                angle: 60,
+                spread: 55,
+                origin: { x: 0, y: 0.7 },
+                colors: colors
+            });
+            confetti({
+                particleCount: 4,
+                angle: 120,
+                spread: 55,
+                origin: { x: 1, y: 0.7 },
+                colors: colors
+            });
+            if (Date.now() < end) {
+                requestAnimationFrame(frame);
+            }
+        })();
+
+        // Big center burst
+        setTimeout(() => {
+            confetti({
+                particleCount: 150,
+                spread: 100,
+                origin: { y: 0.5 },
+                colors: colors,
+                scalar: 1.2
+            });
+        }, 200);
+
+        setTimeout(() => {
+            confetti({
+                particleCount: 100,
+                spread: 120,
+                origin: { y: 0.6 },
+                colors: colors,
+                startVelocity: 45
+            });
+        }, 900);
+    }
+
+    // ========== PART 1 — FLIPCARDS ==========
+    document.querySelectorAll('.flipcard').forEach(card => {
+        card.addEventListener('click', () => {
+            card.classList.toggle('flipped');
+            const idx = card.dataset.idx;
+            mark('flip-' + idx);
+
+            // If all 4 flipped, small confetti
+            const flipped = document.querySelectorAll('.flipcard.flipped').length;
+            if (flipped === 4 && !progressItems.has('part1-done')) {
+                progressItems.add('part1-done');
+                confettiMini();
+            }
+        });
+    });
+
+    // ========== PART 2 — PAIR REVEALS ==========
+    document.querySelectorAll('#part2 .reveal-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+            const targetId = btn.dataset.target;
+            const target = document.getElementById(targetId);
+            const isShowing = target.classList.toggle('show');
+            btn.classList.toggle('active', isShowing);
+            btn.textContent = isShowing ? 'Hide difference' : 'Show difference';
+            if (isShowing) mark('pair-' + targetId);
+        });
+    });
+
+    // ========== PART 3 — TRANSLATIONS ==========
+    document.querySelectorAll('#part3 .translate-item').forEach(item => {
+        const tid = item.dataset.tid;
+        const hintBtn = item.querySelector('.hint-btn');
+        const ansBtn = item.querySelector('.ans-btn');
+        const hintBox = document.getElementById('hint-' + tid);
+        const ansBox = document.getElementById('ans-' + tid);
+
+        hintBtn.addEventListener('click', () => {
+            const showing = hintBox.classList.toggle('show');
+            hintBtn.classList.toggle('active', showing);
+            hintBtn.textContent = showing ? '💡 Hide hint' : '💡 Hint';
+        });
+
+        ansBtn.addEventListener('click', () => {
+            const showing = ansBox.classList.toggle('show');
+            ansBtn.classList.toggle('active', showing);
+            ansBtn.textContent = showing ? 'Hide answer' : 'Show answer';
+            if (showing) mark('trans-' + tid);
+        });
+    });
+
+    document.getElementById('solve-part3').addEventListener('click', () => {
+        document.querySelectorAll('#part3 .translate-item').forEach(item => {
+            const tid = item.dataset.tid;
+            const ansBox = document.getElementById('ans-' + tid);
+            const ansBtn = item.querySelector('.ans-btn');
+            if (!ansBox.classList.contains('show')) {
+                ansBox.classList.add('show');
+                ansBtn.classList.add('active');
+                ansBtn.textContent = 'Hide answer';
+            }
+            mark('trans-' + tid);
+        });
+        confettiMini();
+        showToast('Part 3 solved');
+    });
+
+    // ========== PART 4 — ERROR HUNT ==========
+    function normalize(s) {
+        return s.toLowerCase().trim().replace(/[.,!?;:]/g, '').replace(/\s+/g, ' ');
+    }
+
+    document.querySelectorAll('#part4 .error-item').forEach(item => {
+        const eid = item.dataset.eid;
+        const check = normalize(item.dataset.check);
+        const textarea = item.querySelector('textarea');
+        const checkBtn = item.querySelector('.check-btn');
+        const ansBtn = item.querySelector('.ans-btn');
+        const ansBox = document.getElementById('err-ans-' + eid.slice(1));
+
+        function doCheck() {
+            const val = normalize(textarea.value);
+            if (!val) {
+                showToast('Wpisz poprawioną wersję');
+                return;
+            }
+            if (val.includes(check)) {
+                textarea.style.borderColor = 'var(--ok)';
+                textarea.style.background = '#d4f7dd';
+                textarea.dataset.locked = 'true';
+                item.classList.add('solved');
+                showToast('✓ Correct!');
+                mark('err-' + eid);
+                confettiMini();
+            } else {
+                textarea.style.borderColor = 'var(--bad)';
+                textarea.style.background = '#fde0e0';
+                showToast('✗ Not quite — try again or Show answer');
+            }
+        }
+
+        checkBtn.addEventListener('click', doCheck);
+        textarea.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault();
+                doCheck();
+            }
+        });
+        textarea.addEventListener('input', () => {
+            // Only clear styles if this wasn't a confirmed-correct answer
+            if (!textarea.dataset.locked) {
+                textarea.style.borderColor = '';
+                textarea.style.background = '';
+            }
+        });
+
+        ansBtn.addEventListener('click', () => {
+            const showing = ansBox.classList.toggle('show');
+            ansBtn.classList.toggle('active', showing);
+            ansBtn.textContent = showing ? 'Hide answer' : 'Show answer';
+            if (showing) {
+                item.classList.add('solved');
+                mark('err-' + eid);
+            }
+        });
+    });
+
+    document.getElementById('solve-part4').addEventListener('click', () => {
+        document.querySelectorAll('#part4 .error-item').forEach(item => {
+            const eid = item.dataset.eid;
+            const ansBox = document.getElementById('err-ans-' + eid.slice(1));
+            const ansBtn = item.querySelector('.ans-btn');
+            if (!ansBox.classList.contains('show')) {
+                ansBox.classList.add('show');
+                ansBtn.classList.add('active');
+                ansBtn.textContent = 'Hide answer';
+            }
+            item.classList.add('solved');
+            mark('err-' + eid);
+        });
+        confettiMini();
+        showToast('Part 4 solved');
+    });
+
+    // ========== PART 5 — CONDITIONALS GAPS ==========
+    function checkGap(input) {
+        const val = normalize(input.value);
+        if (!val) {
+            input.classList.remove('correct', 'incorrect');
+            return false;
+        }
+        const answers = input.dataset.answers.split('|').map(normalize);
+        if (answers.includes(val)) {
+            input.classList.add('correct');
+            input.classList.remove('incorrect');
+            mark('gap-' + input.dataset.slot);
+            // If both gaps in the item correct, show badge
+            const item = input.closest('.cond-item');
+            const gaps = item.querySelectorAll('.gap');
+            const allCorrect = Array.from(gaps).every(g => g.classList.contains('correct'));
+            if (allCorrect) {
+                const badge = item.querySelector('.cond-type-badge');
+                if (!badge.classList.contains('show')) {
+                    badge.classList.add('show');
+                    confettiMini();
+                    showToast('✓ ' + badge.dataset.type);
+                }
+            }
+            return true;
+        } else {
+            input.classList.add('incorrect');
+            input.classList.remove('correct');
+            return false;
+        }
+    }
+
+    document.querySelectorAll('#part5 .gap').forEach(input => {
+        input.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                checkGap(input);
+            }
+        });
+        input.addEventListener('blur', () => {
+            if (input.value.trim()) checkGap(input);
+        });
+        input.addEventListener('input', () => {
+            input.classList.remove('correct', 'incorrect');
+        });
+    });
+
+    document.getElementById('solve-part5').addEventListener('click', () => {
+        document.querySelectorAll('#part5 .cond-item').forEach(item => {
+            item.querySelectorAll('.gap').forEach(input => {
+                if (!input.classList.contains('correct')) {
+                    const firstAnswer = input.dataset.answers.split('|')[0];
+                    input.value = firstAnswer;
+                    input.classList.add('correct');
+                    input.classList.remove('incorrect');
+                    mark('gap-' + input.dataset.slot);
+                }
+            });
+            const badge = item.querySelector('.cond-type-badge');
+            badge.classList.add('show');
+        });
+        confettiMini();
+        showToast('Part 5 solved');
+    });
+
+    // ========== PART 6 — MULTIPLE CHOICE ==========
+    document.querySelectorAll('#part6 .mc-item').forEach(item => {
+        const mcid = item.dataset.mcid;
+        const opts = item.querySelectorAll('.mc-opt');
+        const explain = item.querySelector('.mc-explain');
+        const blank = item.querySelector('.blank');
+
+        opts.forEach(opt => {
+            opt.addEventListener('click', () => {
+                if (opt.classList.contains('correct') || opt.classList.contains('locked')) return;
+
+                const correct = opt.dataset.correct === 'true';
+                if (correct) {
+                    opt.classList.add('correct');
+                    // Lock others
+                    opts.forEach(o => { if (o !== opt) o.classList.add('locked'); });
+                    explain.classList.add('show');
+                    // Fill blank
+                    blank.textContent = opt.dataset.val;
+                    blank.classList.add('filled');
+                    mark('mc-' + mcid);
+                    confettiMini();
+                    showToast('✓ Correct!');
+                } else {
+                    opt.classList.add('incorrect');
+                    showToast('✗ Try the other one');
+                }
+            });
+        });
+    });
+
+    document.getElementById('solve-part6').addEventListener('click', () => {
+        document.querySelectorAll('#part6 .mc-item').forEach(item => {
+            const mcid = item.dataset.mcid;
+            const opts = item.querySelectorAll('.mc-opt');
+            const explain = item.querySelector('.mc-explain');
+            const blank = item.querySelector('.blank');
+            let correctOpt = null;
+            opts.forEach(o => {
+                if (o.dataset.correct === 'true') correctOpt = o;
+            });
+            if (correctOpt && !correctOpt.classList.contains('correct')) {
+                correctOpt.classList.add('correct');
+                opts.forEach(o => { if (o !== correctOpt) o.classList.add('locked'); });
+                explain.classList.add('show');
+                blank.textContent = correctOpt.dataset.val;
+                blank.classList.add('filled');
+            }
+            mark('mc-' + mcid);
+        });
+        confettiMini();
+        showToast('Part 6 solved');
+    });
+
+    // ========== CELEBRATE ==========
+    document.getElementById('celebrate-btn').addEventListener('click', () => {
+        celebrateBig();
+    });
+
+    // ========== GRAMMAR NOTES COVERS ==========
+    document.querySelectorAll('.gt-cover').forEach(cover => {
+        cover.addEventListener('click', (e) => {
+            e.stopPropagation();
+            cover.classList.add('revealed');
+        });
+    });
+
+    document.getElementById('reveal-all-notes').addEventListener('click', () => {
+        document.querySelectorAll('.gt-cover').forEach(c => c.classList.add('revealed'));
+    });
+
+    document.getElementById('cover-all-notes').addEventListener('click', () => {
+        document.querySelectorAll('.gt-cover').forEach(c => c.classList.remove('revealed'));
+    });
+
+    // ========== SAVE / RESET ==========
+    function gatherState() {
+        const state = {
+            progress: Array.from(progressItems),
+            flipped: [],
+            explanations: [],
+            hints: [],
+            translations: {},
+            errors: {},
+            errorsStatus: {},
+            gaps: {},
+            mc: {},
+            revealedCovers: [],
+            grammarNotesShown: true
+        };
+
+        document.querySelectorAll('.gt-cover.revealed').forEach(c => {
+            state.revealedCovers.push(c.dataset.cover);
+        });
+
+        document.querySelectorAll('.flipcard').forEach(c => {
+            if (c.classList.contains('flipped')) state.flipped.push(c.dataset.idx);
+        });
+
+        document.querySelectorAll('.explanation.show').forEach(e => state.explanations.push(e.id));
+        document.querySelectorAll('.hint-box.show').forEach(e => state.hints.push(e.id));
+        document.querySelectorAll('.answer-box.show').forEach(e => {
+            if (!state.explanations.includes(e.id)) state.explanations.push(e.id);
+        });
+
+        document.querySelectorAll('#part3 .translate-item textarea').forEach(ta => {
+            const tid = ta.closest('.translate-item').dataset.tid;
+            state.translations[tid] = ta.value;
+        });
+
+        document.querySelectorAll('#part4 .error-item textarea').forEach(ta => {
+            const eid = ta.closest('.error-item').dataset.eid;
+            state.errors[eid] = ta.value;
+            const hasCorrect = ta.style.background === 'rgb(212, 247, 221)' || ta.style.background.includes('d4f7dd');
+            state.errorsStatus[eid] = hasCorrect ? 'correct' : (ta.style.background ? 'incorrect' : '');
+        });
+
+        document.querySelectorAll('#part5 .gap').forEach(input => {
+            state.gaps[input.dataset.slot] = {
+                value: input.value,
+                correct: input.classList.contains('correct')
+            };
+        });
+
+        document.querySelectorAll('#part6 .mc-item').forEach(item => {
+            const mcid = item.dataset.mcid;
+            const correct = item.querySelector('.mc-opt.correct');
+            if (correct) state.mc[mcid] = correct.dataset.val;
+        });
+
+        return state;
+    }
+
+    function restoreState(state) {
+        if (!state) return;
+
+        (state.progress || []).forEach(id => progressItems.add(id));
+        updateProgress();
+
+        (state.flipped || []).forEach(idx => {
+            const c = document.querySelector(`.flipcard[data-idx="${idx}"]`);
+            if (c) c.classList.add('flipped');
+        });
+
+        (state.explanations || []).forEach(id => {
+            const el = document.getElementById(id);
+            if (el) el.classList.add('show');
+            // Update corresponding button state
+            const btn = document.querySelector(`[data-target="${id}"]`);
+            if (btn) {
+                btn.classList.add('active');
+                if (btn.textContent.includes('Show difference')) btn.textContent = 'Hide difference';
+                else if (btn.textContent.includes('Show answer')) btn.textContent = 'Hide answer';
+            }
+        });
+
+        (state.hints || []).forEach(id => {
+            const el = document.getElementById(id);
+            if (el) el.classList.add('show');
+            const btn = document.querySelector(`.hint-btn[data-target="${id}"]`);
+            if (btn) {
+                btn.classList.add('active');
+                btn.textContent = '💡 Hide hint';
+            }
+        });
+
+        if (state.translations) {
+            Object.entries(state.translations).forEach(([tid, val]) => {
+                const ta = document.querySelector(`.translate-item[data-tid="${tid}"] textarea`);
+                if (ta) ta.value = val;
+            });
+        }
+
+        if (state.errors) {
+            Object.entries(state.errors).forEach(([eid, val]) => {
+                const item = document.querySelector(`.error-item[data-eid="${eid}"]`);
+                if (!item) return;
+                const ta = item.querySelector('textarea');
+                if (ta) {
+                    ta.value = val;
+                    const status = (state.errorsStatus || {})[eid];
+                    if (status === 'correct') {
+                        ta.style.borderColor = 'var(--ok)';
+                        ta.style.background = '#d4f7dd';
+                        ta.dataset.locked = 'true';
+                        item.classList.add('solved');
+                    }
+                }
+                // If answer box is shown (in explanations array), also mark solved
+                const ansBox = document.getElementById('err-ans-' + eid.slice(1));
+                if (ansBox && ansBox.classList.contains('show')) {
+                    item.classList.add('solved');
+                }
+            });
+        }
+
+        if (state.gaps) {
+            Object.entries(state.gaps).forEach(([slot, data]) => {
+                const input = document.querySelector(`.gap[data-slot="${slot}"]`);
+                if (input) {
+                    input.value = data.value || '';
+                    if (data.correct) input.classList.add('correct');
+                }
+            });
+            // Check which items have all gaps correct → show badge
+            document.querySelectorAll('#part5 .cond-item').forEach(item => {
+                const gaps = item.querySelectorAll('.gap');
+                const allCorrect = gaps.length > 0 && Array.from(gaps).every(g => g.classList.contains('correct'));
+                if (allCorrect) item.querySelector('.cond-type-badge').classList.add('show');
+            });
+        }
+
+        if (state.mc) {
+            Object.entries(state.mc).forEach(([mcid, val]) => {
+                const item = document.querySelector(`.mc-item[data-mcid="${mcid}"]`);
+                if (!item) return;
+                const opts = item.querySelectorAll('.mc-opt');
+                let correctOpt = null;
+                opts.forEach(o => { if (o.dataset.val === val) correctOpt = o; });
+                if (correctOpt) {
+                    correctOpt.classList.add('correct');
+                    opts.forEach(o => { if (o !== correctOpt) o.classList.add('locked'); });
+                    item.querySelector('.mc-explain').classList.add('show');
+                    const blank = item.querySelector('.blank');
+                    blank.textContent = correctOpt.dataset.val;
+                    blank.classList.add('filled');
+                }
+            });
+        }
+
+        if (state.revealedCovers) {
+            state.revealedCovers.forEach(id => {
+                const c = document.querySelector(`.gt-cover[data-cover="${id}"]`);
+                if (c) c.classList.add('revealed');
+            });
+        }
+    }
+
+    document.getElementById('btn-save').addEventListener('click', () => {
+        try {
+            const state = gatherState();
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+            showToast('💾 Progress saved');
+        } catch (e) {
+            showToast('Save failed');
+        }
+    });
+
+    document.getElementById('btn-reset').addEventListener('click', () => {
+        if (!confirm('Wyczyścić cały postęp? Tej operacji nie można cofnąć.')) return;
+        try {
+            localStorage.removeItem(STORAGE_KEY);
+        } catch (e) {}
+        location.reload();
+    });
+
+    // Restore on load
+    try {
+        const raw = localStorage.getItem(STORAGE_KEY);
+        if (raw) {
+            const state = JSON.parse(raw);
+            restoreState(state);
+        }
+    } catch (e) {
+        console.warn('Could not restore state', e);
+    }
+})();
+</script>
+</body>
+</html>
