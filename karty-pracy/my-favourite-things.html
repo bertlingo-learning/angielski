@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>My Favourite Things - Interactive Worksheet</title>
 <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.4/dist/confetti.browser.min.js"></script>
-<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,700;0,9..144,900;1,9..144,400&family=Merriweather+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,700;0,9..144,900;1,9..144,400&family=Merriweather+Sans:wght@300;400;500;700&display=swap" rel="stylesheet">
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
 :root{
@@ -38,7 +38,7 @@
   --font-body:'Merriweather Sans',sans-serif;
 }
 html{scroll-behavior:smooth}
-body{font-family:var(--font-body);background:var(--bg);color:var(--ink);line-height:1.65;min-height:100vh;overflow-x:hidden}
+body{font-family:var(--font-body);background:var(--bg);color:var(--ink);line-height:1.65;font-weight:400;min-height:100vh;overflow-x:hidden}
 
 /* === DECORATIVE BG === */
 .bg-wash{position:fixed;inset:0;pointer-events:none;z-index:0;overflow:hidden}
@@ -69,10 +69,18 @@ body{font-family:var(--font-body);background:var(--bg);color:var(--ink);line-hei
 .section.visible{opacity:1;transform:translateY(0)}
 .sec-inner{background:var(--surface);border-radius:20px;padding:2rem 2.25rem;box-shadow:var(--shadow-md)}
 .sec-head{display:flex;align-items:center;gap:1rem;margin-bottom:0.35rem}
-.sec-num{font-family:var(--font-display);font-size:2.2rem;font-weight:900;line-height:1;opacity:0.15}
+.sec-num{font-family:var(--font-display);font-size:1rem;font-weight:900;line-height:1;width:2.4rem;height:2.4rem;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;flex-shrink:0;color:#fff;letter-spacing:0.01em}
+#sec1 .sec-num{background:var(--coral)}
+#sec2 .sec-num{background:var(--teal)}
+#sec3 .sec-num{background:var(--gold)}
+#sec4 .sec-num{background:var(--sky)}
+#sec5 .sec-num{background:var(--plum)}
+#sec6 .sec-num{background:var(--teal)}
+#sec7 .sec-num{background:var(--coral)}
+#sec8 .sec-num{background:var(--gold)}
 .sec-title{font-family:var(--font-display);font-size:1.4rem;font-weight:700;color:var(--ink)}
 .sec-desc{font-size:0.9rem;color:var(--ink-light);margin-bottom:1.5rem;margin-left:calc(2.2rem + 1rem)}
-.sec-accent{width:40px;height:4px;border-radius:2px;margin-bottom:1.25rem}
+.sec-accent{width:100%;height:2px;border-radius:2px;margin-bottom:1.25rem;opacity:0.35}
 
 /* === BUTTONS === */
 .btn{font-family:var(--font-body);font-weight:600;border:none;border-radius:10px;padding:0.6rem 1.4rem;cursor:pointer;font-size:0.88rem;transition:all 0.2s}
@@ -104,7 +112,7 @@ body{font-family:var(--font-body);background:var(--bg);color:var(--ink);line-hei
 .flip-card{position:relative;width:100%;height:100%;transition:transform 0.55s ease;transform-style:preserve-3d}
 .flip-outer.flipped .flip-card{transform:rotateY(180deg)}
 .flip-front,.flip-back{position:absolute;inset:0;backface-visibility:hidden;border-radius:14px;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:1.2rem;text-align:center}
-.flip-front{background:var(--surface);box-shadow:var(--shadow-sm)}
+.flip-front{background:var(--surface);transition:transform 0.2s;overflow:hidden}
 .flip-front .flip-emoji{font-size:2.2rem;margin-bottom:0.5rem}
 .flip-front .flip-word{font-family:var(--font-display);font-size:1.15rem;font-weight:700;color:var(--ink)}
 .flip-front .flip-pron{font-size:0.78rem;color:var(--ink-light);margin-top:0.2rem}
@@ -118,13 +126,22 @@ body{font-family:var(--font-body);background:var(--bg);color:var(--ink);line-hei
 .flip-outer:nth-child(6n+4) .flip-back{background:linear-gradient(135deg,var(--plum),#5c3a75)}
 .flip-outer:nth-child(6n+5) .flip-back{background:linear-gradient(135deg,var(--sky),#2a6ab0)}
 .flip-outer:nth-child(6n+6) .flip-back{background:linear-gradient(135deg,#e07860,#d4a843)}
-.flip-outer:hover .flip-front{box-shadow:var(--shadow-md)}
+.flip-outer:hover:not(.flipped) .flip-front{transform:scale(1.04)}
+.flip-front::after{content:'';position:absolute;inset:0;background:linear-gradient(120deg,rgba(255,255,255,0) 30%,rgba(255,255,255,0.55) 50%,rgba(255,255,255,0) 70%);transform:translateX(-120%);pointer-events:none}
+.flip-outer:hover:not(.flipped) .flip-front::after{animation:cardShine 0.45s ease forwards}
+@keyframes cardShine{to{transform:translateX(120%)}}
+.flip-outer:nth-child(6n+1) .flip-front{background:linear-gradient(135deg,#fbd5c8,#fce8e0)}
+.flip-outer:nth-child(6n+2) .flip-front{background:linear-gradient(135deg,#beeae5,#d6f5f2)}
+.flip-outer:nth-child(6n+3) .flip-front{background:linear-gradient(135deg,#fdedb8,#faf5d5)}
+.flip-outer:nth-child(6n+4) .flip-front{background:linear-gradient(135deg,#e0ccf5,#ede0ff)}
+.flip-outer:nth-child(6n+5) .flip-front{background:linear-gradient(135deg,#bcd9f8,#d8eeff)}
+.flip-outer:nth-child(6n+6) .flip-front{background:linear-gradient(135deg,#fcd4b8,#fbe0d0)}
 
 /* === 2. MATCHING === */
 .match-area{display:grid;grid-template-columns:1fr 1fr;gap:2rem}
 .match-col-label{font-size:0.7rem;font-weight:700;letter-spacing:0.12em;text-transform:uppercase;color:var(--ink-light);margin-bottom:0.75rem}
-.match-item{padding:0.85rem 1.1rem;background:var(--bg);border-radius:12px;margin-bottom:0.6rem;cursor:pointer;font-size:0.95rem;font-weight:500;transition:all 0.2s;user-select:none;position:relative}
-.match-item:hover:not(.m-matched){background:var(--warm);transform:translateX(3px)}
+.match-item{padding:0.85rem 1.1rem;background:var(--warm);border-radius:12px;margin-bottom:0.6rem;cursor:pointer;font-size:0.95rem;font-weight:500;transition:all 0.2s;user-select:none;position:relative}
+.match-item:hover:not(.m-matched){background:var(--warm2);transform:scale(1.02)}
 .match-item.m-selected{background:var(--coral);color:#fff;transform:scale(1.02)}
 .match-item.m-matched{cursor:default}
 .match-item.m-matched::after{content:'✓';position:absolute;right:0.8rem;top:50%;transform:translateY(-50%);font-weight:700;font-size:0.85rem}
@@ -158,8 +175,8 @@ body{font-family:var(--font-body);background:var(--bg);color:var(--ink);line-hei
 .about-q{font-weight:600;font-size:0.95rem;margin-bottom:0.6rem}
 .about-textarea{width:100%;border:2px solid var(--warm2);border-radius:10px;padding:0.7rem;font-family:var(--font-body);font-size:0.9rem;color:var(--ink);resize:vertical;min-height:70px;outline:none;transition:border-color 0.2s;background:var(--surface)}
 .about-textarea:focus{border-color:var(--coral)}
-.about-hint{font-size:0.75rem;color:var(--ink-light);margin-top:0.4rem;cursor:pointer}
-.about-hint:hover{color:var(--coral)}
+.about-hint{font-size:0.75rem;color:var(--ink-mid);margin-top:0.5rem;cursor:pointer;background:var(--warm);border:none;border-radius:7px;padding:0.3rem 0.75rem;font-family:var(--font-body);font-weight:500;display:inline-block;transition:background 0.2s,color 0.2s}
+.about-hint:hover{background:var(--warm2);color:var(--ink)}
 
 /* === 5. MULTIPLE CHOICE === */
 .mc-item{margin-bottom:1.5rem;padding-bottom:1.5rem;border-bottom:1px solid var(--warm)}
@@ -257,7 +274,7 @@ body{font-family:var(--font-body);background:var(--bg);color:var(--ink);line-hei
   <div class="hero-tag">Interactive English Worksheet</div>
   <h1>My Favourite <em>Things</em></h1>
   <p class="hero-sub">Talk about what you love, practise useful vocabulary, and have fun!</p>
-  <div class="dummy-img" style="width:100%;max-width:600px;height:200px;margin:1.5rem auto 0;border-radius:20px">
+  <div class="dummy-img" style="width:100%;height:200px;margin:1.5rem auto 0;border-radius:20px">
     <span class="icon">📸</span>
     <span class="label">Hero image placeholder</span>
   </div>
@@ -319,7 +336,7 @@ body{font-family:var(--font-body);background:var(--bg);color:var(--ink);line-hei
   <div class="sec-inner">
     <div class="sec-head"><span class="sec-num">04</span><span class="sec-title">About You</span></div>
     <div class="sec-desc">Answer the questions in English. Even one sentence is great!</div>
-    <div class="sec-accent" style="background:var(--coral)"></div>
+    <div class="sec-accent" style="background:var(--sky)"></div>
     <div class="about-grid" id="aboutGrid"></div>
     <div class="sec-actions">
       <button class="btn btn-coral" onclick="checkAbout()">Done!</button>
@@ -380,7 +397,7 @@ body{font-family:var(--font-body);background:var(--bg);color:var(--ink);line-hei
   <div class="sec-inner">
     <div class="sec-head"><span class="sec-num">08</span><span class="sec-title">Translation Challenge</span></div>
     <div class="sec-desc">Translate the Polish sentences into English. Press Enter to check.</div>
-    <div class="sec-accent" style="background:var(--coral)"></div>
+    <div class="sec-accent" style="background:var(--gold)"></div>
     <div id="transArea"></div>
     <div class="sec-actions">
       <button class="btn btn-solve" onclick="solveTrans()">Solve</button>
