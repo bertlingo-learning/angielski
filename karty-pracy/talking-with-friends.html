@@ -1,0 +1,2180 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Talking with Friends – English Worksheet</title>
+<script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.4/dist/confetti.browser.min.js"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,600;0,9..144,700;0,9..144,900;1,9..144,500&family=Merriweather+Sans:wght@300;400;500;600;700;800&family=Caveat:wght@500;700&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+
+:root{
+  /* Palette: warm cream + coral + teal + gold on light */
+  --bg:#fbf7f0;
+  --bg-soft:#e8dfd0;
+  --surface:#ffffff;
+  --ink:#223642;
+  --ink-soft:#4b6374;
+  --ink-dim:#7f95a4;
+
+  --coral:#e85d5d;
+  --coral-soft:#ff8a7a;
+  --coral-bg:#fde5df;
+
+  --teal:#0c9488;
+  --teal-soft:#2ebfad;
+  --teal-bg:#d6f0ec;
+
+  --gold:#d4a017;
+  --gold-soft:#eac35a;
+  --gold-bg:#fcefc7;
+
+  --plum:#7a4b8a;
+  --plum-soft:#a67db5;
+  --plum-bg:#ece0f2;
+
+  --mint:#4fa870;
+  --mint-bg:#d4ebdc;
+
+  --rose:#f2c5ce;
+
+  --shadow-xs:0 1px 2px rgba(34,54,66,.06);
+  --shadow-sm:0 2px 10px rgba(34,54,66,.07);
+  --shadow-md:0 8px 28px rgba(34,54,66,.10);
+  --shadow-lg:0 18px 50px rgba(34,54,66,.14);
+
+  --radius:18px;
+  --radius-sm:12px;
+  --radius-xs:8px;
+
+  --font-display:'Fraunces',serif;
+  --font-body:'Merriweather Sans',system-ui,sans-serif;
+  --font-hand:'Caveat',cursive;
+}
+
+html{scroll-behavior:smooth}
+body{
+  font-family:var(--font-body);
+  background:var(--bg);
+  color:var(--ink);
+  line-height:1.6;
+  overflow-x:hidden;
+  font-weight:400;
+  -webkit-font-smoothing:antialiased;
+}
+
+/* Background decorative blobs (subtle, light) */
+.bg-blob{position:fixed;border-radius:50%;filter:blur(90px);opacity:.45;pointer-events:none;z-index:0}
+.blob1{width:420px;height:420px;background:var(--coral-bg);top:-120px;left:-120px;animation:blobFloat 22s ease-in-out infinite}
+.blob2{width:380px;height:380px;background:var(--teal-bg);bottom:-100px;right:-100px;animation:blobFloat 28s ease-in-out infinite reverse}
+.blob3{width:320px;height:320px;background:var(--gold-bg);top:38%;left:55%;animation:blobFloat 24s ease-in-out infinite 4s}
+@keyframes blobFloat{0%,100%{transform:translate(0,0) scale(1)}33%{transform:translate(30px,-40px) scale(1.04)}66%{transform:translate(-20px,30px) scale(.96)}}
+
+.container{max-width:1440px;margin:0 auto;padding:0 36px;position:relative;z-index:1}
+
+/* ===== HEADER ===== */
+.header{padding:80px 0 48px;text-align:center;position:relative}
+.header-badge{
+  display:inline-flex;align-items:center;gap:8px;
+  background:linear-gradient(135deg,var(--teal),var(--teal-soft));
+  color:#fff;padding:8px 20px;border-radius:40px;
+  font-size:.76rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;
+  margin-bottom:22px;
+  box-shadow:0 6px 20px rgba(12,148,136,.28);
+}
+.header-badge .dot{width:7px;height:7px;border-radius:50%;background:#fff;animation:pulse 2s ease-in-out infinite}
+@keyframes pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.5;transform:scale(1.3)}}
+
+.header h1{
+  font-family:var(--font-display);
+  font-size:clamp(3rem,5.5vw,4.8rem);
+  font-weight:900;
+  color:var(--ink);
+  line-height:1.1;
+  letter-spacing:-.02em;
+  font-variation-settings:"opsz" 144, "SOFT" 50;
+  margin-bottom:14px;
+}
+.header h1 .accent{
+  color:var(--coral);
+  position:relative;
+  font-style:italic;
+  font-weight:700;
+}
+.header h1 .accent::after{
+  content:'';position:absolute;bottom:4px;left:-4px;right:-4px;height:12px;
+  background:var(--gold-bg);border-radius:8px;z-index:-1;
+  transform:skew(-6deg);
+}
+.header .subtitle{
+  font-size:1.05rem;color:var(--ink-soft);
+  max-width:560px;margin:0 auto 18px;
+}
+.header .scribble{
+  font-family:var(--font-hand);font-size:1.4rem;color:var(--teal);
+  display:inline-block;transform:rotate(-2deg);
+}
+
+/* ===== PROGRESS BAR ===== */
+.progress-wrap{
+  background:var(--surface);border-radius:var(--radius);
+  padding:28px 36px;margin-bottom:56px;
+  box-shadow:var(--shadow-sm);position:relative;overflow:hidden;
+}
+.progress-wrap::before{
+  content:'';position:absolute;top:0;left:0;right:0;height:4px;
+  background:linear-gradient(90deg,var(--coral),var(--gold),var(--teal),var(--plum));
+}
+.progress-top{
+  display:flex;justify-content:space-between;align-items:center;
+  margin-bottom:12px;flex-wrap:wrap;gap:12px;
+}
+.progress-top .label{font-size:.82rem;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:var(--ink-soft)}
+.progress-top .score{font-family:var(--font-hand);font-size:1.65rem;color:var(--teal);font-weight:700;line-height:1}
+.progress-top .buttons{display:flex;gap:8px;flex-wrap:wrap}
+.progress-bar{height:12px;background:var(--bg-soft);border-radius:20px;overflow:hidden;position:relative}
+.progress-fill{
+  height:100%;width:0%;
+  background:linear-gradient(90deg,var(--teal),var(--mint),var(--gold));
+  border-radius:20px;
+  transition:width .6s cubic-bezier(.22,1,.36,1);
+  position:relative;
+}
+.progress-fill::after{
+  content:'';position:absolute;inset:0;
+  background:linear-gradient(90deg,transparent,rgba(255,255,255,.4),transparent);
+  animation:shimmer 2.5s linear infinite;
+}
+@keyframes shimmer{0%{transform:translateX(-100%)}100%{transform:translateX(100%)}}
+
+/* ===== SECTIONS ===== */
+.section{margin-bottom:68px;animation:fadeInUp .6s ease-out both}
+.section:nth-of-type(1){animation-delay:.05s}
+.section:nth-of-type(2){animation-delay:.10s}
+.section:nth-of-type(3){animation-delay:.15s}
+.section:nth-of-type(4){animation-delay:.20s}
+@keyframes fadeInUp{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
+
+.section-header{display:flex;align-items:center;gap:16px;margin-bottom:10px;flex-wrap:wrap}
+.section-number{
+  display:inline-flex;align-items:center;justify-content:center;
+  width:44px;height:44px;border-radius:14px;
+  font-family:var(--font-display);font-weight:900;font-size:1.25rem;
+  color:#fff;flex-shrink:0;
+  box-shadow:var(--shadow-sm);
+}
+.section-header h2{
+  font-family:var(--font-display);
+  font-size:2.2rem;font-weight:700;color:var(--ink);
+  letter-spacing:-.01em;line-height:1.2;
+}
+.section-header .tag{
+  font-size:.68rem;font-weight:700;padding:5px 12px;border-radius:20px;
+  text-transform:uppercase;letter-spacing:.08em;
+}
+
+.instruction{
+  font-size:1rem;color:var(--ink);margin-bottom:20px;
+  display:flex;align-items:flex-start;gap:10px;
+  padding:14px 18px;background:var(--bg-soft);border-radius:var(--radius-sm);
+  font-weight:500;
+}
+.instruction .icon{font-size:1.15rem;line-height:1.2;flex-shrink:0}
+
+.card{
+  background:var(--surface);border-radius:var(--radius);
+  padding:38px;box-shadow:var(--shadow-sm);
+  position:relative;
+}
+
+/* ===== BUTTONS ===== */
+.btn{
+  font-family:var(--font-body);font-weight:700;font-size:.95rem;
+  padding:12px 24px;border-radius:10px;border:none;cursor:pointer;
+  transition:transform .12s ease, box-shadow .2s ease, filter .2s ease;
+  display:inline-flex;align-items:center;gap:8px;line-height:1.2;
+  letter-spacing:.01em;
+}
+.btn:active{transform:scale(.96)}
+.btn-primary{background:var(--teal);color:#fff;box-shadow:0 4px 14px rgba(12,148,136,.3)}
+.btn-primary:hover{filter:brightness(1.08);box-shadow:0 6px 18px rgba(12,148,136,.4)}
+.btn-coral{background:var(--coral);color:#fff;box-shadow:0 4px 14px rgba(232,93,93,.3)}
+.btn-coral:hover{filter:brightness(1.08);box-shadow:0 6px 18px rgba(232,93,93,.4)}
+.btn-gold{background:var(--gold);color:#fff;box-shadow:0 4px 14px rgba(212,160,23,.3)}
+.btn-gold:hover{filter:brightness(1.08)}
+.btn-plum{background:var(--plum);color:#fff;box-shadow:0 4px 14px rgba(122,75,138,.3)}
+.btn-plum:hover{filter:brightness(1.10)}
+.btn-ghost{background:var(--gold-bg);color:#8a6407;border:1.5px solid var(--gold-soft)}
+.btn-ghost:hover{background:var(--gold-soft);color:#fff;filter:brightness(1.05)}
+.btn-small{padding:9px 18px;font-size:.88rem}
+.btn-solve{
+  background:linear-gradient(135deg,var(--gold-soft),var(--gold));
+  color:#5c4508;box-shadow:0 4px 14px rgba(212,160,23,.25);
+}
+.btn-solve:hover{filter:brightness(1.05);transform:translateY(-1px)}
+
+.section-footer{
+  display:flex;justify-content:flex-end;gap:10px;margin-top:16px;flex-wrap:wrap;
+}
+
+/* ===== CHECK RESULT ===== */
+.check-result{
+  margin-top:14px;padding:12px 18px;border-radius:var(--radius-sm);
+  font-size:.92rem;font-weight:600;display:none;animation:slideIn .3s ease;
+}
+.check-result.show{display:block}
+.check-result.success{background:var(--teal-bg);color:var(--teal)}
+.check-result.fail{background:var(--coral-bg);color:var(--coral)}
+.check-result.info{background:var(--gold-bg);color:#8a6407}
+@keyframes slideIn{from{opacity:0;transform:translateY(-5px)}to{opacity:1;transform:translateY(0)}}
+
+/* ===== SECTION 1: VOCAB MOSAIC ===== */
+.vocab-mosaic{display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:18px}
+.vocab-tile{
+  background:var(--surface);border-radius:var(--radius-sm);
+  padding:24px 26px;box-shadow:var(--shadow-xs);
+  cursor:pointer;position:relative;overflow:hidden;
+  transition:transform .18s ease, box-shadow .2s ease;
+}
+.vocab-tile:active{transform:scale(.98)}
+.vocab-tile .emoji{font-size:2.1rem;margin-bottom:6px;display:block}
+.vocab-tile .eng{font-weight:700;font-size:1.15rem;color:var(--ink);margin-bottom:2px;line-height:1.3}
+.vocab-tile .phonetic{font-size:.88rem;color:var(--ink-dim);font-style:italic;margin-bottom:8px;font-family:var(--font-body);font-weight:400}
+.vocab-tile .example{font-size:.94rem;color:var(--ink-soft);line-height:1.45;font-style:italic}
+.vocab-tile .hint-row{display:flex;gap:6px;margin-top:10px;flex-wrap:wrap;align-items:center}
+.vocab-tile .hint-btn{
+  background:var(--gold-bg);border:none;padding:5px 11px;border-radius:6px;
+  font-size:.74rem;font-weight:700;color:#8a6407;cursor:pointer;font-family:var(--font-body);
+  transition:background .2s;
+}
+.vocab-tile .hint-btn:hover{background:var(--gold-soft);color:#fff}
+.vocab-tile .reveal-btn{
+  background:var(--teal-bg);border:none;padding:5px 11px;border-radius:6px;
+  font-size:.74rem;font-weight:700;color:var(--teal);cursor:pointer;font-family:var(--font-body);
+  transition:background .2s;
+}
+.vocab-tile .reveal-btn:hover{background:var(--teal-soft);color:#fff}
+.vocab-tile .hint-text{font-size:.82rem;color:var(--gold);font-weight:600}
+.vocab-tile .pol{
+  background:linear-gradient(135deg,var(--ink),#1a2b36);color:#fff;
+  padding:10px 14px;border-radius:var(--radius-xs);
+  margin-top:10px;font-size:.88rem;font-weight:500;
+  display:none;animation:revealPop .3s ease;
+  line-height:1.4;
+}
+.vocab-tile .pol::before{content:'🇵'; display:none}
+.vocab-tile .pol.show{display:block}
+.vocab-tile .pol .lang-mark{
+  display:inline-flex;align-items:center;gap:4px;
+  vertical-align:middle;margin-right:6px;
+}
+.flag-svg{
+  width:22px;height:15px;border-radius:2px;
+  display:inline-block;vertical-align:middle;flex-shrink:0;
+  box-shadow:0 0 0 1px rgba(0,0,0,.15);
+}
+@keyframes revealPop{from{opacity:0;transform:translateY(5px)}to{opacity:1;transform:translateY(0)}}
+
+/* ===== SECTION 2: FLIP CARDS ===== */
+.flip-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:20px}
+.flip-card-container{perspective:1000px;height:220px;cursor:pointer}
+.flip-card{width:100%;height:100%;position:relative;transform-style:preserve-3d;transition:transform .55s cubic-bezier(.4,.2,.2,1)}
+.flip-card.flipped{transform:rotateY(180deg)}
+.flip-front,.flip-back{
+  position:absolute;inset:0;border-radius:var(--radius-sm);
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  backface-visibility:hidden;padding:18px;text-align:center;
+  box-shadow:var(--shadow-sm);
+}
+.flip-front{background:linear-gradient(145deg,#e8f4f8,#d6eaf4)}
+.flip-front .flip-emoji{font-size:2.4rem;margin-bottom:8px}
+.flip-front .flip-label{font-size:.76rem;color:var(--ink-dim);font-weight:700;letter-spacing:.12em;text-transform:uppercase;margin-bottom:4px}
+.flip-front .flip-text{font-weight:700;font-size:1.2rem;color:var(--ink);font-family:var(--font-body);letter-spacing:-.01em}
+.flip-front .flip-prompt{font-size:.82rem;color:var(--teal);margin-top:8px;font-weight:600}
+
+.flip-back{
+  background:linear-gradient(145deg,var(--teal),#0a7a70);color:#fff;
+  transform:rotateY(180deg);
+}
+.flip-back .flip-original{
+  font-size:.78rem;opacity:.85;margin-bottom:8px;font-style:italic;
+  border-bottom:1px solid rgba(255,255,255,.25);padding-bottom:6px;width:100%;
+}
+.flip-back .flip-meaning{font-weight:700;font-size:1rem;margin-bottom:8px;line-height:1.3}
+.flip-back .flip-example{font-size:.78rem;color:rgba(255,255,255,.85);font-style:italic;line-height:1.4}
+.flip-progress{text-align:center;margin-top:14px;font-size:.82rem;color:var(--ink-soft);font-weight:600}
+
+/* ===== SECTION 3: MATCHING ===== */
+.match-container{display:grid;grid-template-columns:1fr 1fr;gap:20px}
+.match-col{display:flex;flex-direction:column;gap:14px}
+.match-col-label{
+  font-weight:800;font-size:.74rem;text-transform:uppercase;letter-spacing:.1em;
+  color:var(--ink-dim);margin-bottom:2px;
+}
+.match-item{
+  padding:16px 20px;border-radius:var(--radius-sm);
+  font-size:1rem;font-weight:500;cursor:pointer;
+  transition:all .2s;user-select:none;position:relative;
+  display:flex;align-items:center;gap:10px;
+  margin-bottom:10px;
+}
+.match-item:last-child{margin-bottom:0}
+.match-item .pair-number{
+  display:none;width:26px;height:26px;border-radius:50%;
+  background:#fff;color:var(--ink);font-weight:800;font-size:.78rem;
+  align-items:center;justify-content:center;flex-shrink:0;
+  box-shadow:var(--shadow-xs);font-family:var(--font-display);
+}
+.match-item.matched .pair-number{display:inline-flex}
+.match-item.eng-item{background:var(--plum-bg);color:var(--ink)}
+.match-item.pol-item{background:var(--coral-bg);color:var(--ink)}
+.match-item:not(.matched):not(.disabled):hover{transform:scale(1.02);box-shadow:var(--shadow-sm)}
+.match-item.selected{box-shadow:0 0 0 3px var(--teal);transform:scale(1.02)}
+.match-item.matched{
+  background:var(--teal-bg) !important;
+  color:var(--teal);
+  font-weight:700;
+  pointer-events:none;
+}
+.match-item.wrong{background:var(--coral-bg) !important;animation:shake .4s}
+@keyframes shake{0%,100%{transform:translateX(0)}25%{transform:translateX(-5px)}75%{transform:translateX(5px)}}
+
+@media (max-width:640px){
+  .match-container{grid-template-columns:1fr;gap:12px}
+  .match-col-label{margin-top:8px}
+}
+
+/* ===== SECTION 4: DIALOGUE BUILDER ===== */
+.dialogue-scene{
+  background:linear-gradient(135deg,var(--plum-bg),var(--coral-bg));
+  border-radius:var(--radius);padding:22px 24px;margin-bottom:18px;
+}
+.dialogue-scene .scene-label{
+  font-family:var(--font-hand);font-size:1.55rem;color:var(--plum);
+  margin-bottom:4px;font-weight:700;
+}
+.dialogue-scene .scene-desc{font-size:.88rem;color:var(--ink-soft)}
+
+.dialogue-line{display:flex;gap:12px;align-items:flex-start;margin-bottom:14px;animation:fadeInUp .3s ease both}
+.dialogue-avatar{
+  width:40px;height:40px;border-radius:50%;
+  display:flex;align-items:center;justify-content:center;
+  font-size:1.2rem;flex-shrink:0;box-shadow:var(--shadow-sm);
+}
+.avatar-a{background:linear-gradient(135deg,var(--coral-soft),var(--coral))}
+.avatar-b{background:linear-gradient(135deg,var(--teal-soft),var(--teal))}
+.dialogue-bubble{
+  background:var(--surface);border-radius:14px;padding:14px 22px;
+  box-shadow:var(--shadow-xs);font-size:1.05rem;line-height:1.6;
+  max-width:85%;position:relative;
+}
+.dialogue-line.mine{flex-direction:row-reverse}
+.dialogue-line.mine .dialogue-bubble{
+  background:linear-gradient(135deg,var(--ink),#1a2b36);color:#fff;
+}
+.dialogue-gap{
+  display:inline-block;min-width:120px;
+  border-bottom:2.5px dotted var(--teal);
+  padding:2px 6px;margin:0 2px;
+}
+.dialogue-gap input{
+  border:none;background:transparent;
+  font-family:var(--font-body);font-weight:600;font-size:1.05rem;
+  width:100%;outline:none;color:var(--teal);
+  min-width:120px;
+}
+.dialogue-line.mine .dialogue-gap{border-bottom-color:rgba(255,255,255,0.55)}
+.dialogue-line.mine .dialogue-gap input{color:#fff}
+.dialogue-gap.correct-gap{border-bottom:2.5px solid var(--mint);background:var(--mint-bg)}
+.dialogue-gap.correct-gap input{color:var(--mint);font-weight:700}
+.dialogue-gap.wrong-gap{border-bottom:2.5px solid var(--coral);background:var(--coral-bg)}
+.dialogue-gap.wrong-gap input{color:var(--coral)}
+.dialogue-line.mine .dialogue-gap.correct-gap{background:rgba(255,255,255,0.12);border-bottom-color:var(--mint)}
+.dialogue-line.mine .dialogue-gap.correct-gap input{color:var(--mint)}
+.dialogue-line.mine .dialogue-gap.wrong-gap{background:rgba(255,255,255,0.08);border-bottom-color:var(--coral-soft)}
+.dialogue-line.mine .dialogue-gap.wrong-gap input{color:var(--coral-soft)}
+
+/* ===== SECTION 5: SENTENCE SCRAMBLE ===== */
+.scramble-card{
+  background:var(--surface);border-radius:var(--radius);
+  padding:22px;margin-bottom:16px;box-shadow:var(--shadow-xs);
+}
+.scramble-pl{
+  font-family:var(--font-body);font-style:normal;font-weight:400;
+  font-size:1.05rem;color:var(--ink);margin-bottom:4px;
+}
+.scramble-pl .lang-mark{
+  display:inline-flex;align-items:center;gap:4px;
+  margin-right:8px;vertical-align:middle;
+}
+.scramble-zone{
+  min-height:60px;border-radius:var(--radius-sm);padding:14px;
+  display:flex;flex-wrap:wrap;gap:8px;align-items:center;
+  margin:12px 0;transition:background .2s;
+}
+.scramble-answer{background:#fff;min-height:60px;border:1.5px dashed #1a1a1a}
+.scramble-answer:empty::before{
+  content:'Kliknij słowa z banku poniżej...';
+  color:var(--ink-dim);font-style:italic;font-size:.88rem;
+}
+.scramble-answer.correct-zone{background:#fff;border:1.5px dashed var(--mint)}
+.scramble-answer.wrong-zone{background:#fff;border:1.5px dashed var(--coral)}
+.scramble-bank-label{font-size:.74rem;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--ink-dim);margin-top:8px}
+.scramble-bank{background:var(--teal-bg);min-height:52px;border:2px solid var(--teal)}
+.word-chip{
+  display:inline-flex;align-items:center;padding:8px 14px;
+  border-radius:8px;font-size:.88rem;font-weight:600;
+  cursor:pointer;user-select:none;transition:all .18s ease;
+  box-shadow:var(--shadow-xs);
+}
+.word-chip:hover{transform:scale(1.05);box-shadow:var(--shadow-sm)}
+.word-chip:active{transform:scale(.94)}
+.word-chip.in-bank{background:var(--surface);color:var(--ink)}
+.word-chip.in-answer{background:var(--ink);color:#fff}
+.word-chip.correct-word{background:var(--mint) !important;color:#fff}
+.word-chip.wrong-word{background:var(--coral) !important;color:#fff;animation:shake .4s}
+
+/* ===== SECTION 6: MULTIPLE CHOICE ===== */
+.mc-question{margin-bottom:20px}
+.mc-q-text{font-weight:600;font-size:1rem;color:var(--ink);margin-bottom:10px;line-height:1.5}
+.mc-q-text .q-num{
+  display:inline-block;width:26px;height:26px;border-radius:50%;
+  background:var(--plum);color:#fff;font-size:.78rem;font-weight:700;
+  text-align:center;line-height:26px;margin-right:8px;font-family:var(--font-display);
+}
+.mc-options{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:8px}
+.mc-option{
+  padding:14px 20px;background:var(--bg-soft);border-radius:var(--radius-sm);
+  font-size:1rem;cursor:pointer;transition:all .2s;
+  border:2px solid transparent;
+}
+.mc-option:not(.disabled):hover{background:var(--surface);border-color:var(--teal);transform:scale(1.015)}
+.mc-option.correct{background:var(--mint-bg) !important;border-color:var(--mint);color:var(--mint);font-weight:700}
+.mc-option.wrong{background:var(--coral-bg) !important;border-color:var(--coral);color:var(--coral)}
+.mc-option.disabled{cursor:not-allowed}
+.mc-option.disabled:not(.correct):not(.wrong){opacity:.55}
+
+/* ===== SECTION 7: FILL THE GAPS ===== */
+.fill-row{
+  margin-bottom:16px;padding:14px 16px;
+  background:var(--bg-soft);border-radius:var(--radius-sm);
+}
+.fill-sentence{font-size:1rem;line-height:1.7;color:var(--ink);margin-bottom:8px}
+.fill-gap{
+  display:inline-block;min-width:110px;
+  padding:3px 8px;border-radius:6px;
+  border-bottom:2.5px dotted var(--teal);
+  background:var(--surface);
+}
+.fill-gap input{
+  border:none;background:transparent;outline:none;
+  font-family:var(--font-body);font-weight:700;font-size:1rem;
+  color:var(--teal);width:100%;min-width:100px;
+}
+.fill-gap.correct-gap{border-bottom:2.5px solid var(--mint);background:var(--mint-bg)}
+.fill-gap.correct-gap input{color:var(--mint)}
+.fill-gap.wrong-gap{border-bottom:2.5px solid var(--coral);background:var(--coral-bg)}
+.fill-gap.wrong-gap input{color:var(--coral)}
+.fill-actions{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.fill-hint-text{display:none;font-size:.82rem;color:var(--gold);margin-top:6px;font-style:italic;font-weight:600;width:100%}
+.fill-hint-text.show{display:block}
+
+/* ===== SECTION 8: REACTIONS ===== */
+.react-card{
+  background:var(--surface);border-radius:var(--radius);
+  padding:20px;margin-bottom:14px;box-shadow:var(--shadow-xs);
+}
+.react-prompt{
+  font-family:var(--font-body);font-style:normal;font-weight:400;
+  font-size:1.05rem;color:var(--ink);margin-bottom:4px;line-height:1.4;
+}
+.react-prompt .speaker{
+  display:inline-block;font-family:var(--font-body);font-weight:700;
+  font-size:.7rem;color:var(--coral);background:var(--coral-bg);
+  padding:3px 9px;border-radius:6px;margin-right:8px;
+  text-transform:uppercase;letter-spacing:.06em;vertical-align:middle;
+  font-style:normal;
+}
+.react-prompt-context{font-size:.82rem;color:var(--ink-soft);margin-bottom:14px;margin-top:4px}
+.react-options{display:grid;gap:8px}
+.react-opt{
+  padding:14px 20px;background:var(--bg-soft);border-radius:var(--radius-sm);
+  font-size:1rem;cursor:pointer;transition:all .18s;
+  border:2px solid transparent;
+}
+.react-opt:not(.disabled):hover{background:var(--surface);border-color:var(--plum);transform:scale(1.01);box-shadow:0 2px 10px rgba(122,75,138,.15)}
+.react-opt.correct{background:var(--mint-bg) !important;border-color:var(--mint);color:var(--mint);font-weight:700}
+.react-opt.wrong{background:var(--coral-bg) !important;border-color:var(--coral);color:var(--coral)}
+.react-opt.disabled{cursor:not-allowed}
+.react-opt.disabled:not(.correct):not(.wrong){opacity:.55}
+
+/* ===== SECTION 9: WORD PUZZLE ===== */
+.puzzle-card{
+  background:var(--surface);border-radius:var(--radius);
+  padding:22px;margin-bottom:14px;box-shadow:var(--shadow-xs);
+}
+.puzzle-clue{
+  font-family:var(--font-body);font-style:normal;font-weight:400;
+  font-size:1rem;color:var(--ink);margin-bottom:14px;line-height:1.4;
+}
+.puzzle-clue .clue-label{
+  display:inline-block;font-family:var(--font-body);font-style:normal;
+  font-weight:800;font-size:.7rem;color:var(--gold);
+  background:var(--gold-bg);padding:3px 9px;border-radius:6px;
+  margin-right:8px;text-transform:uppercase;letter-spacing:.08em;
+  vertical-align:middle;
+}
+.letter-boxes{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:14px}
+.letter-box{
+  width:36px;height:42px;border-radius:6px;
+  background:var(--bg-soft);border:2px solid var(--bg-soft);
+  display:flex;align-items:center;justify-content:center;
+  font-family:var(--font-display);font-weight:700;font-size:1.1rem;
+  color:var(--ink);transition:all .2s;
+}
+.letter-box.filled{background:var(--teal);color:#fff;border-color:var(--teal)}
+.letter-box.hint{background:var(--gold);color:#fff;border-color:var(--gold)}
+.puzzle-actions{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.puzzle-input{
+  border:2px solid var(--bg-soft);border-radius:8px;
+  padding:9px 14px;font-family:var(--font-body);font-size:.95rem;
+  outline:none;width:200px;text-transform:uppercase;
+  transition:border-color .2s;letter-spacing:.06em;font-weight:600;
+}
+.puzzle-input:focus{border-color:var(--teal)}
+
+/* ===== SECTION 10: TRANSLATE ===== */
+.trans-row{margin-bottom:18px}
+.trans-pl{
+  font-family:var(--font-body);font-style:normal;font-weight:400;
+  font-size:1rem;color:var(--ink);margin-bottom:8px;line-height:1.4;
+}
+.trans-pl .lang-mark{
+  display:inline-flex;align-items:center;gap:4px;
+  margin-right:8px;vertical-align:middle;
+}
+.trans-input{
+  width:100%;border:2px solid var(--bg-soft);border-radius:var(--radius-sm);
+  padding:11px 16px;font-family:var(--font-body);font-size:.95rem;
+  outline:none;transition:border-color .2s;color:var(--ink);
+}
+.trans-input:focus{border-color:var(--teal)}
+.trans-input.correct{border-color:var(--mint);background:var(--mint-bg);color:var(--mint);font-weight:600}
+.trans-input.wrong{border-color:var(--coral);background:var(--coral-bg)}
+.trans-actions{display:flex;gap:8px;margin-top:6px;flex-wrap:wrap;align-items:center}
+.trans-hint-text{display:none;font-size:.8rem;color:var(--gold);font-style:italic;font-weight:600;margin-top:4px;width:100%}
+.trans-hint-text.show{display:block}
+
+/* ===== CELEBRATION ===== */
+.celebrate-section{
+  background:linear-gradient(135deg,var(--teal-bg),var(--gold-bg));
+  border-radius:var(--radius);padding:44px 30px;text-align:center;
+  margin-top:16px;position:relative;overflow:hidden;
+}
+.celebrate-section::before{
+  content:'🎊';position:absolute;top:10px;left:20px;font-size:2rem;opacity:.5;
+}
+.celebrate-section::after{
+  content:'✨';position:absolute;bottom:10px;right:20px;font-size:2rem;opacity:.5;
+}
+.celebrate-section h2{
+  font-family:var(--font-display);font-size:2rem;font-weight:900;
+  color:var(--ink);margin-bottom:10px;letter-spacing:-.01em;
+}
+.celebrate-section p{color:var(--ink-soft);margin-bottom:24px;font-size:1rem}
+.celebrate-btn{
+  background:linear-gradient(135deg,var(--coral),var(--gold));
+  color:#fff;padding:16px 36px;border:none;border-radius:40px;
+  font-family:var(--font-body);font-weight:800;font-size:1.1rem;
+  cursor:pointer;box-shadow:0 8px 24px rgba(232,93,93,.35);
+  transition:all .25s ease;letter-spacing:.03em;
+  display:inline-flex;align-items:center;gap:10px;
+}
+.celebrate-btn:hover{transform:translateY(-3px) scale(1.03);box-shadow:0 12px 32px rgba(232,93,93,.5);filter:brightness(1.05)}
+.celebrate-btn:active{transform:scale(.97)}
+
+/* ===== FOOTER ===== */
+.footer{
+  text-align:center;padding:40px 0 30px;color:var(--ink-dim);
+  font-size:.82rem;border-top:1px solid var(--bg-soft);margin-top:40px;
+}
+.footer .hand{font-family:var(--font-hand);font-size:1.3rem;color:var(--teal);display:block;margin-top:6px}
+
+/* ===== SAVE NOTIFICATION ===== */
+.save-toast{
+  position:fixed;bottom:30px;left:50%;transform:translateX(-50%) translateY(100px);
+  background:var(--ink);color:#fff;padding:12px 24px;border-radius:30px;
+  font-size:.88rem;font-weight:600;
+  box-shadow:var(--shadow-lg);
+  transition:transform .3s cubic-bezier(.4,1.5,.5,1);
+  z-index:100;
+}
+.save-toast.show{transform:translateX(-50%) translateY(0)}
+
+/* ===== RESPONSIVE ===== */
+@media (max-width:900px){
+  .container{padding:0 20px}
+  .vocab-mosaic{grid-template-columns:repeat(auto-fill,minmax(260px,1fr))}
+  .flip-grid{grid-template-columns:repeat(auto-fill,minmax(240px,1fr))}
+}
+@media (max-width:640px){
+  .container{padding:0 16px}
+  .header{padding:40px 0 28px}
+  .card{padding:22px}
+  .progress-wrap{padding:18px 20px}
+  .progress-top{flex-direction:column;align-items:flex-start}
+  .section-header h2{font-size:1.6rem}
+  .section-number{width:38px;height:38px;font-size:1.05rem}
+  .celebrate-section{padding:32px 20px}
+  .celebrate-section h2{font-size:1.55rem}
+  .flip-card-container{height:180px}
+  .letter-box{width:30px;height:36px;font-size:.95rem}
+  .puzzle-input{width:160px}
+  .vocab-mosaic{grid-template-columns:1fr}
+  .flip-grid{grid-template-columns:1fr 1fr}
+}
+</style>
+</head>
+<body>
+
+<div class="bg-blob blob1"></div>
+<div class="bg-blob blob2"></div>
+<div class="bg-blob blob3"></div>
+
+<div class="container">
+
+<!-- ==================== HEADER ==================== -->
+<header class="header">
+  <div class="header-badge"><span class="dot"></span>English Worksheet · Speaking &amp; Socializing</div>
+  <h1>Talking <span class="accent">with Friends</span></h1>
+  <p class="subtitle">Codzienne zwroty do rozmów ze znajomymi: od powitań, przez plany, po reakcje na nowinki.</p>
+  <p class="scribble">10 zadań · mniej więcej 30 minut · let's go!</p>
+</header>
+
+<!-- ==================== PROGRESS BAR ==================== -->
+<div class="progress-wrap">
+  <div class="progress-top">
+    <div>
+      <div class="label">Twój postęp</div>
+      <div class="score" id="scoreDisplay">0 / 79 pkt</div>
+    </div>
+    <div class="buttons">
+      <button class="btn btn-ghost btn-small" onclick="saveProgress()">💾 Zapisz postęp</button>
+      <button class="btn btn-ghost btn-small" onclick="resetProgress()">↻ Reset</button>
+    </div>
+  </div>
+  <div class="progress-bar"><div class="progress-fill" id="progressFill"></div></div>
+</div>
+
+<!-- ==================== SECTION 1: VOCABULARY ==================== -->
+<section class="section">
+  <div class="section-header">
+    <div class="section-number" style="background:linear-gradient(135deg,var(--coral),var(--coral-soft))">1</div>
+    <h2>Key Phrases</h2>
+    <span class="tag" style="background:var(--coral-bg);color:var(--coral)">Słownictwo</span>
+  </div>
+  <p class="instruction"><span class="icon">💡</span> Kliknij kafelek, żeby zobaczyć tłumaczenie. Kliknij ponownie, żeby schować. "Hint" daje delikatną podpowiedź.</p>
+  <div class="vocab-mosaic" id="vocabMosaic"></div>
+  <div class="section-footer">
+    <button class="btn btn-solve btn-small" onclick="solveVocab()">✨ Pokaż wszystkie</button>
+    <button class="btn btn-ghost btn-small" onclick="hideVocab()">Schowaj wszystkie</button>
+  </div>
+</section>
+
+<!-- ==================== SECTION 2: FLIP CARDS ==================== -->
+<section class="section">
+  <div class="section-header">
+    <div class="section-number" style="background:linear-gradient(135deg,var(--teal),var(--teal-soft))">2</div>
+    <h2>Friendship Idioms</h2>
+    <span class="tag" style="background:var(--teal-bg);color:var(--teal)">Flashcards</span>
+  </div>
+  <p class="instruction"><span class="icon">🔄</span> Kliknij kartę, żeby ją odwrócić. Spróbuj najpierw zgadnąć znaczenie, zanim sprawdzisz odpowiedź.</p>
+  <div class="flip-grid" id="flipGrid"></div>
+  <div class="flip-progress" id="flipProgress">Odwrócone: 0 / 6</div>
+</section>
+
+<!-- ==================== SECTION 3: MATCHING ==================== -->
+<section class="section">
+  <div class="section-header">
+    <div class="section-number" style="background:linear-gradient(135deg,var(--plum),var(--plum-soft))">3</div>
+    <h2>Match the Meanings</h2>
+    <span class="tag" style="background:var(--plum-bg);color:var(--plum)">Dopasuj</span>
+  </div>
+  <p class="instruction"><span class="icon">🔗</span> Dopasuj angielskie zwroty do ich polskich odpowiedników. Pary dostaną wspólny numer po poprawnym połączeniu.</p>
+  <div class="card">
+    <div class="match-container">
+      <div class="match-col">
+        <div class="match-col-label">English</div>
+        <div id="matchEng"></div>
+      </div>
+      <div class="match-col">
+        <div class="match-col-label">Polski</div>
+        <div id="matchPol"></div>
+      </div>
+    </div>
+    <div class="check-result" id="matchResult"></div>
+    <div class="section-footer">
+      <button class="btn btn-solve btn-small" onclick="solveMatch()">✨ Pokaż rozwiązanie</button>
+    </div>
+  </div>
+</section>
+
+<!-- ==================== SECTION 4: DIALOGUE ==================== -->
+<section class="section">
+  <div class="section-header">
+    <div class="section-number" style="background:linear-gradient(135deg,var(--gold),var(--gold-soft))">4</div>
+    <h2>Complete the Dialogue</h2>
+    <span class="tag" style="background:var(--gold-bg);color:#8a6407">Uzupełnij</span>
+  </div>
+  <p class="instruction"><span class="icon">💬</span> Wypełnij luki w rozmowie dwóch znajomych, którzy wpadli na siebie po długim czasie. Naciśnij Enter, żeby od razu sprawdzić lukę.</p>
+  <div class="card">
+    <div class="dialogue-scene">
+      <div class="scene-label">Scene: a chance meeting in the park</div>
+      <div class="scene-desc">Sam spotyka Jess po długiej przerwie. Jess ma świetne wieści.</div>
+    </div>
+    <div id="dialogueArea"></div>
+    <div class="check-result" id="dialogueResult"></div>
+    <div class="section-footer">
+      <button class="btn btn-primary btn-small" onclick="checkDialogue()">Sprawdź wszystkie ✓</button>
+      <button class="btn btn-ghost btn-small" onclick="hintDialogue()">💡 Podpowiedź</button>
+      <button class="btn btn-solve btn-small" onclick="solveDialogue()">✨ Pokaż rozwiązanie</button>
+    </div>
+  </div>
+</section>
+
+<!-- ==================== SECTION 5: SENTENCE SCRAMBLE ==================== -->
+<section class="section">
+  <div class="section-header">
+    <div class="section-number" style="background:linear-gradient(135deg,var(--coral),var(--gold))">5</div>
+    <h2>Sentence Scramble</h2>
+    <span class="tag" style="background:var(--coral-bg);color:var(--coral)">Ułóż</span>
+  </div>
+  <p class="instruction"><span class="icon">🧩</span> Ułóż zdanie z rozsypanych słów. Klikaj słowa, żeby przenosić je między bankiem a zdaniem.</p>
+  <div id="scrambleArea"></div>
+</section>
+
+<!-- ==================== SECTION 6: MULTIPLE CHOICE ==================== -->
+<section class="section">
+  <div class="section-header">
+    <div class="section-number" style="background:linear-gradient(135deg,var(--plum),var(--coral))">6</div>
+    <h2>Choose the Right Phrase</h2>
+    <span class="tag" style="background:var(--plum-bg);color:var(--plum)">Wybierz</span>
+  </div>
+  <p class="instruction"><span class="icon">✅</span> Wybierz opcję, która najlepiej pasuje do sytuacji. Sprawdzenie jest natychmiastowe.</p>
+  <div class="card" id="mcArea"></div>
+  <div class="section-footer">
+    <button class="btn btn-solve btn-small" onclick="solveMC()">✨ Pokaż odpowiedzi</button>
+  </div>
+</section>
+
+<!-- ==================== SECTION 7: FILL GAPS ==================== -->
+<section class="section">
+  <div class="section-header">
+    <div class="section-number" style="background:linear-gradient(135deg,var(--teal),var(--gold))">7</div>
+    <h2>Fill the Missing Word</h2>
+    <span class="tag" style="background:var(--teal-bg);color:var(--teal)">Uzupełnij</span>
+  </div>
+  <p class="instruction"><span class="icon">✏️</span> Wpisz brakujące słowo w każdym zdaniu. Kliknij "Hint", jeśli utkniesz. Enter = sprawdź.</p>
+  <div class="card" id="fillArea"></div>
+  <div class="section-footer">
+    <button class="btn btn-primary btn-small" onclick="checkFill()">Sprawdź wszystkie ✓</button>
+    <button class="btn btn-solve btn-small" onclick="solveFill()">✨ Pokaż odpowiedzi</button>
+  </div>
+</section>
+
+<!-- ==================== SECTION 8: REACTIONS ==================== -->
+<section class="section">
+  <div class="section-header">
+    <div class="section-number" style="background:linear-gradient(135deg,var(--plum-soft),var(--coral-soft))">8</div>
+    <h2>React to the News</h2>
+    <span class="tag" style="background:var(--plum-bg);color:var(--plum)">Reaguj</span>
+  </div>
+  <p class="instruction"><span class="icon">😲</span> Znajomy mówi Ci coś. Wybierz najbardziej naturalną reakcję po angielsku.</p>
+  <div id="reactionArea"></div>
+  <div class="section-footer">
+    <button class="btn btn-solve btn-small" onclick="solveReactions()">✨ Pokaż odpowiedzi</button>
+  </div>
+</section>
+
+<!-- ==================== SECTION 9: WORD PUZZLE ==================== -->
+<section class="section">
+  <div class="section-header">
+    <div class="section-number" style="background:linear-gradient(135deg,var(--teal),var(--ink))">9</div>
+    <h2>Guess the Word</h2>
+    <span class="tag" style="background:var(--teal-bg);color:var(--teal)">Odgadnij</span>
+  </div>
+  <p class="instruction"><span class="icon">🔤</span> Odgadnij słowo na podstawie wskazówki. Kliknij "Hint", żeby odkryć kolejną literę.</p>
+  <div id="puzzleArea"></div>
+  <div class="section-footer">
+    <button class="btn btn-solve btn-small" onclick="solvePuzzle()">✨ Pokaż słowa</button>
+  </div>
+</section>
+
+<!-- ==================== SECTION 10: TRANSLATE ==================== -->
+<section class="section">
+  <div class="section-header">
+    <div class="section-number" style="background:linear-gradient(135deg,var(--coral),var(--plum))">10</div>
+    <h2>Translation Challenge</h2>
+    <span class="tag" style="background:var(--coral-bg);color:var(--coral)">Przetłumacz</span>
+  </div>
+  <p class="instruction"><span class="icon">🌍</span> Przetłumacz zdania z polskiego na angielski. To najtrudniejsze zadanie na koniec!</p>
+  <div class="card" id="translateArea"></div>
+  <div class="section-footer">
+    <button class="btn btn-primary btn-small" onclick="checkTranslate()">Sprawdź ✓</button>
+    <button class="btn btn-solve btn-small" onclick="solveTranslate()">✨ Pokaż odpowiedzi</button>
+  </div>
+</section>
+
+<!-- ==================== CELEBRATE SECTION ==================== -->
+<section class="celebrate-section">
+  <h2>Great job! Chcesz świętować?</h2>
+  <p>Kliknij przycisk poniżej, żeby odpalić wielki pokaz. Zasłużyłeś.</p>
+  <button class="celebrate-btn" onclick="megaCelebrate()">🎉 Celebrate!</button>
+</section>
+
+<div class="footer">
+  Talking with Friends · English Worksheet
+  <span class="hand">keep practising!</span>
+</div>
+
+</div><!-- /container -->
+
+<div class="save-toast" id="saveToast">✓ Zapisano postęp</div>
+
+<script>
+/* =========================================================================
+   STATE + SCORING
+   ========================================================================= */
+const STORAGE_KEY = 'talkingWithFriends_v2';
+const MAX_SCORE = 79;
+let totalScore = 0;
+const scored = {};
+
+/* SVG flag helpers */
+const FLAG_PL = `<svg class="flag-svg" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 22 15"><rect width="22" height="15" fill="#fff"/><rect y="7.5" width="22" height="7.5" fill="#dc143c"/></svg>`;
+const FLAG_EN = `<svg class="flag-svg" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 22 15"><rect width="22" height="15" fill="#012169"/><path d="M0,0 L22,15 M22,0 L0,15" stroke="#fff" stroke-width="3"/><path d="M0,0 L22,15 M22,0 L0,15" stroke="#c8102e" stroke-width="1.8"/><rect x="9" width="4" height="15" fill="#fff"/><rect y="5.5" width="22" height="4" fill="#fff"/><rect x="9.8" width="2.4" height="15" fill="#c8102e"/><rect y="6.3" width="22" height="2.4" fill="#c8102e"/></svg>`;
+function flagLangMark(flag){ return `<span class="lang-mark">${flag}</span>`; }
+
+function addPoints(key, n){
+  if(scored[key]) return;
+  scored[key] = n;
+  totalScore = Math.min(totalScore + n, MAX_SCORE);
+  updateScore();
+}
+function updateScore(){
+  document.getElementById('scoreDisplay').textContent = totalScore + ' / ' + MAX_SCORE + ' pkt';
+  document.getElementById('progressFill').style.width = (totalScore / MAX_SCORE * 100) + '%';
+}
+
+/* =========================================================================
+   CONFETTI (from reference)
+   ========================================================================= */
+const PALETTE = ['#e85d5d','#0c9488','#d4a017','#7a4b8a','#4fa870','#ff8a7a'];
+function randomInRange(a,b){return Math.random()*(b-a)+a}
+
+function miniConfetti(el){
+  try{
+    const rect = el.getBoundingClientRect();
+    const x = (rect.left + rect.width/2) / window.innerWidth;
+    const y = (rect.top + rect.height/2) / window.innerHeight;
+    confetti({particleCount:30,spread:55,origin:{x,y},colors:PALETTE,scalar:.75,ticks:90,disableForReducedMotion:true});
+  }catch(e){}
+}
+function sectionConfetti(){
+  const defaults = {origin:{y:.75}, colors:PALETTE, disableForReducedMotion:true};
+  confetti(Object.assign({},defaults,{spread:26,startVelocity:55,particleCount:40}));
+  confetti(Object.assign({},defaults,{spread:60,particleCount:35}));
+  confetti(Object.assign({},defaults,{spread:100,decay:.91,scalar:.8,particleCount:55}));
+}
+function sideFireworks(duration){
+  const end = Date.now() + (duration || 2500);
+  (function frame(){
+    confetti({particleCount:3,angle:60,spread:55,origin:{x:0,y:.8},colors:PALETTE,disableForReducedMotion:true});
+    confetti({particleCount:3,angle:120,spread:55,origin:{x:1,y:.8},colors:PALETTE,disableForReducedMotion:true});
+    if(Date.now() < end) requestAnimationFrame(frame);
+  })();
+}
+function emojiBurst(){
+  const scalar = 2.2;
+  const party = confetti.shapeFromText({text:'🎉',scalar});
+  const star = confetti.shapeFromText({text:'⭐',scalar});
+  const heart = confetti.shapeFromText({text:'💖',scalar});
+  const sparkle = confetti.shapeFromText({text:'✨',scalar});
+  confetti({
+    particleCount:35,spread:130,origin:{y:.55},
+    shapes:[party,star,heart,sparkle],scalar,ticks:220,
+    disableForReducedMotion:true
+  });
+}
+function megaCelebrate(){
+  sectionConfetti();
+  setTimeout(emojiBurst, 300);
+  setTimeout(sideFireworks, 500);
+  setTimeout(() => {
+    confetti({particleCount:100,spread:100,origin:{y:.6},colors:PALETTE,scalar:1.1,ticks:200,disableForReducedMotion:true});
+  }, 1000);
+  setTimeout(emojiBurst, 1800);
+}
+
+/* =========================================================================
+   TOAST
+   ========================================================================= */
+function showToast(msg){
+  const t = document.getElementById('saveToast');
+  t.textContent = msg;
+  t.classList.add('show');
+  clearTimeout(window._toastTO);
+  window._toastTO = setTimeout(() => t.classList.remove('show'), 2000);
+}
+
+/* =========================================================================
+   SECTION 1: VOCABULARY MOSAIC
+   ========================================================================= */
+const vocabData = [
+  {emoji:'👋',eng:'Long time no see!',phonetic:'/lɒŋ taɪm nəʊ siː/',example:'"Long time no see! How have you been?"',pol:'Dawno się nie widzieliśmy!',hint:'Dawno się nie...'},
+  {emoji:'💬',eng:'What have you been up to?',phonetic:'/wɒt həv juː biːn ʌp tuː/',example:'"So, what have you been up to lately?"',pol:'Co u ciebie? / Co porabiałeś ostatnio?',hint:'Co u...?'},
+  {emoji:'🤷',eng:'Not much.',phonetic:'/nɒt mʌtʃ/',example:'"Not much, just working a lot."',pol:'Nic szczególnego.',hint:'Nic szcze...'},
+  {emoji:'☕',eng:'Do you want to grab a coffee?',phonetic:'/duː juː wɒnt tə ɡræb ə ˈkɒfi/',example:'"Do you want to grab a coffee after work?"',pol:'Chcesz wyskoczyć na kawę?',hint:'Chcesz wyskoczyć na...'},
+  {emoji:'🗓️',eng:'Are you free on Saturday?',phonetic:'/ɑː juː friː ɒn ˈsætədeɪ/',example:'"Are you free on Saturday? Let\'s do something."',pol:'Masz wolne w sobotę?',hint:'Masz wolne w...'},
+  {emoji:'📍',eng:'Where should we meet?',phonetic:'/weə ʃʊd wiː miːt/',example:'"Where should we meet? The café on Main Street?"',pol:'Gdzie się spotkamy?',hint:'Gdzie się...'},
+  {emoji:'🎉',eng:"That's great!",phonetic:'/ðæts ɡreɪt/',example:'"You got a new job? That\'s great!"',pol:'Super! / To świetnie!',hint:'To świet...'},
+  {emoji:'😱',eng:'No way!',phonetic:'/nəʊ weɪ/',example:'"She is moving to London? No way!"',pol:'Niemożliwe! / Nie wierzę!',hint:'Nie wi...'},
+  {emoji:'🤔',eng:"I'm not sure about that.",phonetic:'/aɪm nɒt ʃʊə əˈbaʊt ðæt/',example:'"I\'m not sure about that, let me think."',pol:'Nie jestem co do tego pewny/a.',hint:'Nie jestem pew...'},
+  {emoji:'💡',eng:'How about...?',phonetic:'/haʊ əˈbaʊt/',example:'"How about going to the cinema?"',pol:'A może...? / Co powiesz na...?',hint:'A może...?'},
+  {emoji:'📱',eng:"I'll text you later.",phonetic:'/aɪl tekst juː ˈleɪtə/',example:'"I\'ll text you later to arrange the time."',pol:'Napiszę do ciebie później.',hint:'Napiszę do...'},
+  {emoji:'👀',eng:'It was nice seeing you!',phonetic:'/ɪt wɒz naɪs ˈsiːɪŋ juː/',example:'"It was nice seeing you! Take care."',pol:'Miło było cię widzieć!',hint:'Miło było...'},
+];
+
+function buildVocab(){
+  const grid = document.getElementById('vocabMosaic');
+  grid.innerHTML = '';
+  vocabData.forEach((v,i) => {
+    const tile = document.createElement('div');
+    tile.className = 'vocab-tile';
+    tile.innerHTML = `
+      <span class="emoji">${v.emoji}</span>
+      <div class="eng">${v.eng}</div>
+      <div class="phonetic">${v.phonetic}</div>
+      <div class="example">${v.example}</div>
+      <div class="hint-row">
+        <button class="hint-btn" onclick="event.stopPropagation();showVocabHint(${i})">💡 Hint</button>
+        <button class="reveal-btn" onclick="event.stopPropagation();toggleVocab(${i})">🔤 Tłumaczenie</button>
+        <span class="hint-text" id="vocabHint${i}"></span>
+      </div>
+      <div class="pol" id="vocabPol${i}">${flagLangMark(FLAG_PL)}${v.pol}</div>
+    `;
+    grid.appendChild(tile);
+  });
+}
+function toggleVocab(i){
+  const el = document.getElementById('vocabPol'+i);
+  el.classList.toggle('show');
+  if(el.classList.contains('show')){
+    addPoints('vocab_'+i, 1);
+    // light micro feedback, no confetti on every card
+  }
+}
+function showVocabHint(i){
+  document.getElementById('vocabHint'+i).textContent = vocabData[i].hint;
+}
+function solveVocab(){
+  vocabData.forEach((_,i) => {
+    document.getElementById('vocabPol'+i).classList.add('show');
+    addPoints('vocab_'+i, 1);
+  });
+  sectionConfetti();
+}
+function hideVocab(){
+  vocabData.forEach((_,i) => document.getElementById('vocabPol'+i).classList.remove('show'));
+}
+
+/* =========================================================================
+   SECTION 2: FLIP CARDS
+   ========================================================================= */
+const idiomData = [
+  {front:'hang out',emoji:'🏖️',meaning:'spędzać czas (ze znajomymi)',example:'"Let\'s hang out this weekend!"'},
+  {front:'catch up',emoji:'☕',meaning:'nadrobić zaległości (w rozmowie)',example:'"We really need to catch up soon."'},
+  {front:'hit it off',emoji:'⚡',meaning:'od razu się polubić',example:'"We hit it off immediately."'},
+  {front:'get along with',emoji:'🤝',meaning:'dobrze się z kimś dogadywać',example:'"I get along with her really well."'},
+  {front:'keep in touch',emoji:'📱',meaning:'utrzymywać kontakt',example:'"Let\'s keep in touch!"'},
+  {front:'have a blast',emoji:'🎊',meaning:'świetnie się bawić',example:'"We had a blast at the party!"'},
+];
+const flippedCards = new Set();
+
+function buildFlipCards(){
+  const grid = document.getElementById('flipGrid');
+  grid.innerHTML = '';
+  idiomData.forEach((item,i) => {
+    const container = document.createElement('div');
+    container.className = 'flip-card-container';
+    container.innerHTML = `
+      <div class="flip-card" id="flipCard${i}">
+        <div class="flip-front">
+          <div class="flip-emoji">${item.emoji}</div>
+          <div class="flip-label">Idiom</div>
+          <div class="flip-text">${item.front}</div>
+          <div class="flip-prompt">kliknij, żeby odwrócić</div>
+        </div>
+        <div class="flip-back">
+          <div class="flip-original">${item.front}</div>
+          <div class="flip-meaning">${item.meaning}</div>
+          <div class="flip-example">${item.example}</div>
+        </div>
+      </div>
+    `;
+    container.addEventListener('click', () => flipCard(i));
+    grid.appendChild(container);
+  });
+  updateFlipProgress();
+}
+function flipCard(i){
+  document.getElementById('flipCard'+i).classList.toggle('flipped');
+  if(!flippedCards.has(i)){
+    flippedCards.add(i);
+    addPoints('flip_'+i, 1);
+    updateFlipProgress();
+    if(flippedCards.size === idiomData.length){
+      setTimeout(sectionConfetti, 250);
+    }
+  }
+}
+function updateFlipProgress(){
+  document.getElementById('flipProgress').textContent = 'Odwrócone: ' + flippedCards.size + ' / ' + idiomData.length;
+}
+
+/* =========================================================================
+   SECTION 3: MATCHING
+   ========================================================================= */
+const matchPairs = [
+  {eng:"How's it going?",pol:'Jak leci?'},
+  {eng:"Let's hang out!",pol:'Spotkajmy się!'},
+  {eng:"I'll text you later.",pol:'Napiszę do ciebie później.'},
+  {eng:'What time works for you?',pol:'O której ci pasuje?'},
+  {eng:'It was nice seeing you!',pol:'Miło było cię widzieć!'},
+  {eng:'Are you serious?',pol:'Mówisz poważnie?'},
+];
+let matchSelected = null;
+let matchCorrectCount = 0;
+let matchPairCounter = 0;
+
+function buildMatching(){
+  const engCol = document.getElementById('matchEng');
+  const polCol = document.getElementById('matchPol');
+  engCol.innerHTML = '';
+  polCol.innerHTML = '';
+  matchCorrectCount = 0;
+  matchPairCounter = 0;
+  matchSelected = null;
+
+  const shuffledEng = matchPairs.map((p,i) => ({...p,idx:i})).sort(() => Math.random() - .5);
+  const shuffledPol = matchPairs.map((p,i) => ({...p,idx:i})).sort(() => Math.random() - .5);
+
+  shuffledEng.forEach(p => {
+    const div = document.createElement('div');
+    div.className = 'match-item eng-item';
+    div.innerHTML = `<span class="pair-number"></span><span class="item-text">${p.eng}</span>`;
+    div.dataset.idx = p.idx;
+    div.dataset.side = 'eng';
+    div.addEventListener('click', () => selectMatch(div));
+    engCol.appendChild(div);
+  });
+  shuffledPol.forEach(p => {
+    const div = document.createElement('div');
+    div.className = 'match-item pol-item';
+    div.innerHTML = `<span class="pair-number"></span><span class="item-text">${p.pol}</span>`;
+    div.dataset.idx = p.idx;
+    div.dataset.side = 'pol';
+    div.addEventListener('click', () => selectMatch(div));
+    polCol.appendChild(div);
+  });
+}
+
+function selectMatch(el){
+  if(el.classList.contains('matched') || el.classList.contains('disabled')) return;
+  const side = el.dataset.side;
+
+  if(matchSelected && matchSelected === el){
+    el.classList.remove('selected');
+    matchSelected = null;
+    return;
+  }
+  if(matchSelected && matchSelected.dataset.side === side){
+    matchSelected.classList.remove('selected');
+    el.classList.add('selected');
+    matchSelected = el;
+    return;
+  }
+  if(!matchSelected){
+    el.classList.add('selected');
+    matchSelected = el;
+    return;
+  }
+
+  // we have two items of different sides
+  const engEl = side === 'eng' ? el : matchSelected;
+  const polEl = side === 'pol' ? el : matchSelected;
+
+  if(engEl.dataset.idx === polEl.dataset.idx){
+    matchPairCounter++;
+    [engEl,polEl].forEach(n => {
+      n.classList.remove('selected');
+      n.classList.add('matched');
+      n.querySelector('.pair-number').textContent = matchPairCounter;
+    });
+    matchCorrectCount++;
+    addPoints('match_'+engEl.dataset.idx, 1);
+    miniConfetti(polEl);
+    if(matchCorrectCount === matchPairs.length){
+      const r = document.getElementById('matchResult');
+      r.className = 'check-result show success';
+      r.innerHTML = '🎉 Wszystkie pary dopasowane!';
+      setTimeout(sectionConfetti, 200);
+    }
+  } else {
+    engEl.classList.add('wrong');
+    polEl.classList.add('wrong');
+    setTimeout(() => {
+      engEl.classList.remove('wrong','selected');
+      polEl.classList.remove('wrong','selected');
+    }, 500);
+  }
+  matchSelected = null;
+}
+
+function solveMatch(){
+  // Collect all unmatched items, pair by idx, assign numbers
+  const allEng = document.querySelectorAll('#matchEng .match-item');
+  const allPol = document.querySelectorAll('#matchPol .match-item');
+  matchPairs.forEach((_,idx) => {
+    const engEl = Array.from(allEng).find(e => e.dataset.idx == idx && !e.classList.contains('matched'));
+    const polEl = Array.from(allPol).find(e => e.dataset.idx == idx && !e.classList.contains('matched'));
+    if(engEl && polEl){
+      matchPairCounter++;
+      [engEl,polEl].forEach(n => {
+        n.classList.remove('selected','wrong');
+        n.classList.add('matched');
+        n.querySelector('.pair-number').textContent = matchPairCounter;
+      });
+      matchCorrectCount++;
+      addPoints('match_'+idx, 1);
+    }
+  });
+  const r = document.getElementById('matchResult');
+  r.className = 'check-result show info';
+  r.innerHTML = '✨ Pokazano wszystkie dopasowania';
+  sectionConfetti();
+}
+
+/* =========================================================================
+   SECTION 4: DIALOGUE
+   ========================================================================= */
+const dialogueLines = [
+  {speaker:'b',text:'Hey, Jess! Long time no see!'},
+  {speaker:'a',text:'Oh wow, ___1___! How have you been?',gaps:{1:{answer:'long time no see',label:'(3 words)'}}},
+  {speaker:'b',text:"I'm great! ___2___ lately?",gaps:{2:{answer:'what have you been up to',label:'(6 words)'}}},
+  {speaker:'a',text:'___3___, just working at the shop. And you?',gaps:{3:{answer:'not much',label:'(2 words)'}}},
+  {speaker:'b',text:"I got a new job!"},
+  {speaker:'a',text:"___4___! I'm so happy for you!",gaps:{4:{answer:"that's great",label:'(2 words)'}}},
+  {speaker:'b',text:"Thanks! Hey, ___5___ grab a coffee sometime?",gaps:{5:{answer:'do you want to',label:'(4 words)'}}},
+  {speaker:'a',text:'Sure! ___6___ on Saturday?',gaps:{6:{answer:'are you free',label:'(3 words)'}}},
+  {speaker:'b',text:'Yes! Where should we meet?'},
+  {speaker:'a',text:'___7___ that new place near the park?',gaps:{7:{answer:'how about',label:'(2 words)'}}},
+];
+const dialogueHintIdx = {};
+
+function buildDialogue(){
+  const area = document.getElementById('dialogueArea');
+  area.innerHTML = '';
+  dialogueLines.forEach((line,i) => {
+    const div = document.createElement('div');
+    div.className = 'dialogue-line' + (line.speaker === 'a' ? ' mine' : '');
+    div.style.animationDelay = (i*0.06)+'s';
+
+    const avatar = document.createElement('div');
+    avatar.className = 'dialogue-avatar ' + (line.speaker === 'a' ? 'avatar-a' : 'avatar-b');
+    avatar.textContent = line.speaker === 'a' ? '🧑' : '👩';
+
+    const bubble = document.createElement('div');
+    bubble.className = 'dialogue-bubble';
+
+    let html = line.text;
+    if(line.gaps){
+      Object.keys(line.gaps).forEach(k => {
+        const g = line.gaps[k];
+        html = html.replace('___'+k+'___',
+          `<span class="dialogue-gap" id="dgapwrap${k}"><input type="text" id="dgap${k}" data-answer="${g.answer}" data-label="${g.label}" placeholder="${g.label}" autocomplete="off" spellcheck="false"></span>`);
+      });
+    }
+    bubble.innerHTML = html;
+    div.appendChild(avatar);
+    div.appendChild(bubble);
+    area.appendChild(div);
+  });
+
+  // Enter to check individual gap
+  document.querySelectorAll('#dialogueArea input[data-answer]').forEach(inp => {
+    inp.addEventListener('keydown', e => {
+      if(e.key === 'Enter'){
+        e.preventDefault();
+        checkSingleDialogueGap(inp);
+      }
+    });
+  });
+}
+
+function normalize(s){
+  return (s||'').toLowerCase().trim().replace(/[?.!,"]/g,'').replace(/'/g,"'").replace(/\s+/g,' ');
+}
+
+function checkSingleDialogueGap(inp){
+  const gap = document.getElementById('dgapwrap'+inp.id.replace('dgap',''));
+  const answer = normalize(inp.dataset.answer);
+  const val = normalize(inp.value);
+  if(val === answer){
+    gap.classList.add('correct-gap');
+    gap.classList.remove('wrong-gap');
+    addPoints('dgap_'+inp.id, 1);
+    miniConfetti(inp);
+  } else {
+    gap.classList.add('wrong-gap');
+    gap.classList.remove('correct-gap');
+  }
+}
+
+function checkDialogue(){
+  let correct = 0, total = 0;
+  document.querySelectorAll('#dialogueArea input[data-answer]').forEach(inp => {
+    total++;
+    const gap = document.getElementById('dgapwrap'+inp.id.replace('dgap',''));
+    const answer = normalize(inp.dataset.answer);
+    const val = normalize(inp.value);
+    if(val === answer){
+      gap.classList.add('correct-gap');
+      gap.classList.remove('wrong-gap');
+      addPoints('dgap_'+inp.id, 1);
+      correct++;
+    } else {
+      gap.classList.add('wrong-gap');
+      gap.classList.remove('correct-gap');
+    }
+  });
+  const r = document.getElementById('dialogueResult');
+  if(correct === total){
+    r.className = 'check-result show success';
+    r.innerHTML = '🎉 Wszystkie luki wypełnione poprawnie!';
+    sectionConfetti();
+  } else {
+    r.className = 'check-result show fail';
+    r.innerHTML = `Poprawnie: ${correct} / ${total}. Popraw czerwone i spróbuj ponownie.`;
+  }
+}
+
+function hintDialogue(){
+  const gaps = document.querySelectorAll('#dialogueArea input[data-answer]');
+  for(let inp of gaps){
+    const gap = document.getElementById('dgapwrap'+inp.id.replace('dgap',''));
+    if(gap.classList.contains('correct-gap')) continue;
+    const answer = inp.dataset.answer;
+    const id = inp.id;
+    if(!dialogueHintIdx[id]) dialogueHintIdx[id] = 0;
+    const words = answer.split(' ');
+    if(dialogueHintIdx[id] < words.length - 1){  // never reveal full
+      dialogueHintIdx[id]++;
+      inp.value = words.slice(0, dialogueHintIdx[id]).join(' ');
+      inp.focus();
+    } else {
+      inp.focus();
+    }
+    return;
+  }
+}
+
+function solveDialogue(){
+  document.querySelectorAll('#dialogueArea input[data-answer]').forEach(inp => {
+    const gap = document.getElementById('dgapwrap'+inp.id.replace('dgap',''));
+    inp.value = inp.dataset.answer;
+    gap.classList.remove('wrong-gap');
+    gap.classList.add('correct-gap');
+    addPoints('dgap_'+inp.id, 1);
+  });
+  const r = document.getElementById('dialogueResult');
+  r.className = 'check-result show info';
+  r.innerHTML = '✨ Pokazano wszystkie odpowiedzi';
+  sectionConfetti();
+}
+
+/* =========================================================================
+   SECTION 5: SCRAMBLE
+   ========================================================================= */
+const scrambleSentences = [
+  {words:["Let's",'hang','out','this','weekend','!'],correct:"Let's hang out this weekend!",pl:'Spotkajmy się w ten weekend!'},
+  {words:['We','really','need','to','catch','up','.'],correct:'We really need to catch up.',pl:'Naprawdę musimy nadrobić zaległości.'},
+  {words:['I','get','along','with','her','really','well','.'],correct:'I get along with her really well.',pl:'Bardzo dobrze się z nią dogaduję.'},
+  {words:['Are','you','free','on','Friday','evening','?'],correct:'Are you free on Friday evening?',pl:'Masz wolne w piątek wieczorem?'},
+];
+
+function shuffleDistinct(arr){
+  const orig = arr.join('|');
+  let shuffled;
+  let attempts = 0;
+  do {
+    shuffled = [...arr].sort(() => Math.random() - .5);
+    attempts++;
+  } while(shuffled.join('|') === orig && attempts < 20);
+  return shuffled;
+}
+
+function buildScramble(){
+  const area = document.getElementById('scrambleArea');
+  area.innerHTML = '';
+  scrambleSentences.forEach((s,i) => {
+    const card = document.createElement('div');
+    card.className = 'scramble-card';
+
+    const plHint = document.createElement('div');
+    plHint.className = 'scramble-pl';
+    plHint.innerHTML = `${flagLangMark(FLAG_PL)}${s.pl}`;
+
+    const answerZone = document.createElement('div');
+    answerZone.className = 'scramble-zone scramble-answer';
+    answerZone.id = 'scrAns' + i;
+
+    const bankLabel = document.createElement('div');
+    bankLabel.className = 'scramble-bank-label';
+    bankLabel.textContent = 'Dostępne słowa:';
+
+    const bankZone = document.createElement('div');
+    bankZone.className = 'scramble-zone scramble-bank';
+    bankZone.id = 'scrBank' + i;
+
+    const shuffled = shuffleDistinct(s.words);
+    shuffled.forEach(w => {
+      const chip = document.createElement('span');
+      chip.className = 'word-chip in-bank';
+      chip.textContent = w;
+      chip.addEventListener('click', () => moveWord(chip, i));
+      bankZone.appendChild(chip);
+    });
+
+    const btnWrap = document.createElement('div');
+    btnWrap.style.cssText = 'margin-top:10px;display:flex;gap:8px;flex-wrap:wrap';
+
+    const checkBtn = document.createElement('button');
+    checkBtn.className = 'btn btn-primary btn-small';
+    checkBtn.textContent = 'Sprawdź ✓';
+    checkBtn.addEventListener('click', () => checkScramble(i));
+
+    const resetBtn = document.createElement('button');
+    resetBtn.className = 'btn btn-ghost btn-small';
+    resetBtn.textContent = '↻ Reset';
+    resetBtn.addEventListener('click', () => resetScramble(i));
+
+    const solveBtn = document.createElement('button');
+    solveBtn.className = 'btn btn-solve btn-small';
+    solveBtn.textContent = '✨ Rozwiąż';
+    solveBtn.addEventListener('click', () => solveScramble(i));
+
+    btnWrap.appendChild(checkBtn);
+    btnWrap.appendChild(resetBtn);
+    btnWrap.appendChild(solveBtn);
+
+    const result = document.createElement('div');
+    result.className = 'check-result';
+    result.id = 'scrResult' + i;
+
+    card.appendChild(plHint);
+    card.appendChild(answerZone);
+    card.appendChild(bankLabel);
+    card.appendChild(bankZone);
+    card.appendChild(btnWrap);
+    card.appendChild(result);
+    area.appendChild(card);
+  });
+}
+
+function moveWord(chip, idx){
+  const answer = document.getElementById('scrAns'+idx);
+  const bank = document.getElementById('scrBank'+idx);
+  answer.classList.remove('correct-zone','wrong-zone');
+  if(chip.classList.contains('in-bank')){
+    chip.classList.remove('in-bank','correct-word','wrong-word');
+    chip.classList.add('in-answer');
+    answer.appendChild(chip);
+  } else {
+    chip.classList.remove('in-answer','correct-word','wrong-word');
+    chip.classList.add('in-bank');
+    bank.appendChild(chip);
+  }
+}
+
+function checkScramble(idx){
+  const answer = document.getElementById('scrAns'+idx);
+  const chips = answer.querySelectorAll('.word-chip');
+  const attempt = Array.from(chips).map(c => c.textContent).join(' ').replace(/\s+([?.!,])/g,'$1');
+  const r = document.getElementById('scrResult'+idx);
+  const correct = scrambleSentences[idx].correct;
+  const attemptNorm = attempt.replace(/\s+([?.!,])/g,'$1');
+  const correctNorm = correct.replace(/\s+([?.!,])/g,'$1');
+
+  if(attemptNorm === correctNorm){
+    r.className = 'check-result show success';
+    r.innerHTML = '🎉 Brawo!';
+    answer.classList.add('correct-zone');
+    chips.forEach(c => c.classList.add('correct-word'));
+    addPoints('scr_'+idx, 2);
+    miniConfetti(answer);
+  } else {
+    r.className = 'check-result show fail';
+    r.innerHTML = 'Coś jest nie tak. Spróbuj jeszcze raz.';
+    answer.classList.add('wrong-zone');
+    chips.forEach(c => {c.classList.add('wrong-word');setTimeout(()=>c.classList.remove('wrong-word'),500)});
+    setTimeout(() => answer.classList.remove('wrong-zone'), 600);
+  }
+}
+
+function resetScramble(idx){
+  const answer = document.getElementById('scrAns'+idx);
+  const bank = document.getElementById('scrBank'+idx);
+  const chips = answer.querySelectorAll('.word-chip');
+  answer.classList.remove('correct-zone','wrong-zone');
+  chips.forEach(c => {
+    c.classList.remove('in-answer','correct-word','wrong-word');
+    c.classList.add('in-bank');
+    bank.appendChild(c);
+  });
+  document.getElementById('scrResult'+idx).className = 'check-result';
+}
+
+function solveScramble(idx){
+  const answer = document.getElementById('scrAns'+idx);
+  const bank = document.getElementById('scrBank'+idx);
+  // clear
+  answer.innerHTML = '';
+  bank.innerHTML = '';
+  answer.classList.remove('wrong-zone');
+  answer.classList.add('correct-zone');
+  // rebuild in correct order
+  const correctWords = scrambleSentences[idx].words;
+  correctWords.forEach(w => {
+    const chip = document.createElement('span');
+    chip.className = 'word-chip in-answer correct-word';
+    chip.textContent = w;
+    chip.addEventListener('click', () => moveWord(chip, idx));
+    answer.appendChild(chip);
+  });
+  const r = document.getElementById('scrResult'+idx);
+  r.className = 'check-result show info';
+  r.innerHTML = '✨ Pokazano poprawną kolejność';
+  addPoints('scr_'+idx, 2);
+}
+
+/* =========================================================================
+   SECTION 6: MULTIPLE CHOICE
+   ========================================================================= */
+const mcQuestions = [
+  {
+    q:'You meet an old friend after a long time. What do you say first?',
+    options:["Not much.","Long time no see!","I'll text you later.","Where should we meet?"],
+    correct:1
+  },
+  {
+    q:'Your friend says: "I just got engaged!" How do you react?',
+    options:["Not much.","That's great! I'm so happy for you!","Are you free on Saturday?","I'm not sure about that."],
+    correct:1
+  },
+  {
+    q:'You want to invite a friend to a café. What do you say?',
+    options:["How's it going?","Do you want to grab a coffee?","It was nice seeing you!","No way!"],
+    correct:1
+  },
+  {
+    q:'Someone asks: "What have you been up to?" You had a quiet week. What do you reply?',
+    options:["Not much, just working.","Long time no see!","Are you serious?","Hit it off."],
+    correct:0
+  },
+  {
+    q:'You are saying goodbye after a nice meeting. What is natural to say?',
+    options:["Where should we meet?","It was nice seeing you! Let's keep in touch.","Do you want to grab a coffee?","Not much."],
+    correct:1
+  },
+];
+
+function buildMC(){
+  const area = document.getElementById('mcArea');
+  area.innerHTML = '';
+  mcQuestions.forEach((q,i) => {
+    const wrap = document.createElement('div');
+    wrap.className = 'mc-question';
+    wrap.innerHTML = `
+      <div class="mc-q-text"><span class="q-num">${i+1}</span>${q.q}</div>
+      <div class="mc-options" id="mcOpts${i}">
+        ${q.options.map((o,j) => `<div class="mc-option" data-idx="${j}" onclick="selectMC(${i},${j})">${o}</div>`).join('')}
+      </div>
+    `;
+    area.appendChild(wrap);
+  });
+}
+
+function selectMC(qIdx, oIdx){
+  const opts = document.querySelectorAll('#mcOpts'+qIdx+' .mc-option');
+  if(opts[0].classList.contains('disabled')) return;
+  opts.forEach(o => o.classList.add('disabled'));
+
+  if(oIdx === mcQuestions[qIdx].correct){
+    opts[oIdx].classList.add('correct');
+    addPoints('mc_'+qIdx, 2);
+    miniConfetti(opts[oIdx]);
+  } else {
+    opts[oIdx].classList.add('wrong');
+    opts[mcQuestions[qIdx].correct].classList.add('correct');
+  }
+}
+
+function solveMC(){
+  mcQuestions.forEach((q,i) => {
+    const opts = document.querySelectorAll('#mcOpts'+i+' .mc-option');
+    if(opts[0].classList.contains('disabled')) return;
+    opts.forEach(o => o.classList.add('disabled'));
+    opts[q.correct].classList.add('correct');
+    addPoints('mc_'+i, 2);
+  });
+  sectionConfetti();
+}
+
+/* =========================================================================
+   SECTION 7: FILL GAPS
+   ========================================================================= */
+const fillSentences = [
+  {text:'I need to ___ up with my old friend from school.',answer:'catch',hint:'Zaczyna się od "c". Czasownik, oznacza nadrobić zaległości.'},
+  {text:'We ___ it off right away. She was so funny!',answer:'hit',hint:'Zaczyna się od "h". Dosłownie "uderzyć", ale tutaj: od razu się polubić.'},
+  {text:'Do you ___ along with your neighbours?',answer:'get',hint:'Zaczyna się od "g". Bardzo powszechny czasownik; w tym wyrażeniu: dogadywać się.'},
+  {text:"Let's ___ out at the mall this Saturday.",answer:'hang',hint:'Zaczyna się od "h". Oznacza spędzać czas ze znajomymi.'},
+  {text:'___ time no see! How have you been?',answer:'long',hint:'Zaczyna się od "l". Przeciwieństwo "short".'},
+];
+
+function buildFill(){
+  const area = document.getElementById('fillArea');
+  area.innerHTML = '';
+  fillSentences.forEach((s,i) => {
+    const row = document.createElement('div');
+    row.className = 'fill-row';
+
+    const sent = document.createElement('div');
+    sent.className = 'fill-sentence';
+    const parts = s.text.split('___');
+    sent.innerHTML = parts[0] +
+      `<span class="fill-gap" id="fillGap${i}"><input type="text" id="fillInput${i}" data-answer="${s.answer}" data-idx="${i}" placeholder="___" autocomplete="off" spellcheck="false" style="text-align:center"></span>`
+      + parts[1];
+
+    const actions = document.createElement('div');
+    actions.className = 'fill-actions';
+    actions.innerHTML = `
+      <button class="btn btn-ghost btn-small" onclick="showFillHint(${i})">💡 Podpowiedź</button>
+      <button class="btn btn-primary btn-small" onclick="checkFillSingle(${i})">Sprawdź</button>
+      <div class="fill-hint-text" id="fillHint${i}">${s.hint}</div>
+    `;
+
+    row.appendChild(sent);
+    row.appendChild(actions);
+    area.appendChild(row);
+  });
+
+  // Enter to check
+  document.querySelectorAll('#fillArea input[data-answer]').forEach(inp => {
+    inp.addEventListener('keydown', e => {
+      if(e.key === 'Enter'){ e.preventDefault(); checkFillSingle(parseInt(inp.dataset.idx)); }
+    });
+  });
+
+  const result = document.createElement('div');
+  result.className = 'check-result';
+  result.id = 'fillResult';
+  area.appendChild(result);
+}
+
+function showFillHint(i){
+  document.getElementById('fillHint'+i).classList.add('show');
+}
+
+function checkFillSingle(i){
+  const inp = document.getElementById('fillInput'+i);
+  const gap = document.getElementById('fillGap'+i);
+  if(normalize(inp.value) === normalize(fillSentences[i].answer)){
+    gap.classList.add('correct-gap');
+    gap.classList.remove('wrong-gap');
+    addPoints('fill_'+i, 1);
+    miniConfetti(inp);
+  } else {
+    gap.classList.add('wrong-gap');
+    gap.classList.remove('correct-gap');
+  }
+}
+
+function checkFill(){
+  let correct = 0;
+  fillSentences.forEach((s,i) => {
+    const inp = document.getElementById('fillInput'+i);
+    const gap = document.getElementById('fillGap'+i);
+    if(normalize(inp.value) === normalize(s.answer)){
+      gap.classList.add('correct-gap');
+      gap.classList.remove('wrong-gap');
+      addPoints('fill_'+i, 1);
+      correct++;
+    } else {
+      gap.classList.add('wrong-gap');
+      gap.classList.remove('correct-gap');
+    }
+  });
+  const r = document.getElementById('fillResult');
+  if(correct === fillSentences.length){
+    r.className = 'check-result show success';
+    r.innerHTML = '🎉 Wszystko poprawnie!';
+    sectionConfetti();
+  } else {
+    r.className = 'check-result show fail';
+    r.innerHTML = `Poprawnie: ${correct} / ${fillSentences.length}. Popraw czerwone.`;
+  }
+}
+
+function solveFill(){
+  fillSentences.forEach((s,i) => {
+    const inp = document.getElementById('fillInput'+i);
+    const gap = document.getElementById('fillGap'+i);
+    inp.value = s.answer;
+    gap.classList.remove('wrong-gap');
+    gap.classList.add('correct-gap');
+    addPoints('fill_'+i, 1);
+  });
+  const r = document.getElementById('fillResult');
+  r.className = 'check-result show info';
+  r.innerHTML = '✨ Pokazano odpowiedzi';
+  sectionConfetti();
+}
+
+/* =========================================================================
+   SECTION 8: REACTIONS
+   ========================================================================= */
+const reactionScenarios = [
+  {
+    speaker:'Alex',
+    news:"I'm getting married next month!",
+    options:["That's great! I'm so happy for you!","Not much.","I'm not sure about that.","Where should we meet?"],
+    correct:0
+  },
+  {
+    speaker:'Sam',
+    news:'I just failed my driving test for the third time.',
+    options:["No way! That's amazing!","Have a blast!","Oh no, I'm sorry to hear that.","Long time no see!"],
+    correct:2
+  },
+  {
+    speaker:'Jess',
+    news:'I saw a famous actor at the grocery store yesterday!',
+    options:["I'm not sure about that.","No way! Are you serious?","I'll text you later.","Not much."],
+    correct:1
+  },
+  {
+    speaker:'Pat',
+    news:"I'm moving to another city next week.",
+    options:["How about going to the cinema?","That's great! Good luck!","Oh, I'll miss you. Let's keep in touch.","Hit it off."],
+    correct:2
+  },
+];
+
+function buildReactions(){
+  const area = document.getElementById('reactionArea');
+  area.innerHTML = '';
+  reactionScenarios.forEach((s,i) => {
+    const card = document.createElement('div');
+    card.className = 'react-card';
+    card.innerHTML = `
+      <div class="react-prompt"><span class="speaker">${s.speaker}</span>"${s.news}"</div>
+      <div class="react-prompt-context">Jak najnaturalniej zareagować?</div>
+      <div class="react-options" id="reactOpts${i}">
+        ${s.options.map((o,j) => `<div class="react-opt" onclick="selectReaction(${i},${j})">${o}</div>`).join('')}
+      </div>
+    `;
+    area.appendChild(card);
+  });
+}
+
+function selectReaction(sIdx, oIdx){
+  const opts = document.querySelectorAll('#reactOpts'+sIdx+' .react-opt');
+  if(opts[0].classList.contains('disabled')) return;
+  opts.forEach(o => o.classList.add('disabled'));
+
+  if(oIdx === reactionScenarios[sIdx].correct){
+    opts[oIdx].classList.add('correct');
+    addPoints('react_'+sIdx, 2);
+    miniConfetti(opts[oIdx]);
+  } else {
+    opts[oIdx].classList.add('wrong');
+    opts[reactionScenarios[sIdx].correct].classList.add('correct');
+  }
+}
+
+function solveReactions(){
+  reactionScenarios.forEach((s,i) => {
+    const opts = document.querySelectorAll('#reactOpts'+i+' .react-opt');
+    if(opts[0].classList.contains('disabled')) return;
+    opts.forEach(o => o.classList.add('disabled'));
+    opts[s.correct].classList.add('correct');
+    addPoints('react_'+i, 2);
+  });
+  sectionConfetti();
+}
+
+/* =========================================================================
+   SECTION 9: PUZZLE
+   ========================================================================= */
+const puzzleWords = [
+  {word:'ACQUAINTANCE',clue:'Znajomy (ale nie bliski przyjaciel). Osoba, którą znasz pobieżnie.',revealed:0},
+  {word:'WEEKEND',clue:'Sobota i niedziela. "Are you free this ___?"',revealed:0},
+  {word:'CATCH',clue:'Czasownik w wyrażeniu "___ up" – nadrabiać zaległości w rozmowie.',revealed:0},
+];
+
+function buildPuzzle(){
+  const area = document.getElementById('puzzleArea');
+  area.innerHTML = '';
+  puzzleWords.forEach((p,i) => {
+    p.revealed = 0;
+    const card = document.createElement('div');
+    card.className = 'puzzle-card';
+
+    const clue = document.createElement('div');
+    clue.className = 'puzzle-clue';
+    clue.innerHTML = `<span class="clue-label">Wskazówka</span>${p.clue}`;
+
+    const boxes = document.createElement('div');
+    boxes.className = 'letter-boxes';
+    boxes.id = 'puzzleBoxes' + i;
+    for(let j=0;j<p.word.length;j++){
+      const box = document.createElement('div');
+      box.className = 'letter-box';
+      box.id = 'pbox'+i+'_'+j;
+      boxes.appendChild(box);
+    }
+
+    const actions = document.createElement('div');
+    actions.className = 'puzzle-actions';
+
+    const inp = document.createElement('input');
+    inp.type = 'text';
+    inp.className = 'puzzle-input';
+    inp.id = 'puzzleInput'+i;
+    inp.placeholder = 'Wpisz słowo...';
+    inp.autocomplete = 'off';
+    inp.spellcheck = false;
+    inp.addEventListener('keydown', e => {
+      if(e.key === 'Enter'){ e.preventDefault(); checkPuzzle(i); }
+    });
+
+    const checkBtn = document.createElement('button');
+    checkBtn.className = 'btn btn-primary btn-small';
+    checkBtn.textContent = 'Sprawdź';
+    checkBtn.addEventListener('click', () => checkPuzzle(i));
+
+    const hintBtn = document.createElement('button');
+    hintBtn.className = 'btn btn-gold btn-small';
+    hintBtn.textContent = '💡 Kolejna litera';
+    hintBtn.addEventListener('click', () => puzzleHint(i));
+
+    actions.appendChild(inp);
+    actions.appendChild(checkBtn);
+    actions.appendChild(hintBtn);
+
+    const result = document.createElement('div');
+    result.className = 'check-result';
+    result.id = 'puzzleResult' + i;
+
+    card.appendChild(clue);
+    card.appendChild(boxes);
+    card.appendChild(actions);
+    card.appendChild(result);
+    area.appendChild(card);
+  });
+}
+
+function puzzleHint(i){
+  const p = puzzleWords[i];
+  if(p.revealed < p.word.length - 1){  // leave at least 1 letter hidden
+    const box = document.getElementById('pbox'+i+'_'+p.revealed);
+    box.textContent = p.word[p.revealed];
+    box.classList.add('filled','hint');
+    p.revealed++;
+  }
+}
+
+function checkPuzzle(i){
+  const inp = document.getElementById('puzzleInput'+i);
+  const r = document.getElementById('puzzleResult'+i);
+  const p = puzzleWords[i];
+  if((inp.value||'').toUpperCase().trim() === p.word){
+    for(let j=0;j<p.word.length;j++){
+      const box = document.getElementById('pbox'+i+'_'+j);
+      box.textContent = p.word[j];
+      box.classList.add('filled');
+      box.classList.remove('hint');
+    }
+    r.className = 'check-result show success';
+    r.innerHTML = '🎉 Dobrze!';
+    addPoints('puz_'+i, 3);
+    miniConfetti(inp);
+  } else {
+    r.className = 'check-result show fail';
+    r.innerHTML = 'Nie to słowo. Spróbuj jeszcze raz lub kliknij "Kolejna litera".';
+  }
+}
+
+function solvePuzzle(){
+  puzzleWords.forEach((p,i) => {
+    for(let j=0;j<p.word.length;j++){
+      const box = document.getElementById('pbox'+i+'_'+j);
+      box.textContent = p.word[j];
+      box.classList.add('filled');
+      box.classList.remove('hint');
+    }
+    const r = document.getElementById('puzzleResult'+i);
+    r.className = 'check-result show info';
+    r.innerHTML = '✨ Słowo: ' + p.word;
+    addPoints('puz_'+i, 3);
+  });
+  sectionConfetti();
+}
+
+/* =========================================================================
+   SECTION 10: TRANSLATE
+   ========================================================================= */
+const transData = [
+  {pl:'Dawno się nie widzieliśmy! Jak leci?',en:"Long time no see! How's it going?",hint:'Zacznij od "Long time..."'},
+  {pl:'Chcesz wyskoczyć na kawę?',en:'Do you want to grab a coffee?',hint:'Zacznij od "Do you..."'},
+  {pl:'Masz wolne w sobotę?',en:'Are you free on Saturday?',hint:'Zacznij od "Are you..."'},
+  {pl:'Naprawdę musimy nadrobić zaległości.',en:'We really need to catch up.',hint:'Zacznij od "We really..."'},
+];
+
+function buildTranslate(){
+  const area = document.getElementById('translateArea');
+  area.innerHTML = '';
+  transData.forEach((t,i) => {
+    const row = document.createElement('div');
+    row.className = 'trans-row';
+
+    const pl = document.createElement('div');
+    pl.className = 'trans-pl';
+    pl.innerHTML = `${flagLangMark(FLAG_PL)}${t.pl}`;
+
+    const inp = document.createElement('input');
+    inp.type = 'text';
+    inp.className = 'trans-input';
+    inp.id = 'transInput' + i;
+    inp.placeholder = 'Twoje tłumaczenie...';
+    inp.autocomplete = 'off';
+    inp.spellcheck = false;
+    inp.addEventListener('keydown', e => {
+      if(e.key === 'Enter'){ e.preventDefault(); checkTranslateSingle(i); }
+    });
+
+    const actions = document.createElement('div');
+    actions.className = 'trans-actions';
+    actions.innerHTML = `
+      <button class="btn btn-ghost btn-small" onclick="showTransHint(${i})">💡 Podpowiedź</button>
+      <button class="btn btn-primary btn-small" onclick="checkTranslateSingle(${i})">Sprawdź</button>
+      <div class="trans-hint-text" id="transHint${i}">${t.hint}</div>
+    `;
+
+    row.appendChild(pl);
+    row.appendChild(inp);
+    row.appendChild(actions);
+    area.appendChild(row);
+  });
+
+  const result = document.createElement('div');
+  result.className = 'check-result';
+  result.id = 'transResult';
+  area.appendChild(result);
+}
+
+function showTransHint(i){
+  document.getElementById('transHint'+i).classList.add('show');
+}
+
+function checkTranslateSingle(i){
+  const inp = document.getElementById('transInput'+i);
+  const val = normalize(inp.value);
+  const answer = normalize(transData[i].en);
+  if(val === answer){
+    inp.classList.add('correct');
+    inp.classList.remove('wrong');
+    addPoints('trans_'+i, 2);
+    miniConfetti(inp);
+  } else {
+    inp.classList.add('wrong');
+    inp.classList.remove('correct');
+  }
+}
+
+function checkTranslate(){
+  let correct = 0;
+  transData.forEach((t,i) => {
+    const inp = document.getElementById('transInput'+i);
+    const val = normalize(inp.value);
+    const answer = normalize(t.en);
+    if(val === answer){
+      inp.classList.add('correct');
+      inp.classList.remove('wrong');
+      addPoints('trans_'+i, 2);
+      correct++;
+    } else {
+      inp.classList.add('wrong');
+      inp.classList.remove('correct');
+    }
+  });
+  const r = document.getElementById('transResult');
+  if(correct === transData.length){
+    r.className = 'check-result show success';
+    r.innerHTML = '🎉 Doskonale! Wszystkie tłumaczenia poprawne.';
+    sectionConfetti();
+    setTimeout(sideFireworks, 300);
+  } else {
+    r.className = 'check-result show fail';
+    r.innerHTML = `Poprawnie: ${correct} / ${transData.length}. Popraw czerwone.`;
+  }
+}
+
+function solveTranslate(){
+  transData.forEach((t,i) => {
+    const inp = document.getElementById('transInput'+i);
+    inp.value = t.en;
+    inp.classList.add('correct');
+    inp.classList.remove('wrong');
+    addPoints('trans_'+i, 2);
+  });
+  const r = document.getElementById('transResult');
+  r.className = 'check-result show info';
+  r.innerHTML = '✨ Pokazano odpowiedzi';
+  sectionConfetti();
+}
+
+/* =========================================================================
+   SAVE / LOAD / RESET (localStorage)
+   ========================================================================= */
+function saveProgress(){
+  try{
+    const state = {
+      totalScore,
+      scored: {...scored},
+      vocab: vocabData.map((_,i) => document.getElementById('vocabPol'+i)?.classList.contains('show') || false),
+      flipped: Array.from(flippedCards),
+      match: getMatchState(),
+      dialogue: getDialogueState(),
+      scramble: getScrambleState(),
+      mc: getMCState(),
+      fill: getFillState(),
+      reactions: getReactionsState(),
+      puzzle: getPuzzleState(),
+      trans: getTransState(),
+    };
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+    showToast('✓ Zapisano postęp');
+  }catch(e){
+    showToast('Nie udało się zapisać');
+  }
+}
+
+function getMatchState(){
+  return Array.from(document.querySelectorAll('#matchEng .match-item.matched, #matchPol .match-item.matched'))
+    .map(el => ({side:el.dataset.side, idx:el.dataset.idx, num:el.querySelector('.pair-number').textContent}));
+}
+function getDialogueState(){
+  const out = {};
+  document.querySelectorAll('#dialogueArea input[data-answer]').forEach(inp => {
+    out[inp.id] = {val: inp.value, gapClass: document.getElementById('dgapwrap'+inp.id.replace('dgap','')).className};
+  });
+  return out;
+}
+function getScrambleState(){
+  return scrambleSentences.map((s,i) => {
+    const ans = document.getElementById('scrAns'+i);
+    return ans ? Array.from(ans.querySelectorAll('.word-chip')).map(c => c.textContent) : [];
+  });
+}
+function getMCState(){
+  return mcQuestions.map((_,i) => {
+    const opts = document.querySelectorAll('#mcOpts'+i+' .mc-option');
+    if(!opts[0] || !opts[0].classList.contains('disabled')) return null;
+    const correct = Array.from(opts).findIndex(o => o.classList.contains('correct'));
+    const wrong = Array.from(opts).findIndex(o => o.classList.contains('wrong'));
+    return {correct, wrong};
+  });
+}
+function getFillState(){
+  return fillSentences.map((_,i) => {
+    const inp = document.getElementById('fillInput'+i);
+    const gap = document.getElementById('fillGap'+i);
+    return inp ? {val: inp.value, cls: gap.className} : null;
+  });
+}
+function getReactionsState(){
+  return reactionScenarios.map((_,i) => {
+    const opts = document.querySelectorAll('#reactOpts'+i+' .react-opt');
+    if(!opts[0] || !opts[0].classList.contains('disabled')) return null;
+    const correct = Array.from(opts).findIndex(o => o.classList.contains('correct'));
+    const wrong = Array.from(opts).findIndex(o => o.classList.contains('wrong'));
+    return {correct, wrong};
+  });
+}
+function getPuzzleState(){
+  return puzzleWords.map((p,i) => {
+    const inp = document.getElementById('puzzleInput'+i);
+    const letters = [];
+    for(let j=0;j<p.word.length;j++){
+      const box = document.getElementById('pbox'+i+'_'+j);
+      letters.push({text:box.textContent, cls:box.className});
+    }
+    return {val: inp?.value||'', revealed: p.revealed, letters};
+  });
+}
+function getTransState(){
+  return transData.map((_,i) => {
+    const inp = document.getElementById('transInput'+i);
+    return inp ? {val: inp.value, cls: inp.className} : null;
+  });
+}
+
+function loadProgress(){
+  try{
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if(!raw) return;
+    const state = JSON.parse(raw);
+
+    totalScore = state.totalScore || 0;
+    Object.assign(scored, state.scored || {});
+    updateScore();
+
+    // Vocab
+    (state.vocab||[]).forEach((show,i) => {
+      if(show) document.getElementById('vocabPol'+i)?.classList.add('show');
+    });
+    // Flipped
+    (state.flipped||[]).forEach(i => {
+      const c = document.getElementById('flipCard'+i);
+      if(c){ c.classList.add('flipped'); flippedCards.add(i); }
+    });
+    updateFlipProgress();
+    // Match
+    (state.match||[]).forEach(m => {
+      const sel = '#'+(m.side==='eng'?'matchEng':'matchPol')+' .match-item[data-idx="'+m.idx+'"]';
+      const el = document.querySelector(sel);
+      if(el){
+        el.classList.add('matched');
+        el.querySelector('.pair-number').textContent = m.num;
+        matchPairCounter = Math.max(matchPairCounter, parseInt(m.num)||0);
+      }
+    });
+    matchCorrectCount = (state.match||[]).length / 2;
+    // Dialogue
+    if(state.dialogue){
+      Object.keys(state.dialogue).forEach(id => {
+        const inp = document.getElementById(id);
+        if(inp){
+          inp.value = state.dialogue[id].val;
+          const gap = document.getElementById('dgapwrap'+id.replace('dgap',''));
+          if(gap && state.dialogue[id].gapClass) gap.className = state.dialogue[id].gapClass;
+        }
+      });
+    }
+    // Scramble
+    (state.scramble||[]).forEach((arr,i) => {
+      if(!arr || !arr.length) return;
+      const ans = document.getElementById('scrAns'+i);
+      const bank = document.getElementById('scrBank'+i);
+      if(!ans || !bank) return;
+      // find each word chip in bank and move if in saved answer
+      arr.forEach(word => {
+        const chips = bank.querySelectorAll('.word-chip');
+        for(let c of chips){
+          if(c.textContent === word){
+            c.classList.remove('in-bank');
+            c.classList.add('in-answer');
+            ans.appendChild(c);
+            break;
+          }
+        }
+      });
+    });
+    // MC
+    (state.mc||[]).forEach((m,i) => {
+      if(!m) return;
+      const opts = document.querySelectorAll('#mcOpts'+i+' .mc-option');
+      opts.forEach(o => o.classList.add('disabled'));
+      if(m.correct >= 0) opts[m.correct]?.classList.add('correct');
+      if(m.wrong >= 0) opts[m.wrong]?.classList.add('wrong');
+    });
+    // Fill
+    (state.fill||[]).forEach((f,i) => {
+      if(!f) return;
+      const inp = document.getElementById('fillInput'+i);
+      const gap = document.getElementById('fillGap'+i);
+      if(inp){ inp.value = f.val; }
+      if(gap && f.cls) gap.className = f.cls;
+    });
+    // Reactions
+    (state.reactions||[]).forEach((r,i) => {
+      if(!r) return;
+      const opts = document.querySelectorAll('#reactOpts'+i+' .react-opt');
+      opts.forEach(o => o.classList.add('disabled'));
+      if(r.correct >= 0) opts[r.correct]?.classList.add('correct');
+      if(r.wrong >= 0) opts[r.wrong]?.classList.add('wrong');
+    });
+    // Puzzle
+    (state.puzzle||[]).forEach((p,i) => {
+      if(!p) return;
+      const inp = document.getElementById('puzzleInput'+i);
+      if(inp) inp.value = p.val;
+      puzzleWords[i].revealed = p.revealed || 0;
+      (p.letters||[]).forEach((l,j) => {
+        const box = document.getElementById('pbox'+i+'_'+j);
+        if(box){ box.textContent = l.text; box.className = l.cls; }
+      });
+    });
+    // Trans
+    (state.trans||[]).forEach((t,i) => {
+      if(!t) return;
+      const inp = document.getElementById('transInput'+i);
+      if(inp){ inp.value = t.val; inp.className = t.cls; }
+    });
+  }catch(e){
+    console.warn('Load failed', e);
+  }
+}
+
+function resetProgress(){
+  if(!confirm('Na pewno zresetować cały postęp? Tej operacji nie da się cofnąć.')) return;
+  localStorage.removeItem(STORAGE_KEY);
+  location.reload();
+}
+
+/* =========================================================================
+   INIT
+   ========================================================================= */
+function init(){
+  buildVocab();
+  buildFlipCards();
+  buildMatching();
+  buildDialogue();
+  buildScramble();
+  buildMC();
+  buildFill();
+  buildReactions();
+  buildPuzzle();
+  buildTranslate();
+  loadProgress();
+}
+
+document.addEventListener('DOMContentLoaded', init);
+</script>
+</body>
+</html>
