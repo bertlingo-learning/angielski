@@ -309,80 +309,346 @@ section {
   box-shadow: 0 8px 20px -6px rgba(224,48,110,0.5);
 }
 
-/* SECTION 1: VOCAB CARDS */
-.vocab-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-  gap: 1rem;
+/* SECTION 1: VOCAB - FULL-WIDTH ACCORDION */
+.vocab-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.85rem;
 }
-.vocab-card {
+.vocab-item {
   background: var(--paper);
   border: 1.5px solid var(--ink);
   border-radius: 14px;
-  padding: 1.4rem 1.5rem;
   box-shadow: 4px 4px 0 var(--magenta);
-  transition: transform 0.2s;
+  overflow: hidden;
+  transition: box-shadow 0.2s;
 }
-.vocab-card:nth-child(6n+2) { box-shadow: 4px 4px 0 var(--mint); }
-.vocab-card:nth-child(6n+3) { box-shadow: 4px 4px 0 var(--cobalt); }
-.vocab-card:nth-child(6n+4) { box-shadow: 4px 4px 0 var(--coral); }
-.vocab-card:nth-child(6n+5) { box-shadow: 4px 4px 0 var(--citron); }
-.vocab-card:nth-child(6n+6) { box-shadow: 4px 4px 0 var(--plum); }
-.vocab-card .pl-word {
+.vocab-item:nth-child(6n+2) { box-shadow: 4px 4px 0 var(--mint); }
+.vocab-item:nth-child(6n+3) { box-shadow: 4px 4px 0 var(--cobalt); }
+.vocab-item:nth-child(6n+4) { box-shadow: 4px 4px 0 var(--coral); }
+.vocab-item:nth-child(6n+5) { box-shadow: 4px 4px 0 var(--citron); }
+.vocab-item:nth-child(6n+6) { box-shadow: 4px 4px 0 var(--plum); }
+
+.vocab-summary {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 1.15rem 1.5rem;
+  cursor: pointer;
+  background: transparent;
+  border: none;
+  text-align: left;
+  font-family: var(--sans);
+  transition: background 0.15s;
+}
+.vocab-summary:hover {
+  background: var(--bg-soft);
+}
+.vocab-summary .pl-word {
   font-family: var(--display);
-  font-weight: 800; font-size: 1.55rem;
+  font-weight: 800;
+  font-size: 1.6rem;
   color: var(--ink);
   letter-spacing: -0.02em;
-  margin-bottom: 0.35rem;
-  line-height: 1.05;
+  line-height: 1.1;
+  flex-shrink: 0;
 }
-.vocab-card .pl-context {
-  font-size: 0.86rem;
+.vocab-summary .pl-context-mini {
+  flex: 1;
+  font-size: 0.95rem;
   color: var(--ink-dim);
-  margin-bottom: 1rem;
-  line-height: 1.45;
+  font-style: italic;
+  line-height: 1.4;
+  min-width: 0;
 }
-.vocab-card .pl-context .quote {
+.vocab-summary .pl-context-mini .quote {
   color: var(--ink-soft);
+}
+.vocab-summary .chevron {
+  flex-shrink: 0;
+  width: 34px; height: 34px;
+  display: inline-flex; align-items: center; justify-content: center;
+  border-radius: 50%;
+  background: var(--bg-soft);
+  border: 1.5px solid var(--ink);
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--ink);
+  transition: transform 0.3s cubic-bezier(.2,.8,.2,1), background 0.2s, color 0.2s;
+}
+.vocab-item.open .vocab-summary .chevron {
+  transform: rotate(180deg);
+  background: var(--ink);
+  color: var(--paper);
+}
+@media (max-width: 640px) {
+  .vocab-summary { flex-wrap: wrap; gap: 0.4rem 0.8rem; padding: 1rem 1.15rem; }
+  .vocab-summary .pl-word { font-size: 1.35rem; }
+  .vocab-summary .pl-context-mini {
+    flex-basis: 100%;
+    order: 3;
+    font-size: 0.86rem;
+  }
+  .vocab-summary .chevron { margin-left: auto; }
+}
+
+.vocab-body {
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height 0.45s cubic-bezier(.2,.8,.2,1);
+}
+.vocab-item.open .vocab-body {
+  max-height: 6000px;
+}
+.vocab-body-inner {
+  padding: 0.6rem 1.5rem 1.7rem;
+  border-top: 1.5px solid var(--line);
+  margin: 0 1.5rem;
+}
+@media (max-width: 640px) {
+  .vocab-body-inner { padding: 0.6rem 0 1.4rem; margin: 0 1.15rem; }
+}
+
+/* PWN intro: subtelne, tag-style, bez tip-boxów */
+.vocab-pwn-note {
+  margin: 1.1rem 0 1.3rem;
+  font-size: 0.92rem;
+  color: var(--ink-soft);
+  line-height: 1.55;
+  padding: 0.65rem 0;
+  border-bottom: 1.5px dashed var(--line-strong);
+}
+.vocab-pwn-note .pwn-tag {
+  display: inline-block;
+  font-family: var(--display);
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--magenta-deep);
+  background: var(--magenta-soft);
+  padding: 0.18rem 0.55rem;
+  border-radius: 4px;
+  margin-right: 0.5rem;
+  vertical-align: 1px;
+}
+
+/* Numerowane bloki znaczeń: czyste, bez tip-box pattern */
+.meaning-block {
+  margin-bottom: 1.4rem;
+}
+.meaning-block:last-of-type { margin-bottom: 0; }
+
+.meaning-head {
+  display: flex;
+  align-items: baseline;
+  gap: 0.6rem;
+  margin-bottom: 0.45rem;
+  flex-wrap: wrap;
+}
+.meaning-num {
+  font-family: var(--display);
+  font-size: 0.78rem;
+  font-weight: 800;
+  letter-spacing: 0.05em;
+  color: var(--paper);
+  background: var(--cobalt);
+  padding: 0.22rem 0.65rem;
+  border-radius: 6px;
+  flex-shrink: 0;
+  font-variant-numeric: tabular-nums;
+}
+.meaning-block:nth-of-type(6n+2) .meaning-num { background: var(--mint); }
+.meaning-block:nth-of-type(6n+3) .meaning-num { background: var(--coral); }
+.meaning-block:nth-of-type(6n+4) .meaning-num { background: var(--plum); }
+.meaning-block:nth-of-type(6n+5) .meaning-num { background: var(--citron-deep); }
+.meaning-block:nth-of-type(6n+6) .meaning-num { background: var(--magenta); }
+
+.meaning-title {
+  font-family: var(--display);
+  font-weight: 700;
+  font-size: 1.05rem;
+  color: var(--ink);
+  letter-spacing: -0.01em;
+  line-height: 1.35;
+}
+
+.meaning-en-line {
+  font-family: var(--display);
+  font-size: 1.05rem;
+  color: var(--ink);
+  margin: 0.55rem 0 0.7rem;
+  letter-spacing: -0.005em;
+  line-height: 1.4;
+}
+.meaning-en-line .arrow {
+  color: var(--ink-dim);
+  font-weight: 700;
+  margin-right: 0.3rem;
+  font-size: 1.1em;
+}
+.meaning-en-line strong {
+  font-weight: 700;
+  color: var(--cobalt-deep);
+}
+.meaning-block:nth-of-type(6n+2) .meaning-en-line strong { color: var(--mint-deep); }
+.meaning-block:nth-of-type(6n+3) .meaning-en-line strong { color: #b8421d; }
+.meaning-block:nth-of-type(6n+4) .meaning-en-line strong { color: var(--plum); }
+.meaning-block:nth-of-type(6n+5) .meaning-en-line strong { color: var(--citron-deep); }
+.meaning-block:nth-of-type(6n+6) .meaning-en-line strong { color: var(--magenta-deep); }
+
+.meaning-commentary {
+  font-size: 0.92rem;
+  color: var(--ink-soft);
+  line-height: 1.6;
+  margin-bottom: 0.7rem;
+}
+.meaning-commentary em {
+  font-style: italic;
+  color: var(--ink);
   font-weight: 500;
 }
-.vocab-card .reveal-btn {
-  font-family: var(--display);
-  font-size: 0.82rem; font-weight: 700;
+.meaning-commentary strong {
+  font-weight: 600;
   color: var(--ink);
+}
+
+.examples {
+  list-style: none;
+  margin: 0; padding: 0;
+}
+.example {
+  padding: 0.55rem 0;
+  font-size: 0.96rem;
+  line-height: 1.5;
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+}
+.example .en-line {
+  color: var(--ink);
+  font-weight: 500;
+  font-style: italic;
+  font-family: var(--display);
+}
+.example .en-line .bullet {
+  color: var(--ink-dim);
+  margin-right: 0.4rem;
+  font-style: normal;
+}
+
+/* Subtelne ukrywanie polskich tłumaczeń: blur zamiast czarnego paska */
+.pl-translation {
+  font-size: 0.86rem;
+  color: var(--ink-soft);
+  margin-left: 1.2rem;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  align-self: flex-start;
+}
+.pl-translation .pl-text {
+  display: inline-block;
+  transition: filter 0.35s ease, color 0.2s;
+  cursor: pointer;
+  padding: 0.1em 0.35em;
+  border-radius: 4px;
+}
+.pl-translation.hidden .pl-text {
+  filter: blur(5px);
+  color: var(--ink-soft);
+  user-select: none;
   background: var(--bg-soft);
+}
+.pl-translation.hidden .reveal-cue {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--cobalt-deep);
+  background: var(--cobalt-soft);
+  padding: 0.2rem 0.55rem;
+  border-radius: 999px;
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s;
+}
+.pl-translation.hidden .reveal-cue:hover {
+  background: var(--cobalt);
+  color: white;
+}
+.pl-translation.revealed .pl-text {
+  filter: none;
+  color: var(--ink-soft);
+  background: transparent;
+}
+.pl-translation.revealed .reveal-cue {
+  display: none;
+}
+
+/* Pułapka: lekka żółta plama, bez border-left */
+.warning-box {
+  margin-top: 1.3rem;
+  padding: 0.95rem 1.15rem;
+  background: var(--citron-soft);
+  border: 1.5px solid var(--citron);
+  border-radius: 10px;
+  font-size: 0.93rem;
+  line-height: 1.6;
+  color: var(--ink);
+}
+.warning-box .warn-label {
+  display: inline-block;
+  font-family: var(--display);
+  font-weight: 800;
+  font-size: 0.78rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--citron-deep);
+  margin-right: 0.45rem;
+}
+.warning-box em {
+  font-style: italic;
+  color: var(--ink);
+  font-weight: 500;
+}
+.warning-box strong {
+  font-weight: 700;
+  color: var(--magenta-deep);
+}
+
+/* Zwykły tekst kursywą wewnątrz akapitów - dla angielskich słów-cytatów */
+.vocab-body em {
+  font-style: italic;
+  color: var(--ink);
+  font-weight: 500;
+}
+
+.toggle-all-pl-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-family: var(--display);
+  font-size: 0.82rem;
+  font-weight: 700;
+  color: var(--ink);
+  background: var(--paper);
   border: 1.5px solid var(--ink);
   padding: 0.5rem 1rem;
   border-radius: 999px;
-  cursor: pointer; transition: all 0.15s;
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s;
+  margin-bottom: 1rem;
+  letter-spacing: 0.02em;
 }
-.vocab-card .reveal-btn:hover {
-  background: var(--ink); color: var(--paper);
-  transform: scale(1.04);
+.toggle-all-pl-btn:hover {
+  background: var(--ink);
+  color: var(--paper);
 }
-.vocab-card .answer {
-  display: none;
-  margin-top: 1rem;
-  padding: 0.95rem 1.1rem;
-  background: var(--mint-soft);
-  border-radius: 10px;
-  border: 1.5px solid var(--mint);
-  animation: slideDown 0.35s cubic-bezier(.2,.8,.2,1);
-}
-.vocab-card .answer.visible { display: block; }
-.vocab-card .answer .en {
-  font-family: var(--display);
-  font-weight: 700; font-size: 1.05rem;
-  color: var(--mint-deep);
-  margin-bottom: 0.35rem;
-  letter-spacing: -0.01em;
-  line-height: 1.3;
-}
-.vocab-card .answer .note {
-  font-size: 0.84rem;
-  color: var(--ink-soft);
-  line-height: 1.45;
-}
+
 @keyframes slideDown {
   from { opacity: 0; transform: translateY(-6px); }
   to   { opacity: 1; transform: translateY(0); }
@@ -1002,16 +1268,18 @@ footer .heart { color: var(--magenta); font-size: 1.1em; }
     <div class="section-tag tag-magenta"><span class="num">01</span> Vocabulary</div>
     <div class="section-title-block">
       <h2>Polskie słowa, których obcokrajowiec nie ogarnie</h2>
-      <div class="subtitle">Klasyki nieprzetłumaczalne. Najpierw zastanów się sam, potem kliknij "pokaż" i sprawdź propozycję.</div>
+      <div class="subtitle">Klasyki nieprzetłumaczalne. Każde słowo to osobna sekcja z różnymi znaczeniami i kontekstami. Kliknij, aby rozwinąć.</div>
     </div>
   </div>
 
   <div class="intro">
-    Niektóre polskie słowa to <b>językowe zagadki</b>. W angielskim trzeba je opisać kilkoma słowami, a i tak nie zawsze odda się sens. Pomyśl, jak Ty byś to przetłumaczył, zanim sprawdzisz odpowiedź.
+    Niektóre polskie słowa to <b>językowe zagadki</b>: jedno słowo ma kilka odcieni, a każdy odcień w angielskim wymaga innego tłumaczenia. Najpierw zastanów się sam, jak Ty byś to przetłumaczył w danym kontekście. Polskie tłumaczenia przykładów są zamglone, kliknij "kliknij", aby je odsłonić. Definicje opieramy na PWN-ie, a opisy słów angielskich częściowo na Vocabulary.com.
   </div>
 
-  <div class="vocab-grid" id="vocabGrid"></div>
-  <button class="solve-btn" onclick="solveVocab()">Pokaż wszystkie tłumaczenia →</button>
+  <button class="toggle-all-pl-btn" onclick="toggleAllPL()">Odsłoń / ukryj wszystkie tłumaczenia</button>
+
+  <div class="vocab-list" id="vocabGrid"></div>
+  <button class="solve-btn" onclick="solveVocab()">Rozwiń wszystkie sekcje →</button>
 </section>
 
 <section id="s2">
@@ -1106,18 +1374,496 @@ footer .heart { color: var(--magenta); font-size: 1.1em; }
 
 <script>
 const VOCAB = [
-  { pl: 'kombinować',          ctx: '<span class="quote">"Kombinuje, jak by tu mniej zapłacić."</span>',  en: 'to scheme / to figure out a way / to wangle', note: 'Brak idealnego odpowiednika. "To scheme" sugeruje nieuczciwość; "to figure out a way" jest neutralne.' },
-  { pl: 'ogarnąć',             ctx: '<span class="quote">"Daj mi chwilę, muszę to ogarnąć."</span>',       en: "to handle / to get a grip / to wrap one's head around", note: 'W kontekście "ogarnij się!" → "pull yourself together".' },
-  { pl: 'załatwić',            ctx: '<span class="quote">"Załatwiłem ci bilety."</span>',                  en: 'to sort out / to arrange / to take care of', note: 'Polski "załatwić" bywa nieformalny i czasem dwuznaczny. Angielski nie ma tej barwy.' },
-  { pl: 'doba',                ctx: '<span class="quote">"Pracował dwie doby z rzędu."</span>',            en: '24 hours / a full day', note: 'W angielskim brak jednego słowa na "24 godziny" jako jednostkę.' },
-  { pl: 'żal',                 ctx: '<span class="quote">"Mam do niego żal."</span>',                      en: 'resentment / sorrow / regret', note: '"Regret" = żal do siebie; "resentment" = żal do kogoś. Polskie "żal" łączy oba.' },
-  { pl: 'fajny',               ctx: '<span class="quote">"To była fajna impreza."</span>',                 en: 'cool / nice / great', note: 'Bardzo szerokie słowo, podobnie jak "cool", ale używamy go znacznie częściej.' },
-  { pl: 'masakra',             ctx: '<span class="quote">"Korki na mieście, masakra!"</span>',             en: 'a nightmare / a disaster / a mess', note: 'W slangu wyraża frustrację, nie dosłowną tragedię.' },
-  { pl: 'beka',                ctx: '<span class="quote">"Ale beka z tego filmu!"</span>',                 en: 'hilarious / a riot / cracking up', note: '"It was an absolute riot" oddaje ducha "była beka".' },
-  { pl: 'nic mi się nie chce',ctx: '<span class="quote">"Niedziela, nic mi się nie chce."</span>',           en: "I don't feel like doing anything", note: 'Polski "nie chce mi się" jest krótki i oddaje kompletny brak motywacji. Angielski potrzebuje całej frazy z "feel like".' },
-  { pl: 'pogadać',             ctx: '<span class="quote">"Musimy pogadać."</span>',                        en: 'to have a chat / to talk', note: '"We need to talk" brzmi po angielsku poważniej niż polskie "musimy pogadać".' },
-  { pl: 'no właśnie',          ctx: 'reakcja: <span class="quote">"No właśnie!"</span>',                   en: "exactly / right / that's the thing", note: 'Trzy odcienie: zgoda ("exactly"), potwierdzenie ("right"), refleksja ("that\'s the thing").' },
-  { pl: 'no nie wiem',         ctx: '<span class="quote">"No nie wiem, czy to dobry pomysł."</span>',      en: "I'm not sure / I don't know about that", note: '"I don\'t know about that" ładnie oddaje wahanie z polskiego "no nie wiem".' }
+  {
+    pl: 'kombinować',
+    quote: 'Kombinuje, jak by tu mniej zapłacić.',
+    pwnNote: 'PWN podaje pięć znaczeń, ale w praktyce do angielskiego potrzebujemy czterech (znaczenie 5 to eufemizm, omijamy).',
+    meanings: [
+      {
+        title: 'Łączyć elementy w całość (znaczenie podstawowe, formalne)',
+        en: '<strong>to combine</strong>',
+        commentary: null,
+        examples: [
+          { en: 'He combined two recipes into one dish.', pl: 'Połączył dwa przepisy w jedno danie.' },
+          { en: 'She combined business with pleasure.', pl: 'Połączyła interesy z przyjemnością.' }
+        ]
+      },
+      {
+        title: 'Szukać rozwiązania, główkować (potoczne, neutralne)',
+        en: '<strong>to work out how / to figure out how</strong>',
+        commentary: 'Vocabulary.com mówi wprost: <em>figure out</em> to "investigate or think something through in order to understand it", czyli rozkminić, dojść do tego. Pasuje idealnie. Uwaga: <em>figure out a way</em> brzmi jak "wykombinować sposób, znaleźć obejście", a nie "główkować nad czymś", więc lepiej <em>figure out how</em> / <em>work out how</em>.',
+        examples: [
+          { en: "He's trying to work out how to pay less.", pl: 'Kombinuje, jak by tu mniej zapłacić.' },
+          { en: "I'm figuring out how to fit everything into one suitcase.", pl: 'Kombinuję, jak zmieścić wszystko do jednej walizki.' }
+        ]
+      },
+      {
+        title: 'Nieuczciwie coś załatwiać, robić podejrzane interesy',
+        en: '<strong>to scheme</strong> (mocniejsze, negatywne) / <strong>to be up to something</strong> (potoczne, "knuć coś")',
+        commentary: 'Vocabulary.com ostrzega: <em>scheme</em> "often carries a negative connotation, devious plans and secret plots". Po angielsku to słowo prawie zawsze brzmi negatywnie, więc nie nadaje się jako neutralne tłumaczenie polskiego "kombinować".',
+        examples: [
+          { en: 'The two managers were scheming to push their colleague out.', pl: 'Kombinowali, jak wygryźć kolegę.' },
+          { en: 'What are you up to?', pl: 'Co kombinujesz?' }
+        ]
+      },
+      {
+        title: 'Skombinować, załatwić sprytem (osobny pod-odcień, brytyjskie potoczne)',
+        en: '<strong>to wangle</strong>',
+        commentary: 'Vocabulary.com: <em>wangle</em> to "get something through deception or devious coaxing", czyli załatwić coś sprytem, czasem na granicy uczciwości. Brytyjskie, potoczne, lekko cwaniackie.',
+        examples: [
+          { en: 'He wangled an invitation to the VIP party.', pl: 'Skombinował zaproszenie na imprezę VIP.' },
+          { en: 'I managed to wangle a day off.', pl: 'Udało mi się wykombinować dzień wolny.' }
+        ]
+      },
+      {
+        title: 'Majstrować, dłubać przy czymś (potoczne)',
+        en: '<strong>to tinker with / to mess (around) with</strong>',
+        commentary: null,
+        examples: [
+          { en: "He's been tinkering with the engine all morning.", pl: 'Kombinuje przy silniku od rana.' },
+          { en: 'Stop messing with the settings.', pl: 'Przestań kombinować przy ustawieniach.' }
+        ]
+      }
+    ],
+    warning: 'Najczęstszy błąd to traktowanie <em>scheme</em> jako uniwersalnego tłumaczenia. Polskie "kombinuję, co kupić mamie" jest zupełnie neutralne, a <em>I\'m scheming what to get my mom</em> brzmi, jakbyś planował coś nikczemnego.'
+  },
+
+  {
+    pl: 'ogarnąć',
+    quote: 'Daj mi chwilę, muszę to ogarnąć.',
+    pwnNote: 'PWN daje siedem znaczeń (z "ogarnąć się" włącznie). Do angielskiego sensownie sprowadza się to do czterech użyć potocznych.',
+    meanings: [
+      {
+        title: 'Zająć się czymś, poradzić sobie',
+        en: '<strong>to handle / to deal with / to sort out</strong>',
+        commentary: null,
+        examples: [
+          { en: "Don't worry, I'll handle it.", pl: 'Spoko, ogarnę.' },
+          { en: "Can you handle the kids while I'm out?", pl: 'Ogarniesz dzieciaki, jak mnie nie będzie?' },
+          { en: "I'll sort out the hotel booking.", pl: 'Ogarnę rezerwację hotelu.' }
+        ]
+      },
+      {
+        title: 'Zrozumieć, pojąć (intelektualnie)',
+        en: "<strong>to get one's head around / to wrap one's head around</strong>",
+        commentary: 'To idiom, który dosłownie znaczy "owinąć głowę dookoła czegoś", obrazowo: ogarnąć coś umysłem.',
+        examples: [
+          { en: 'Give me a moment, I need to get my head around this.', pl: 'Daj mi chwilę, muszę to ogarnąć.' },
+          { en: "I can't wrap my head around how this algorithm works.", pl: 'Nie mogę ogarnąć, jak ten algorytm działa.' }
+        ]
+      },
+      {
+        title: 'Ogarnij się! (weź się w garść)',
+        en: '<strong>pull yourself together / get a grip / get your act together</strong>',
+        commentary: 'Trzy warianty o różnym natężeniu: <em>pull yourself together</em> jest najbardziej standardowe, <em>get a grip</em> mocniejsze, <em>get your act together</em> sugeruje, że ktoś jest życiowo rozsypany.',
+        examples: [
+          { en: "Pull yourself together, it's not the end of the world.", pl: 'Ogarnij się, to nie koniec świata.' },
+          { en: 'He really needs to get his act together.', pl: 'Naprawdę musi się ogarnąć.' }
+        ]
+      },
+      {
+        title: 'Ogarniać coś na bieżąco, panować nad sytuacją',
+        en: '<strong>to be on top of something</strong>',
+        commentary: null,
+        examples: [
+          { en: "Don't worry, I'm on top of it.", pl: 'Spokojnie, ogarniam.' },
+          { en: "She's really on top of her work.", pl: 'Naprawdę ogarnia robotę.' }
+        ]
+      }
+    ],
+    warning: '<em>to handle</em> nie pasuje do "ogarniam, jak to działa". Tu trzeba <em>get my head around</em>, bo chodzi o zrozumienie, nie o zajęcie się sprawą.'
+  },
+
+  {
+    pl: 'załatwić',
+    quote: 'Załatwiłem ci bilety.',
+    pwnNote: 'PWN: trzy główne znaczenia plus słynne "załatwić kogoś" (potoczne, eufemistyczne).',
+    meanings: [
+      {
+        title: 'Doprowadzić sprawę do końca, zorganizować (codzienne)',
+        en: '<strong>to sort out / to get / to take care of</strong>',
+        commentary: 'W brytyjskim <em>sort out</em> jest absolutnym klasykiem. W amerykańskim częściej <em>take care of</em>. Najprostsze, codzienne <em>I got</em> też działa świetnie.',
+        examples: [
+          { en: "I've sorted out some tickets for you.", pl: 'Załatwiłem ci bilety.' },
+          { en: 'I got you tickets.', pl: 'Załatwiłem ci bilety. (krócej, AmE)' },
+          { en: "I'll take care of the paperwork.", pl: 'Załatwię papierkową robotę.' }
+        ]
+      },
+      {
+        title: 'Zorganizować formalnie (wydarzenie, spotkanie, transport)',
+        en: '<strong>to arrange</strong>',
+        commentary: 'Rozdzielenie z punktu 1 jest istotne: <em>arrange</em> pasuje, gdy planujesz coś na przyszłość (spotkanie, transport, rezerwację). Nie pasuje, gdy "załatwiasz sobie pracę", wtedy <em>to land a job</em> albo zwykłe <em>to get</em>.',
+        examples: [
+          { en: "I've arranged a meeting with the client.", pl: 'Załatwiłem spotkanie z klientem.' },
+          { en: 'Could you arrange transportation from the airport?', pl: 'Mógłbyś załatwić transport z lotniska?' }
+        ]
+      },
+      {
+        title: 'Załatwić z marszu, "to mam załatwione"',
+        en: "<strong>(it's) sorted</strong>",
+        commentary: 'Bardzo brytyjskie, krótkie, codzienne.',
+        examples: [
+          { en: "Don't worry, it's sorted.", pl: 'Spoko, załatwione.' },
+          { en: "Leave it to me, I'll sort it.", pl: 'Zostaw mi to, załatwię.' }
+        ]
+      },
+      {
+        title: 'Załatwić kogoś (potoczne, negatywne)',
+        en: '<strong>to take someone out / to finish someone off</strong>',
+        commentary: 'To znaczenie z PWN-u (#3), "załatwił go" oznacza zabił lub pozbawił możliwości działania. W angielskim też istnieje, dokładnie z tym samym podwójnym dnem co po polsku.',
+        examples: [
+          { en: 'They took him out before he could testify.', pl: 'Załatwili go, zanim zdążył zeznawać.' }
+        ]
+      }
+    ],
+    warning: 'Nie powiesz <em>I arranged a new job</em> w sensie "załatwiłem sobie nową pracę", bo to brzmi, jakbyś zaaranżował komuś pracę. Powiedz <em>I got a new job</em> lub <em>I landed a new job</em>.'
+  },
+
+  {
+    pl: 'doba',
+    quote: 'Pracował dwie doby z rzędu.',
+    pwnNote: 'PWN: "okres obrotu Ziemi dookoła własnej osi dzielony na 24 godziny". Angielski po prostu nie ma jednego słowa na to pojęcie i trzeba sobie radzić opisowo.',
+    meanings: [
+      {
+        title: 'Doba jako jednostka 24 godzin',
+        en: '<strong>a day</strong> (kontekstowo) / <strong>24 hours / a 24-hour period</strong> (gdy chcesz to podkreślić)',
+        commentary: 'W codziennej angielszczyźnie <em>day</em> zwykle wystarcza, ale w sytuacjach, gdzie liczy się dokładność czasu, lepiej powiedzieć wprost <em>24 hours</em>. Apteki czynne całą dobę: <em>24-hour pharmacy</em>, <em>24/7 pharmacy</em>.',
+        examples: [
+          { en: 'The pharmacy is open 24 hours.', pl: 'Apteka jest otwarta całą dobę.' },
+          { en: 'Within a 24-hour period.', pl: 'W ciągu doby.' }
+        ]
+      },
+      {
+        title: 'Pracować dwie doby z rzędu',
+        en: '<strong>He worked two days straight.</strong> / <strong>He worked for 48 hours straight.</strong> / <strong>He had been working for two days straight.</strong>',
+        commentary: 'Tu są dwie sprawy: jak oddać "dobę" i jak dobrać czas gramatyczny.<br><br>Najprostsze i najnaturalniejsze: <em>He worked two days straight.</em> Słowo <em>straight</em> znaczy "z rzędu, non stop" i to wyrażenie idealnie pasuje.<br><br>Jeśli chcesz wyraźnie podkreślić, że to były pełne 48 godzin bez przerwy: <em>He worked for 48 hours straight.</em><br><br>Jeśli mówisz o tle innego wydarzenia w przeszłości: <em>He had been working for two days straight (when he finally collapsed).</em>',
+        examples: [
+          { en: 'He worked two days straight without a break.', pl: 'Pracował dwie doby z rzędu bez przerwy.' },
+          { en: 'He worked for 48 hours straight to finish the project.', pl: 'Pracował 48 godzin z rzędu, żeby skończyć projekt.' },
+          { en: "He'd been working for two days straight when he finally collapsed.", pl: 'Pracował dwie doby z rzędu, gdy w końcu padł.' }
+        ]
+      }
+    ],
+    warning: '<strong>Czas gramatyczny:</strong> <em>He\'s been working for two days straight</em> znaczy "pracuje od dwóch dni", czyli czynność wciąż trwa. Polskie "pracował" to czas dokonany, czynność skończona, więc trzeba <em>worked</em> lub <em>had been working</em>, nie <em>has been working</em>.<br><br><strong>Znaczenie:</strong> Angielskie <em>day</em> w mowie potocznej często znaczy "dzień roboczy" albo "dzień od rana do wieczora", a nie pełne 24 godziny jak polska "doba". Jeśli kontekst tego wymaga, mów wprost <em>24 hours</em>.'
+  },
+
+  {
+    pl: 'żal',
+    quote: 'Mam do niego żal.',
+    pwnNote: 'PWN rozróżnia trzy znaczenia: smutek, skrucha, pretensja. Każde wymaga innego angielskiego słowa.',
+    meanings: [
+      {
+        title: 'Żal jako pretensja, uraza do kogoś',
+        en: '<strong>to hold something against someone / to resent someone / to have a bone to pick with someone</strong>',
+        commentary: '<em>Hold against</em> jest najbliższym odpowiednikiem polskiego "mieć żal". <em>Resent</em> jest mocniejsze, bardziej trwałe, "żywić urazę". <em>Have a bone to pick</em> jest potoczne, oznacza, że chcesz coś z kimś wyjaśnić, masz mu coś do zarzucenia.',
+        examples: [
+          { en: 'I hold it against him.', pl: 'Mam do niego żal o to.' },
+          { en: 'She still resents her sister.', pl: 'Wciąż ma żal do siostry.' },
+          { en: "I've got a bone to pick with him.", pl: 'Mam z nim coś do obgadania / mam do niego pretensję.' }
+        ]
+      },
+      {
+        title: 'Żal jako smutek',
+        en: '<strong>sorrow / sadness / grief</strong>',
+        commentary: '<em>Sorrow</em> jest literackie, <em>grief</em> sugeruje żałobę po stracie.',
+        examples: [
+          { en: 'She felt deep sorrow.', pl: 'Poczuła głęboki żal.' },
+          { en: 'He was overcome with grief.', pl: 'Ogarnął go żal po stracie.' }
+        ]
+      },
+      {
+        title: 'Żal jako skrucha, żałowanie czegoś, co się zrobiło',
+        en: '<strong>regret</strong>',
+        commentary: null,
+        examples: [
+          { en: 'I regret what I did.', pl: 'Żałuję tego, co zrobiłem. / Mam żal do siebie o to.' },
+          { en: 'She showed no regret.', pl: 'Nie okazała żalu / skruchy.' }
+        ]
+      },
+      {
+        title: '"Żal mi go" (współczucie, lekka litość)',
+        en: '<strong>I feel sorry for him</strong>',
+        commentary: null,
+        examples: [
+          { en: 'I feel sorry for him.', pl: 'Żal mi go.' }
+        ]
+      }
+    ],
+    warning: 'Angielskie <em>I\'m angry with him</em> znaczy "jestem na niego zły", czyli bieżąca złość, a nie utrzymująca się uraza. Polski "żal" jest bardziej trwały, dłużej trzymany. Podobnie <em>I\'m a bit fed up with him</em> znaczy "mam go dość, wkurza mnie", to też nie to samo, co "mam żal".'
+  },
+
+  {
+    pl: 'fajny',
+    quote: 'To była fajna impreza.',
+    pwnNote: 'PWN: "potoczne, dobry, ładny". Słowo-worek, w angielskim też istnieje cała galeria odpowiedników o różnym wieku i regionie.',
+    meanings: [
+      {
+        title: 'Klasyczne "fajny", coś przyjemnego, miłego, dobrego',
+        en: '<strong>nice / cool / great</strong>',
+        commentary: 'Najszerszy zakres: <em>nice</em> jest neutralne, <em>cool</em> potoczne i raczej amerykańsko-globalne, <em>great</em> trochę bardziej entuzjastyczne.',
+        examples: [
+          { en: "That's a nice jacket.", pl: 'Fajna kurtka.' },
+          { en: "He's a cool guy.", pl: 'Fajny gość.' },
+          { en: 'It was a great party.', pl: 'To była fajna impreza.' }
+        ]
+      },
+      {
+        title: 'Mocniej, z entuzjazmem (AmE)',
+        en: '<strong>awesome</strong>',
+        commentary: null,
+        examples: [
+          { en: 'That movie was awesome!', pl: 'Ten film był mega fajny!' }
+        ]
+      },
+      {
+        title: 'Brytyjskie potoczne',
+        en: '<strong>brilliant / cracking</strong>',
+        commentary: '<em>Brilliant</em> w brytyjskim oznacza "świetny, fajny", nie tylko "błyskotliwy". <em>Cracking</em> jest mocniej potoczne, prawie slangowe.',
+        examples: [
+          { en: "That's brilliant!", pl: 'Ale fajne!' },
+          { en: 'That was a cracking party.', pl: 'Niezła była ta impreza.' }
+        ]
+      },
+      {
+        title: 'Młodzieżowe (uwaga: szybko się dezaktualizują)',
+        en: '<strong>sick / dope / sweet</strong>',
+        commentary: 'Te trzy są bardzo zależne od pokolenia i mogą za pięć lat brzmieć tak, jak dziś brzmi <em>groovy</em>.',
+        examples: [
+          { en: 'That bike is sick.', pl: 'Ale fajny rower.' }
+        ]
+      }
+    ],
+    warning: '<em>Fine</em> nie znaczy "fajny". <em>He\'s a fine guy</em> brzmi sztywno, prawie staroświecko, jakby ojciec opisywał kandydata na męża dla córki. Do mówienia "fajny" w sensie "miły, sympatyczny" używaj <em>nice</em> albo <em>cool</em>.'
+  },
+
+  {
+    pl: 'masakra',
+    quote: 'Korki na mieście, masakra!',
+    pwnNote: 'PWN: dwa znaczenia. Pierwsze dosłowne (masowe zabijanie), drugie potoczne (ekspresja frustracji lub przesady).',
+    meanings: [
+      {
+        title: 'Masakra dosłowna, masowe zabicie',
+        en: '<strong>a massacre</strong>',
+        commentary: null,
+        examples: [
+          { en: 'The massacre was a war crime.', pl: 'Ta masakra była zbrodnią wojenną.' }
+        ]
+      },
+      {
+        title: 'Masakra jako wykrzyknik frustracji',
+        en: '<strong>a nightmare / a disaster / a mess</strong>',
+        commentary: 'Każde ma trochę inny smaczek: <em>nightmare</em> to "koszmar" (najbliżej "masakry"), <em>disaster</em> sugeruje, że coś poszło bardzo źle, <em>mess</em> to bałagan, chaos.',
+        examples: [
+          { en: 'The traffic in town is a nightmare!', pl: 'Korki w mieście, masakra!' },
+          { en: 'The exam was a complete disaster.', pl: 'Egzamin to była totalna masakra.' },
+          { en: 'My desk is a mess.', pl: 'Mam masakrę na biurku.' }
+        ]
+      },
+      {
+        title: 'Wzmacniacze potoczne ("ale masakra!")',
+        en: '<strong>brutal / insane / awful</strong>',
+        commentary: null,
+        examples: [
+          { en: "Traffic's insane today.", pl: 'Korki dzisiaj, masakra.' },
+          { en: 'The weather was brutal.', pl: 'Pogoda była masakryczna.' }
+        ]
+      }
+    ],
+    warning: 'Polskie "masakra" w sensie potocznym to wyolbrzymienie, a nie literalna tragedia. <em>Massacre</em> po angielsku zachowuje pełną wagę dosłownego znaczenia, więc nie powiesz <em>the traffic is a massacre</em>, bo to brzmi groteskowo. Do potocznej "masakry" używaj <em>nightmare</em> albo <em>disaster</em>.<br><br><strong>O "korkach":</strong> Po angielsku zwykle mówi się po prostu <em>the traffic</em>, a nie <em>traffic jams</em>. <em>Traffic jams</em> brzmi bardziej technicznie ("zatory komunikacyjne"). W codziennym kontekście naturalniejsze jest <em>the traffic was terrible</em>, <em>traffic\'s a nightmare</em>.'
+  },
+
+  {
+    pl: 'beka',
+    quote: 'Ale beka z tego filmu!',
+    pwnNote: 'Tego nie ma w PWN-ie z tym znaczeniem (potoczne młodzieżowe, "coś bardzo śmiesznego, ubaw"). Angielski ma sporo opcji o różnym natężeniu.',
+    meanings: [
+      {
+        title: 'Beka jako "coś bardzo śmiesznego"',
+        en: '<strong>hilarious / a riot / a hoot</strong>',
+        commentary: '<em>Hilarious</em> jest klasyczne i działa wszędzie. <em>A riot</em> i <em>a hoot</em> są bardziej potoczne, oba dosłownie "rozróba/krzyk", przenośnie "ubaw".',
+        examples: [
+          { en: 'That film was hilarious!', pl: 'Ale beka z tego filmu!' },
+          { en: 'That movie was an absolute riot!', pl: 'Totalna beka z tego filmu!' },
+          { en: "She's a hoot.", pl: 'Ona to czysta beka.' }
+        ]
+      },
+      {
+        title: 'Coś rozwaliło mnie ze śmiechu',
+        en: '<strong>to crack someone up / to have someone in stitches / to have someone dying (laughing)</strong>',
+        commentary: null,
+        examples: [
+          { en: 'That film cracked me up.', pl: 'Ten film mnie rozwalił.' },
+          { en: 'She had me in stitches.', pl: 'Skręcałem się ze śmiechu przy niej.' },
+          { en: 'That had me dying.', pl: 'Umierałem ze śmiechu.' }
+        ]
+      },
+      {
+        title: 'Brytyjskie potoczne "ubaw"',
+        en: '<strong>a right laugh</strong>',
+        commentary: 'Bardzo brytyjskie, <em>right</em> tutaj wzmacnia. W amerykańskim angielskim brzmi obco.',
+        examples: [
+          { en: 'We had a right laugh.', pl: 'Niezła była beka.' }
+        ]
+      },
+      {
+        title: 'Mieć z kogoś bekę (śmiać się z kogoś)',
+        en: '<strong>to take the mickey (out of someone)</strong> [BrE] / <strong>to make fun of someone</strong>',
+        commentary: null,
+        examples: [
+          { en: 'They were taking the mickey out of him.', pl: 'Mieli z niego bekę.' },
+          { en: 'Stop making fun of her.', pl: 'Przestań mieć z niej bekę.' }
+        ]
+      }
+    ],
+    warning: '<em>To have a beak</em> nie istnieje, to byłaby kalka. Nie próbuj kombinować dosłownie, używaj <em>hilarious / a riot / cracked me up</em>.'
+  },
+
+  {
+    pl: 'nic mi się nie chce',
+    quote: 'Niedziela, nic mi się nie chce.',
+    pwnNote: 'W polskim to konstrukcja bezosobowa ("chce mi się"), której angielski w ogóle nie ma. Trzeba przerobić zdanie na osobową.',
+    meanings: [
+      {
+        title: 'Nie chce mi się czegoś robić',
+        en: "<strong>I don't feel like (doing) something / I can't be bothered (to do something)</strong>",
+        commentary: '<em>I don\'t feel like</em> jest neutralne i działa wszędzie. <em>I can\'t be bothered</em> jest brytyjskie, potoczne, oddaje znudzenie i lenistwo idealnie. W amerykańskim angielskim <em>can\'t be bothered</em> jest zrozumiałe, ale rzadziej używane.',
+        examples: [
+          { en: "It's Sunday, I don't feel like doing anything.", pl: 'Niedziela, nic mi się nie chce.' },
+          { en: "I can't be bothered to cook today.", pl: 'Nie chce mi się dziś gotować.' }
+        ]
+      },
+      {
+        title: 'Nic mi się nie chce, jestem w trybie leniuchowania',
+        en: "<strong>I'm in lazy mode / I just want to do nothing</strong>",
+        commentary: null,
+        examples: [
+          { en: "It's Sunday, I'm in lazy mode.", pl: 'Niedziela, nic mi się nie chce.' }
+        ]
+      },
+      {
+        title: 'Brak motywacji w ogóle',
+        en: '<strong>I have no energy / I have no motivation</strong>',
+        commentary: 'To poważniejsze, ale czasem polskie "nic mi się nie chce" tak właśnie brzmi.',
+        examples: [
+          { en: 'I have zero motivation today.', pl: 'Dzisiaj nic mi się nie chce.' }
+        ]
+      }
+    ],
+    warning: '<em>I don\'t want</em> znaczy "nie chcę" (świadoma decyzja), a <em>I don\'t feel like</em> znaczy "nie mam ochoty" (chwilowy nastrój). Polskie "nie chce mi się" jest bliższe drugiemu, czyli chwilowy brak ochoty, nie kategoryczna odmowa.'
+  },
+
+  {
+    pl: 'musimy pogadać',
+    quote: 'Musimy pogadać.',
+    pwnNote: 'Polskie "pogadać" jest potoczne i lekkie, ale w pełnym zwrocie "musimy pogadać" często sygnalizuje poważniejszy ton.',
+    meanings: [
+      {
+        title: 'Lekkie, codzienne "pogadać sobie"',
+        en: '<strong>to have a chat / to catch up</strong>',
+        commentary: '<em>Chat</em> po angielsku jest naprawdę luźne, pogawędka.',
+        examples: [
+          { en: "Let's have a chat.", pl: 'Pogadajmy sobie.' },
+          { en: 'We should catch up sometime.', pl: 'Powinniśmy się kiedyś spotkać i pogadać.' }
+        ]
+      },
+      {
+        title: '"Musimy pogadać" w sensie poważnym',
+        en: '<strong>we need to talk</strong>',
+        commentary: 'To zdanie po angielsku brzmi bardzo poważnie. <em>We need to talk</em> w popkulturze tak silnie kojarzy się ze zrywaniem związku albo poważnymi pretensjami, że może wywołać niepokój u rozmówcy.',
+        examples: [
+          { en: 'We need to talk.', pl: 'Musimy pogadać.' },
+          { en: 'We need to have a serious talk.', pl: 'Musimy poważnie porozmawiać.' }
+        ]
+      },
+      {
+        title: '"Musimy pogadać" w sensie nieformalnym (BrE)',
+        en: '<strong>we need to have a chat</strong>',
+        commentary: 'To jest pośrednie: <em>chat</em> łagodzi powagę <em>we need to talk</em>. W brytyjskim często używane, gdy chce się złagodzić ton.',
+        examples: [
+          { en: 'We need to have a chat about your homework.', pl: 'Musimy sobie pogadać o twojej pracy domowej.' }
+        ]
+      }
+    ],
+    warning: 'Jeśli chcesz po prostu zaproponować spotkanie i pogadanie, <em>we need to talk</em> jest za mocne. Powiedz <em>let\'s catch up</em> albo <em>want to grab a coffee and chat?</em>. <em>We need to talk</em> zostaw na sytuacje, gdy faktycznie chcesz coś poważnego wyjaśnić.'
+  },
+
+  {
+    pl: 'no właśnie!',
+    quote: 'No właśnie!',
+    pwnNote: 'PWN traktuje "właśnie" jako partykułę z trzema funkcjami w wykrzyknieniu, a "no" jako odrębną partykułę wzmacniającą. Razem tworzą wyrażenie konwersacyjne, które w polskim ma kilka funkcji.',
+    meanings: [
+      {
+        title: '"No właśnie!" jako zgoda, potwierdzenie',
+        en: "<strong>Exactly! / That's right! / Right!</strong>",
+        commentary: null,
+        examples: [
+          { en: '"It\'s getting too expensive." "Exactly!"', pl: '"Robi się za drogo." "No właśnie!"' },
+          { en: '"He should apologize first." "Right!"', pl: '"Powinien najpierw przeprosić." "No właśnie!"' }
+        ]
+      },
+      {
+        title: '"No właśnie!" w sensie "sam to mówię"',
+        en: "<strong>That's what I'm saying! / That's what I said!</strong>",
+        commentary: null,
+        examples: [
+          { en: '"He should apologize." "That\'s what I\'m saying!"', pl: '"Powinien przeprosić." "No właśnie!"' }
+        ]
+      },
+      {
+        title: '"No właśnie!" w sensie "też tak mam, znam to"',
+        en: '<strong>Tell me about it!</strong>',
+        commentary: 'To idiom, którego nie tłumaczy się dosłownie. <em>Tell me about it</em> znaczy "też tego doświadczam, doskonale rozumiem".',
+        examples: [
+          { en: '"Mondays are the worst." "Tell me about it!"', pl: '"Poniedziałki są najgorsze." "No właśnie!"' }
+        ]
+      },
+      {
+        title: 'Zawieszone "no właśnie..." (zastanowienie, niepewność)',
+        en: '<strong>Well... / Yeah, about that...</strong>',
+        commentary: 'Tutaj funkcja jest zupełnie inna, to wahanie, sygnał, że chce się coś wyjaśnić, czasem wycofać.',
+        examples: [
+          { en: '"Did you finish the report?" "Well..."', pl: '"Skończyłeś raport?" "No właśnie..."' }
+        ]
+      }
+    ],
+    warning: '<em>Exactly</em> jest bezpiecznym wyborem dla 80% sytuacji, ale nie pasuje do każdego "no właśnie". W zawieszonym "no właśnie..." (gdzie czuć wahanie) <em>exactly</em> brzmiałoby zupełnie nie na miejscu.'
+  },
+
+  {
+    pl: 'no nie wiem',
+    quote: 'No nie wiem, czy to dobry pomysł.',
+    pwnNote: 'Polskie "no" na początku zdania to nie <em>no</em> po angielsku, tylko wypełniacz wprowadzający potoczny, niepewny ton. Angielski oddaje to przez <em>well</em>, <em>hmm</em>, <em>yeah</em>.',
+    meanings: [
+      {
+        title: '"No nie wiem" jako wyraz wahania, sceptycyzmu',
+        en: "<strong>I'm not sure / I don't know about that / I'm not so sure about that</strong>",
+        commentary: 'Najczęstsze i najbezpieczniejsze. <em>I don\'t know about that</em> ma dokładnie ten odcień sceptyczny co polskie "no nie wiem".',
+        examples: [
+          { en: "I'm not sure if that's a good idea.", pl: 'No nie wiem, czy to dobry pomysł.' },
+          { en: "I don't know about that.", pl: 'No nie wiem...' }
+        ]
+      },
+      {
+        title: 'Mocniejsze wahanie, z wypełniaczem',
+        en: "<strong>Hmm, I'm not sure / Yeah, I don't know</strong>",
+        commentary: 'Dodanie <em>hmm</em> lub <em>yeah</em> z przodu oddaje to potoczne polskie "no" znacznie lepiej niż samo neutralne <em>I\'m not sure</em>.',
+        examples: [
+          { en: "Hmm, I'm not sure that's a good idea.", pl: 'Hmm, no nie wiem, czy to dobry pomysł.' },
+          { en: "Yeah, I don't know about that one.", pl: 'No nie wiem...' }
+        ]
+      },
+      {
+        title: 'Wątpliwości w bardziej wyraźnej formie',
+        en: "<strong>I have my doubts / I'm not convinced</strong>",
+        commentary: '<em>I have my doubts</em> jest neutralne i pasuje, gdy chcesz powiedzieć dyplomatycznie, że się nie zgadzasz. <em>I\'m not convinced</em> jest bardziej formalne.',
+        examples: [
+          { en: 'I have my doubts about this.', pl: 'Mam co do tego wątpliwości.' },
+          { en: "I'm not convinced that's a good idea.", pl: 'Nie jestem przekonany, że to dobry pomysł.' }
+        ]
+      }
+    ],
+    warning: 'Polskie "no" na początku ("no nie wiem", "no właśnie", "no dobra") to wypełniacz potoczny. Bez angielskiego odpowiednika (<em>well</em>, <em>yeah</em>, <em>hmm</em>) zdanie traci ten luźny, konwersacyjny ton. <em>I\'m not sure</em> brzmi neutralnie, <em>Yeah, I\'m not sure</em> brzmi już potocznie.'
+  }
 ];
 
 const MATCH_PAIRS = [
@@ -1207,7 +1953,7 @@ const TF = [
     explain: '<b>Fałsz.</b> Poprawnie: "I hope so". Polski używa rzeczownika "nadzieja", angielski czasownika "hope".' }
 ];
 
-const STATE_KEY = 'pl-en-worksheet-v3';
+const STATE_KEY = 'pl-en-worksheet-v4';
 let state = { vocab: {}, match: { matched: [] }, gaps: {}, flash: {}, quiz: {}, tf: {} };
 
 function loadState() {
@@ -1240,7 +1986,7 @@ function totalPoints() {
 }
 function currentPoints() {
   let p = 0;
-  p += Object.values(state.vocab).filter(Boolean).length;
+  p += VOCAB.filter((_, i) => state.vocab[i] && state.vocab[i].open).length;
   p += state.match.matched.length;
   p += GAPS.filter((g, i) => normalize(state.gaps[i]) === normalize(g.ans)).length;
   p += Object.values(state.flash).filter(Boolean).length;
@@ -1286,45 +2032,135 @@ function hexToRgba(hex, a) {
   return `rgba(${r},${g},${b},${a})`;
 }
 
-/* ==== VOCAB ==== */
+/* ==== VOCAB - ACCORDION ==== */
 function renderVocab() {
   const grid = document.getElementById('vocabGrid');
-  grid.innerHTML = VOCAB.map((v, i) => `
-    <div class="vocab-card" data-i="${i}">
-      <div class="pl-word">${v.pl}</div>
-      <div class="pl-context">${v.ctx}</div>
-      <button class="reveal-btn">Pokaż tłumaczenie</button>
-      <div class="answer ${state.vocab[i] ? 'visible' : ''}">
-        <div class="en">${v.en}</div>
-        <div class="note">${v.note}</div>
-      </div>
-    </div>
-  `).join('');
+  grid.innerHTML = VOCAB.map((v, i) => {
+    const meaningsHTML = v.meanings.map((m, mi) => {
+      const examplesHTML = m.examples.map((ex, ei) => {
+        const revealed = state.vocab[i] && state.vocab[i].plRevealed && state.vocab[i].plRevealed[`${mi}_${ei}`];
+        return `
+          <li class="example">
+            <span class="en-line"><span class="bullet">•</span>${ex.en}</span>
+            <span class="pl-translation ${revealed ? 'revealed' : 'hidden'}" data-vi="${i}" data-mi="${mi}" data-ei="${ei}">
+              <span class="pl-text">${ex.pl}</span>
+              <span class="reveal-cue">kliknij</span>
+            </span>
+          </li>
+        `;
+      }).join('');
+      return `
+        <div class="meaning-block">
+          <div class="meaning-head">
+            <span class="meaning-num">${mi + 1}</span>
+            <span class="meaning-title">${m.title}</span>
+          </div>
+          <div class="meaning-en-line"><span class="arrow">→</span>${m.en}</div>
+          ${m.commentary ? `<div class="meaning-commentary">${m.commentary}</div>` : ''}
+          <ul class="examples">${examplesHTML}</ul>
+        </div>
+      `;
+    }).join('');
 
-  grid.querySelectorAll('.vocab-card').forEach(card => {
-    const i = parseInt(card.dataset.i);
-    const btn = card.querySelector('.reveal-btn');
-    const answer = card.querySelector('.answer');
-    btn.addEventListener('click', (e) => {
+    const isOpen = state.vocab[i] && state.vocab[i].open;
+    return `
+      <div class="vocab-item ${isOpen ? 'open' : ''}" data-i="${i}">
+        <button class="vocab-summary" type="button" data-i="${i}" aria-expanded="${isOpen ? 'true' : 'false'}">
+          <span class="pl-word">${v.pl}</span>
+          <span class="pl-context-mini"><span class="quote">"${v.quote}"</span></span>
+          <span class="chevron">▾</span>
+        </button>
+        <div class="vocab-body">
+          <div class="vocab-body-inner">
+            ${v.pwnNote ? `<div class="vocab-pwn-note"><span class="pwn-tag">PWN</span>${v.pwnNote}</div>` : ''}
+            ${meaningsHTML}
+            ${v.warning ? `<div class="warning-box"><span class="warn-label">⚠ Uwaga</span>${v.warning}</div>` : ''}
+          </div>
+        </div>
+      </div>
+    `;
+  }).join('');
+
+  // Klik w nagłówek = rozwijanie
+  grid.querySelectorAll('.vocab-summary').forEach(btn => {
+    const i = parseInt(btn.dataset.i);
+    btn.addEventListener('click', () => toggleVocabItem(i));
+  });
+
+  // Klik w polskie tłumaczenie lub w "kliknij" = odsłanianie
+  grid.querySelectorAll('.pl-translation').forEach(el => {
+    el.addEventListener('click', (e) => {
       e.stopPropagation();
-      const isVisible = answer.classList.toggle('visible');
-      state.vocab[i] = isVisible;
-      btn.textContent = isVisible ? 'Ukryj' : 'Pokaż tłumaczenie';
+      const vi = parseInt(el.dataset.vi);
+      const mi = parseInt(el.dataset.mi);
+      const ei = parseInt(el.dataset.ei);
+      const key = `${mi}_${ei}`;
+      if (!state.vocab[vi]) state.vocab[vi] = { open: false, plRevealed: {} };
+      if (!state.vocab[vi].plRevealed) state.vocab[vi].plRevealed = {};
+      state.vocab[vi].plRevealed[key] = !state.vocab[vi].plRevealed[key];
+      el.classList.toggle('hidden');
+      el.classList.toggle('revealed');
       persist();
-      updateProgress();
     });
-    if (state.vocab[i]) btn.textContent = 'Ukryj';
   });
 }
-function solveVocab() {
-  document.querySelectorAll('#vocabGrid .vocab-card').forEach((card, i) => {
-    const ans = card.querySelector('.answer');
-    const btn = card.querySelector('.reveal-btn');
-    if (!ans.classList.contains('visible')) {
-      ans.classList.add('visible');
-      btn.textContent = 'Ukryj';
+
+function toggleVocabItem(i) {
+  const item = document.querySelector(`.vocab-item[data-i="${i}"]`);
+  if (!item) return;
+  if (!state.vocab[i]) state.vocab[i] = { open: false, plRevealed: {} };
+  const isOpen = item.classList.toggle('open');
+  state.vocab[i].open = isOpen;
+  const btn = item.querySelector('.vocab-summary');
+  if (btn) btn.setAttribute('aria-expanded', isOpen ? 'true' : 'false');
+  persist();
+  updateProgress();
+  const allOpen = VOCAB.every((_, idx) => state.vocab[idx] && state.vocab[idx].open);
+  if (allOpen && isOpen) sectionDone();
+}
+
+function toggleAllPL() {
+  let totalRevealed = 0;
+  let totalAll = 0;
+  VOCAB.forEach((v, vi) => {
+    v.meanings.forEach((m, mi) => {
+      m.examples.forEach((_, ei) => {
+        totalAll++;
+        if (state.vocab[vi] && state.vocab[vi].plRevealed && state.vocab[vi].plRevealed[`${mi}_${ei}`]) {
+          totalRevealed++;
+        }
+      });
+    });
+  });
+  const shouldReveal = totalRevealed < totalAll / 2;
+  VOCAB.forEach((v, vi) => {
+    if (!state.vocab[vi]) state.vocab[vi] = { open: false, plRevealed: {} };
+    if (!state.vocab[vi].plRevealed) state.vocab[vi].plRevealed = {};
+    v.meanings.forEach((m, mi) => {
+      m.examples.forEach((_, ei) => {
+        state.vocab[vi].plRevealed[`${mi}_${ei}`] = shouldReveal;
+      });
+    });
+  });
+  persist();
+  document.querySelectorAll('.pl-translation').forEach(el => {
+    if (shouldReveal) {
+      el.classList.remove('hidden');
+      el.classList.add('revealed');
+    } else {
+      el.classList.add('hidden');
+      el.classList.remove('revealed');
     }
-    state.vocab[i] = true;
+  });
+}
+
+function solveVocab() {
+  document.querySelectorAll('#vocabGrid .vocab-item').forEach((item, i) => {
+    item.classList.add('open');
+    if (!state.vocab[i]) state.vocab[i] = { open: false, plRevealed: {} };
+    state.vocab[i].open = true;
+    const btn = item.querySelector('.vocab-summary');
+    if (btn) btn.setAttribute('aria-expanded', 'true');
   });
   persist(); updateProgress(); sectionDone();
 }
