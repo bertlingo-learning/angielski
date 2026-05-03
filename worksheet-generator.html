@@ -179,13 +179,41 @@ body::before {
   background: var(--surface-2);
   border: 1px solid var(--border);
   border-radius: 11px;
-  cursor: pointer;
-  transition: all 0.18s;
+  cursor: grab;
+  transition: border-color 0.18s, background 0.18s, opacity 0.18s, box-shadow 0.18s;
   position: relative;
+}
+.task-card:active { cursor: grabbing; }
+.task-card.dragging {
+  opacity: 0.45;
+  box-shadow: 0 8px 22px rgba(29, 131, 72, 0.18);
+}
+.task-card.drag-over {
+  border-color: var(--accent);
+  background: rgba(45, 204, 113, 0.08);
 }
 .task-card:hover:not(.disabled) { border-color: var(--border-bright); }
 .task-card.checked { border-color: var(--accent); background: rgba(196, 245, 58, 0.04); }
 .task-card.disabled { opacity: 0.4; cursor: not-allowed; }
+
+.reorder-reset {
+  margin-top: 1rem;
+  font-family: var(--mono);
+  font-size: 0.78rem;
+  letter-spacing: 0.05em;
+  background: none;
+  border: 1px dashed var(--border-bright);
+  color: var(--text-dim);
+  padding: 0.5rem 1rem;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+.reorder-reset:hover {
+  color: var(--accent);
+  border-color: var(--accent);
+  border-style: solid;
+}
 .task-card input { display: none; }
 .task-checkbox {
   width: 18px; height: 18px; border: 1.5px solid var(--border-bright); border-radius: 5px;
@@ -501,7 +529,7 @@ kura	chicken</div>
       <div class="sec-num">02</div>
       <div class="sec-title">Typy zadań</div>
     </div>
-    <div class="sec-desc">Wybierz, które sekcje mają znaleźć się na karcie pracy. Każda sekcja używa tych samych słówek.</div>
+    <div class="sec-desc">Wybierz, które sekcje mają znaleźć się na karcie pracy. <strong>Przeciągnij kafelki</strong>, żeby zmienić kolejność na karcie. Każda sekcja używa tych samych słówek.</div>
 
     <div class="task-grid" id="taskGrid">
       <div class="task-card" data-task="flashcards">
@@ -553,7 +581,16 @@ kura	chicken</div>
           <div class="task-info-desc">Ułóż słowa w zdanie</div>
         </div>
       </div>
+      <div class="task-card" data-task="cornell">
+        <input type="checkbox" hidden>
+        <div class="task-checkbox"></div>
+        <div class="task-info">
+          <div class="task-info-name">📖 Pytania &amp; odpowiedzi</div>
+          <div class="task-info-desc">Rozwijane sekcje z odpowiedziami (gramatyka, definicje)</div>
+        </div>
+      </div>
     </div>
+    <button type="button" class="reorder-reset" id="reorderReset">↻ Resetuj kolejność do domyślnej</button>
   </div>
 
   <!-- SECTION 3: STYLE -->
@@ -632,14 +669,14 @@ kura	chicken</div>
         <div>
           <label class="label" for="ttsLang">Język wypowiedzi</label>
           <select id="ttsLang" class="input">
-            <option value="en-US" selected>Angielski (US)</option>
-            <option value="en-GB">Angielski (UK)</option>
+            <option value="en-GB" selected>Angielski (UK)</option>
+            <option value="en-US">Angielski (US)</option>
             <option value="de-DE">Niemiecki</option>
             <option value="es-ES">Hiszpański</option>
             <option value="fr-FR">Francuski</option>
             <option value="it-IT">Włoski</option>
-            <option value="pt-PT">Portugalski</option>
-            <option value="ru-RU">Rosyjski</option>
+            <option value="ja-JP">Japoński</option>
+            <option value="zh-CN">Chiński (uproszczony)</option>
           </select>
         </div>
         <div>
@@ -681,10 +718,11 @@ const STATE = {
   customAccent: null,
   customBg: null,
   customText: null,
-  tasks: { flashcards: true, matching: true, scramble: true, quiz: false, unscramble: false },
+  tasks: { flashcards: true, matching: true, scramble: true, quiz: false, unscramble: false, cornell: false },
+  taskOrder: ['flashcards', 'matching', 'scramble', 'quiz', 'unscramble', 'cornell'],
   quizOptions: 4,
   ttsEnabled: true,
-  ttsLang: 'en-US',
+  ttsLang: 'en-GB',
   ttsVoice: ''
 };
 
@@ -735,7 +773,8 @@ function parseTaskTags(s) {
     m: 'matching', match: 'matching', matching: 'matching',
     s: 'scramble', scramble: 'scramble',
     q: 'quiz', quiz: 'quiz',
-    u: 'unscramble', unscramble: 'unscramble', sentence: 'unscramble'
+    u: 'unscramble', unscramble: 'unscramble', sentence: 'unscramble',
+    c: 'cornell', cornell: 'cornell'
   };
   const result = [];
   s.split(/[,;|]/).forEach(tag => {
@@ -752,7 +791,7 @@ function rowsForTask(taskName) {
 
 // Sprawdza, czy są wiersze z tagami dla nieaktywnych typów zadań
 function getOrphanedTagWarnings() {
-  const taskNames = ['flashcards', 'matching', 'scramble', 'quiz', 'unscramble'];
+  const taskNames = ['flashcards', 'matching', 'scramble', 'quiz', 'unscramble', 'cornell'];
   const warnings = [];
   taskNames.forEach(task => {
     if (STATE.tasks[task]) return; // typ jest aktywny, OK
@@ -766,7 +805,7 @@ function getOrphanedTagWarnings() {
       // tylko te które mają TEN konkretny tag
       const withThisTag = orphans.filter(r => r._tasks.includes(task));
       if (withThisTag.length > 0) {
-        const labels = { flashcards: 'Flashcards', matching: 'Matching', scramble: 'Word Scramble', quiz: 'Quiz', unscramble: 'Sentence Unscramble' };
+        const labels = { flashcards: 'Flashcards', matching: 'Matching', scramble: 'Word Scramble', quiz: 'Quiz', unscramble: 'Sentence Unscramble', cornell: 'Pytania & odpowiedzi' };
         warnings.push({ task, count: withThisTag.length, label: labels[task] });
       }
     }
@@ -832,7 +871,8 @@ function updateTSVStatus() {
     matching: rowsForTask('matching').length,
     scramble: rowsForTask('scramble').length,
     quiz: rowsForTask('quiz').length,
-    unscramble: rowsForTask('unscramble').length
+    unscramble: rowsForTask('unscramble').length,
+    cornell: rowsForTask('cornell').length
   };
   const hasTagsCol = result.headers.includes('tasks');
   const taggedRows = result.rows.filter(r => r._tasks.length > 0).length;
@@ -840,9 +880,9 @@ function updateTSVStatus() {
   status.className = 'tsv-status ok';
   let msg = `<span class="icon">✓</span> <strong>Wykryto ${result.rows.length} wierszy.</strong>`;
   if (hasTagsCol && taggedRows > 0) {
-    msg += `<span class="hint">Klasyfikacja: flashcards: ${counts.flashcards}, matching: ${counts.matching}, scramble: ${counts.scramble}, quiz: ${counts.quiz}, unscramble: ${counts.unscramble} (${taggedRows} wierszy ze specyficznymi tagami)</span>`;
+    msg += `<span class="hint">Klasyfikacja: flashcards: ${counts.flashcards}, matching: ${counts.matching}, scramble: ${counts.scramble}, quiz: ${counts.quiz}, unscramble: ${counts.unscramble}, cornell: ${counts.cornell} (${taggedRows} wierszy ze specyficznymi tagami)</span>`;
   } else {
-    msg += `<span class="hint">Wszystkie wiersze trafią do każdego zaznaczonego typu zadania. Aby przypisać wiersze do konkretnych typów, dodaj kolumnę <code>tasks</code> z tagami: f, m, s, q, u (lub kombinacje typu f,m).</span>`;
+    msg += `<span class="hint">Wszystkie wiersze trafią do każdego zaznaczonego typu zadania. Aby przypisać wiersze do konkretnych typów, dodaj kolumnę <code>tasks</code> z tagami: f, m, s, q, u, c (lub kombinacje typu f,m).</span>`;
   }
   status.innerHTML = msg;
   updateTaskAvailability();
@@ -924,9 +964,11 @@ document.getElementById('tsvExampleToggle').addEventListener('click', () => {
 });
 
 document.querySelectorAll('.task-card').forEach(card => {
+  card.setAttribute('draggable', 'true');
   card.addEventListener('click', e => {
+    // Tylko jeśli nie jesteśmy w trakcie drag-a
+    if (_draggedTaskCard) return;
     if (card.classList.contains('disabled')) return;
-    // Kliknięcie w przyciski liczby opcji quizu nie toggle'uje karty
     if (e.target.closest('.suboption-buttons')) return;
     const cb = card.querySelector('input');
     cb.checked = !cb.checked;
@@ -935,8 +977,61 @@ document.querySelectorAll('.task-card').forEach(card => {
     updateOrphanWarning();
     validateGenerate();
   });
-  // initial state
   if (card.querySelector('input').checked) card.classList.add('checked');
+
+  // Drag-and-drop reorder
+  card.addEventListener('dragstart', e => {
+    _draggedTaskCard = card;
+    card.classList.add('dragging');
+    e.dataTransfer.effectAllowed = 'move';
+    try { e.dataTransfer.setData('text/plain', card.dataset.task); } catch (err) {}
+  });
+  card.addEventListener('dragend', () => {
+    card.classList.remove('dragging');
+    document.querySelectorAll('.task-card.drag-over').forEach(c => c.classList.remove('drag-over'));
+    setTimeout(() => { _draggedTaskCard = null; }, 50); // mała zwłoka żeby click nie wystrzelił
+  });
+  card.addEventListener('dragover', e => {
+    if (!_draggedTaskCard || _draggedTaskCard === card) return;
+    e.preventDefault();
+    e.dataTransfer.dropEffect = 'move';
+    card.classList.add('drag-over');
+  });
+  card.addEventListener('dragleave', () => {
+    card.classList.remove('drag-over');
+  });
+  card.addEventListener('drop', e => {
+    e.preventDefault();
+    card.classList.remove('drag-over');
+    if (!_draggedTaskCard || _draggedTaskCard === card) return;
+    const grid = document.getElementById('taskGrid');
+    const draggedRect = _draggedTaskCard.getBoundingClientRect();
+    const targetRect = card.getBoundingClientRect();
+    // Wstaw przed lub po w zależności od pozycji
+    if (draggedRect.top < targetRect.top) {
+      grid.insertBefore(_draggedTaskCard, card.nextSibling);
+    } else {
+      grid.insertBefore(_draggedTaskCard, card);
+    }
+    updateTaskOrder();
+  });
+});
+
+let _draggedTaskCard = null;
+
+function updateTaskOrder() {
+  const cards = document.querySelectorAll('#taskGrid .task-card');
+  STATE.taskOrder = Array.from(cards).map(c => c.dataset.task);
+}
+
+document.getElementById('reorderReset').addEventListener('click', () => {
+  const defaultOrder = ['flashcards', 'matching', 'scramble', 'quiz', 'unscramble', 'cornell'];
+  const grid = document.getElementById('taskGrid');
+  defaultOrder.forEach(taskName => {
+    const card = grid.querySelector('.task-card[data-task="' + taskName + '"]');
+    if (card) grid.appendChild(card);
+  });
+  STATE.taskOrder = defaultOrder.slice();
 });
 
 // Quiz suboption buttons
@@ -1194,36 +1289,27 @@ function buildWorksheetHTML() {
   const bg = STATE.customBg || def.bg;
   const textColor = STATE.customText || def.text;
 
-  // Build sections in order
+  // Build sections in order according to STATE.taskOrder
   const sectionsHTML = [];
   const sectionsJS = [];
   let sectionCount = 0;
 
-  if (STATE.tasks.flashcards) {
+  const builders = {
+    flashcards: { html: buildFlashcardsSection, js: buildFlashcardsJS },
+    matching: { html: buildMatchingSection, js: buildMatchingJS },
+    scramble: { html: buildScrambleSection, js: buildScrambleJS },
+    quiz: { html: buildQuizSection, js: buildQuizJS },
+    unscramble: { html: buildUnscrambleSection, js: buildUnscrambleJS },
+    cornell: { html: buildCornellSection, js: buildCornellJS }
+  };
+
+  STATE.taskOrder.forEach(taskName => {
+    if (!STATE.tasks[taskName]) return;
+    if (!builders[taskName]) return;
     sectionCount++;
-    sectionsHTML.push(buildFlashcardsSection(sectionCount));
-    sectionsJS.push(buildFlashcardsJS(sectionCount));
-  }
-  if (STATE.tasks.matching) {
-    sectionCount++;
-    sectionsHTML.push(buildMatchingSection(sectionCount));
-    sectionsJS.push(buildMatchingJS(sectionCount));
-  }
-  if (STATE.tasks.scramble) {
-    sectionCount++;
-    sectionsHTML.push(buildScrambleSection(sectionCount));
-    sectionsJS.push(buildScrambleJS(sectionCount));
-  }
-  if (STATE.tasks.quiz) {
-    sectionCount++;
-    sectionsHTML.push(buildQuizSection(sectionCount));
-    sectionsJS.push(buildQuizJS(sectionCount));
-  }
-  if (STATE.tasks.unscramble) {
-    sectionCount++;
-    sectionsHTML.push(buildUnscrambleSection(sectionCount));
-    sectionsJS.push(buildUnscrambleJS(sectionCount));
-  }
+    sectionsHTML.push(builders[taskName].html(sectionCount));
+    sectionsJS.push(builders[taskName].js(sectionCount));
+  });
 
   // Build the full HTML based on preset
   return buildWorksheetTemplate({
@@ -1252,19 +1338,32 @@ function buildWorksheetHTML() {
 function buildFlashcardsSection(num) {
   const rows = rowsForTask('flashcards');
   const cards = rows.map((r, i) => {
-    // Auto-skala fontu w zależności od długości tekstu
-    const longest = Math.max(r.pl.length, r.en.length);
-    let sizeClass = 'fc-size-l';
-    if (longest > 80) sizeClass = 'fc-size-xs';
-    else if (longest > 50) sizeClass = 'fc-size-s';
-    else if (longest > 25) sizeClass = 'fc-size-m';
+    // Niezależna autoskalą per strona
+    function pickSize(text) {
+      const len = text.length;
+      const longestWord = Math.max(...text.split(/\s+/).map(w => w.length));
+      let cls = 'fc-size-l';
+      if (len > 80) cls = 'fc-size-xs';
+      else if (len > 50) cls = 'fc-size-s';
+      else if (len > 25) cls = 'fc-size-m';
+      // jeśli pojedyncze słowo długie, zejdź niżej żeby się zmieściło bez łamania
+      if (longestWord >= 14 && cls === 'fc-size-l') cls = 'fc-size-m';
+      if (longestWord >= 18 && cls === 'fc-size-m') cls = 'fc-size-s';
+      if (longestWord >= 22 && cls === 'fc-size-s') cls = 'fc-size-xs';
+      return cls;
+    }
+    const frontSize = pickSize(r.pl);
+    const backSize = pickSize(r.en);
+    // Aspect ratio fiszki - bierzemy najmniejszy z dwóch (czyli najszerszą fiszkę dla bezpieczeństwa)
+    const sizeOrder = { 'fc-size-l': 0, 'fc-size-m': 1, 'fc-size-s': 2, 'fc-size-xs': 3 };
+    const cardSize = sizeOrder[frontSize] > sizeOrder[backSize] ? frontSize : backSize;
     return `
-        <div class="flashcard ${sizeClass}" data-idx="${i}" onclick="flipCard(this)">
+        <div class="flashcard ${cardSize}" data-idx="${i}" onclick="flipCard(this)">
           <div class="flashcard-inner">
-            <div class="flashcard-face flashcard-front">
+            <div class="flashcard-face flashcard-front ${frontSize}">
               <div class="flash-word">${escapeHtml(r.pl)}</div>
             </div>
-            <div class="flashcard-face flashcard-back">
+            <div class="flashcard-face flashcard-back ${backSize}">
               <div class="flash-word-back-pl">${escapeHtml(r.pl)}</div>
               <div class="flash-word-back">${escapeHtml(r.en)}</div>
               <button class="tts-btn tts-btn-corner" onclick="ttsBtnClick(event, ${JSON.stringify(r.en).replace(/"/g, '&quot;')})" title="Czytaj" aria-label="Czytaj">🔊</button>
@@ -1681,6 +1780,7 @@ function buildUnscrambleSection(num) {
       <div class="unsc-card" data-idx="${i}" data-correct='${correctJSON}'>
         <div class="unsc-prompt">
           <span class="unsc-pl">${escapeHtml(r.pl)}</span>
+          <button class="tts-btn tts-btn-unsc" onclick="ttsBtnClick(event, ${JSON.stringify(r.en).replace(/"/g, '&quot;')})" title="Posłuchaj poprawnego zdania" aria-label="Czytaj">🔊</button>
         </div>
         <div class="unsc-answer-area" data-section="${num}" data-card-idx="${i}">
           <div class="unsc-answer-empty">Kliknij słowa poniżej lub przeciągnij je tutaj</div>
@@ -1953,6 +2053,73 @@ function buildUnscrambleJS(num) {
     }
     targetZone.classList.remove('drag-over');
   });
+`;
+}
+
+// ============================================================
+// CORNELL - rozwijane sekcje
+// ============================================================
+function buildCornellSection(num) {
+  const rows = rowsForTask('cornell');
+  const items = rows.map((r, i) => `
+    <div class="cornell-card" data-idx="${i}">
+      <button class="cornell-q" onclick="toggleCornell(${num}, ${i})" aria-expanded="false">
+        <span class="cornell-q-num">${i + 1}</span>
+        <span class="cornell-q-text">${escapeHtml(r.pl)}</span>
+        <span class="cornell-q-arrow">▾</span>
+      </button>
+      <div class="cornell-a" id="cornell-a-${num}-${i}">
+        <div class="cornell-a-inner">${escapeHtml(r.en)}</div>
+      </div>
+    </div>`).join('');
+
+  return `
+    <section class="ws-section" data-section="${num}" id="sec-${num}">
+      <div class="ws-sec-head">
+        <div class="ws-sec-num">0${num}</div>
+        <h2 class="ws-sec-title">Pytania &amp; odpowiedzi</h2>
+      </div>
+      <p class="ws-sec-desc">Kliknij pytanie, żeby odsłonić odpowiedź. Spróbuj najpierw odpowiedzieć w głowie!</p>
+      <div class="cornell-grid">${items}</div>
+      <div class="ws-actions">
+        <button class="ws-btn-solve" onclick="solveCornell(${num})">Rozwiń wszystkie</button>
+      </div>
+      <div class="ws-feedback" id="fb-${num}"></div>
+    </section>`;
+}
+
+function buildCornellJS(num) {
+  const total = rowsForTask('cornell').length;
+  return `
+  // ── CORNELL (section ${num}) ──
+  let _cornellOpened_${num} = new Set();
+  const _cornellTotal_${num} = ${total};
+
+  window.toggleCornell = function(secNum, idx) {
+    const card = document.querySelector('#sec-${num} .cornell-card[data-idx="' + idx + '"]');
+    if (!card) return;
+    const btn = card.querySelector('.cornell-q');
+    const expanded = card.classList.toggle('open');
+    btn.setAttribute('aria-expanded', expanded ? 'true' : 'false');
+    if (expanded) {
+      _cornellOpened_${num}.add(idx);
+      if (_cornellOpened_${num}.size === _cornellTotal_${num}) {
+        showSectionFeedback(${num}, true, '📖 Wszystkie odpowiedzi przejrzane!');
+        markSectionDone(${num});
+      }
+    }
+  };
+
+  window.solveCornell = function(secNum) {
+    document.querySelectorAll('#sec-${num} .cornell-card').forEach(card => {
+      card.classList.add('open');
+      const btn = card.querySelector('.cornell-q');
+      if (btn) btn.setAttribute('aria-expanded', 'true');
+      _cornellOpened_${num}.add(parseInt(card.dataset.idx));
+    });
+    showSectionFeedback(${num}, true, '✓ Wszystkie odsłonięte');
+    markSectionDone(${num});
+  };
 `;
 }
 
@@ -2520,7 +2687,7 @@ ${t.extraBgCSS}
   backface-visibility: hidden; -webkit-backface-visibility: hidden;
   border-radius: 14px;
   display: flex; flex-direction: column; align-items: center; justify-content: center;
-  padding: 1.4rem 1.5rem;
+  padding: 1.5rem 1.85rem;
   text-align: center;
   border: 1.5px solid var(--ws-border-strong);
   background: var(--ws-surface);
@@ -2529,7 +2696,9 @@ ${t.extraBgCSS}
 }
 /* Dłuższe teksty - lewo zamiast center, większy padding */
 .flashcard.fc-size-s .flashcard-face,
-.flashcard.fc-size-xs .flashcard-face {
+.flashcard.fc-size-xs .flashcard-face,
+.flashcard-face.fc-size-s,
+.flashcard-face.fc-size-xs {
   padding: 1.6rem 1.7rem;
   align-items: stretch;
   justify-content: center;
@@ -2540,7 +2709,13 @@ ${t.extraBgCSS}
 .flashcard.fc-size-xs .flash-word,
 .flashcard.fc-size-xs .flash-word-back,
 .flashcard.fc-size-s .flash-word-back-pl,
-.flashcard.fc-size-xs .flash-word-back-pl {
+.flashcard.fc-size-xs .flash-word-back-pl,
+.flashcard-face.fc-size-s .flash-word,
+.flashcard-face.fc-size-s .flash-word-back,
+.flashcard-face.fc-size-xs .flash-word,
+.flashcard-face.fc-size-xs .flash-word-back,
+.flashcard-face.fc-size-s .flash-word-back-pl,
+.flashcard-face.fc-size-xs .flash-word-back-pl {
   text-align: left;
   hyphens: auto;
 }
@@ -2563,13 +2738,13 @@ ${t.extraBgCSS}
   font-weight: 700;
   color: var(--ws-text);
   line-height: 1.2;
-  word-break: break-word;
-  hyphens: auto;
+  overflow-wrap: normal;
+  word-break: keep-all;
 }
-.flashcard.fc-size-l .flash-word { font-size: 1.5rem; }
-.flashcard.fc-size-m .flash-word { font-size: 1.2rem; }
-.flashcard.fc-size-s .flash-word { font-size: 0.95rem; line-height: 1.35; }
-.flashcard.fc-size-xs .flash-word { font-size: 0.8rem; line-height: 1.4; }
+.flashcard.fc-size-l .flash-word, .flashcard-face.fc-size-l .flash-word { font-size: 1.5rem; }
+.flashcard.fc-size-m .flash-word, .flashcard-face.fc-size-m .flash-word { font-size: 1.2rem; }
+.flashcard.fc-size-s .flash-word, .flashcard-face.fc-size-s .flash-word { font-size: 0.95rem; line-height: 1.35; }
+.flashcard.fc-size-xs .flash-word, .flashcard-face.fc-size-xs .flash-word { font-size: 0.8rem; line-height: 1.4; }
 .flash-word-back-pl {
   font-family: var(--ws-body);
   font-size: 0.78rem;
@@ -2590,13 +2765,13 @@ ${t.extraBgCSS}
   font-weight: 700;
   color: var(--ws-accent);
   line-height: 1.2;
-  word-break: break-word;
-  hyphens: auto;
+  overflow-wrap: normal;
+  word-break: keep-all;
 }
-.flashcard.fc-size-l .flash-word-back { font-size: 1.5rem; }
-.flashcard.fc-size-m .flash-word-back { font-size: 1.2rem; }
-.flashcard.fc-size-s .flash-word-back { font-size: 0.95rem; line-height: 1.35; }
-.flashcard.fc-size-xs .flash-word-back { font-size: 0.8rem; line-height: 1.4; }
+.flashcard.fc-size-l .flash-word-back, .flashcard-face.fc-size-l .flash-word-back { font-size: 1.5rem; }
+.flashcard.fc-size-m .flash-word-back, .flashcard-face.fc-size-m .flash-word-back { font-size: 1.2rem; }
+.flashcard.fc-size-s .flash-word-back, .flashcard-face.fc-size-s .flash-word-back { font-size: 0.95rem; line-height: 1.35; }
+.flashcard.fc-size-xs .flash-word-back, .flashcard-face.fc-size-xs .flash-word-back { font-size: 0.8rem; line-height: 1.4; }
 .flash-hint {
   font-family: var(--ws-mono);
   font-size: 0.65rem;
@@ -2971,6 +3146,10 @@ ${t.extraBgCSS}
 }
 .unsc-prompt {
   margin-bottom: 0.95rem;
+  display: flex;
+  align-items: flex-start;
+  gap: 0.7rem;
+  justify-content: space-between;
 }
 .unsc-pl {
   font-family: var(--ws-display);
@@ -2978,6 +3157,11 @@ ${t.extraBgCSS}
   font-size: 1.18rem;
   color: var(--ws-text);
   line-height: 1.3;
+  flex: 1;
+}
+.tts-btn-unsc {
+  flex-shrink: 0;
+  margin-top: 0.1rem;
 }
 .unsc-answer-area {
   min-height: 56px;
@@ -3102,6 +3286,85 @@ ${t.extraBgCSS}
 .unsc-hint-btn:hover, .unsc-clear-btn:hover {
   border-color: var(--ws-accent);
   color: var(--ws-accent);
+}
+
+/* ========== CORNELL ========== */
+.cornell-grid {
+  display: grid; gap: 0.65rem;
+}
+.cornell-card {
+  background: var(--ws-surface);
+  border: 1.5px solid var(--ws-border-strong);
+  border-radius: 12px;
+  overflow: hidden;
+  transition: border-color 0.25s, box-shadow 0.25s;
+}
+.cornell-card.open {
+  border-color: var(--ws-accent);
+  box-shadow: 0 4px 12px ${accentRgba(0.12)};
+}
+.cornell-q {
+  width: 100%;
+  display: flex;
+  align-items: flex-start;
+  gap: 0.85rem;
+  padding: 1rem 1.1rem;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  text-align: left;
+  font-family: var(--ws-display);
+  color: var(--ws-text);
+  transition: background 0.2s;
+}
+.cornell-q:hover { background: var(--ws-surface-2); }
+.cornell-card.open .cornell-q { background: var(--ws-accent-soft); }
+.cornell-q-num {
+  font-family: var(--ws-mono);
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: var(--ws-accent);
+  background: var(--ws-card);
+  border: 1px solid var(--ws-accent);
+  border-radius: 7px;
+  width: 28px; height: 28px;
+  display: grid; place-items: center;
+  flex-shrink: 0;
+  margin-top: 0.1rem;
+}
+.cornell-q-text {
+  flex: 1;
+  font-weight: 700;
+  font-size: 1.15rem;
+  line-height: 1.35;
+}
+.cornell-q-arrow {
+  flex-shrink: 0;
+  font-size: 1rem;
+  color: var(--ws-accent);
+  transition: transform 0.25s;
+  margin-top: 0.3rem;
+}
+.cornell-card.open .cornell-q-arrow {
+  transform: rotate(180deg);
+}
+.cornell-a {
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height 0.3s ease-out;
+}
+.cornell-card.open .cornell-a {
+  max-height: 1500px;
+  transition: max-height 0.5s ease-in;
+}
+.cornell-a-inner {
+  padding: 0.5rem 1.1rem 1.15rem 4rem;
+  font-family: var(--ws-body);
+  font-size: 1.04rem;
+  line-height: 1.55;
+  color: var(--ws-text);
+  border-top: 1px dashed var(--ws-border);
+  margin-top: 0;
 }
 
 /* ========== QUIZ ========== */
