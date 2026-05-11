@@ -175,7 +175,8 @@ body::before {
 .task-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 0.7rem; }
 .task-card {
   display: flex; align-items: flex-start; gap: 0.7rem;
-  padding: 0.95rem 1rem;
+  padding: 0.95rem 1rem 0.95rem 1rem;
+  padding-top: 2.5rem;
   background: var(--surface-2);
   border: 1px solid var(--border);
   border-radius: 11px;
@@ -231,6 +232,112 @@ body::before {
 .task-info-name { font-weight: 600; font-size: 0.92rem; }
 .task-info-desc { color: var(--text-muted); font-size: 0.78rem; margin-top: 0.2rem; line-height: 1.35; }
 .task-card.disabled .task-info-desc { color: var(--warn); }
+
+.instr-master {
+  margin: 0 0 0.9rem 0;
+  display: flex;
+  justify-content: flex-end;
+}
+.instr-master-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.55rem;
+  font-family: var(--mono);
+  font-size: 0.76rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  padding: 0.55rem 0.95rem;
+  border-radius: 8px;
+  border: 1px solid var(--border);
+  background: var(--surface);
+  color: var(--text-dim);
+  cursor: pointer;
+  transition: all 0.15s;
+}
+.instr-master-btn:hover {
+  color: var(--text);
+  border-color: var(--border-bright);
+}
+.instr-master-btn.active {
+  background: rgba(196, 245, 58, 0.08);
+  border-color: var(--accent);
+  color: var(--accent);
+}
+.instr-master-btn.mixed {
+  background: rgba(196, 245, 58, 0.04);
+  border-color: var(--border-bright);
+  color: var(--text);
+  border-style: dashed;
+}
+.instr-master-btn.off {
+  background: var(--surface);
+  border-color: var(--border);
+  color: var(--text-dim);
+  opacity: 0.7;
+}
+.instr-master-btn.off .instr-master-icon {
+  filter: grayscale(1) opacity(0.7);
+}
+.instr-master-icon {
+  font-size: 0.95rem;
+  line-height: 1;
+}
+.instr-master-label {
+  font-weight: 700;
+}
+.instr-master-state {
+  font-weight: 500;
+  opacity: 0.75;
+  font-size: 0.72rem;
+  letter-spacing: 0.02em;
+  text-transform: none;
+}
+
+.task-instr-toggle {
+  position: absolute;
+  top: 0.5rem;
+  right: 0.5rem;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.32rem;
+  font-family: var(--mono);
+  font-size: 0.68rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  padding: 0.3rem 0.55rem;
+  border-radius: 6px;
+  border: 1px solid var(--border);
+  background: var(--surface);
+  color: var(--text-dim);
+  cursor: pointer;
+  transition: all 0.15s;
+  opacity: 0.5;
+}
+.task-card:hover .task-instr-toggle {
+  opacity: 1;
+}
+.task-instr-toggle:hover {
+  color: var(--text);
+  border-color: var(--border-bright);
+}
+.task-instr-toggle.active {
+  background: rgba(196, 245, 58, 0.08);
+  border-color: var(--accent);
+  color: var(--accent);
+  opacity: 1;
+}
+.task-instr-toggle.active:hover {
+  background: rgba(196, 245, 58, 0.15);
+}
+.task-instr-icon {
+  font-size: 0.78rem;
+  line-height: 1;
+}
+.task-instr-toggle:not(.active) .task-instr-icon {
+  filter: grayscale(1) opacity(0.7);
+}
 
 .task-suboption {
   display: none;
@@ -411,6 +518,38 @@ body::before {
 
 /* GENERATE BUTTON */
 .generate-area { margin-top: 2rem; text-align: center; }
+.generate-btns {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.85rem;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+.btn-preview {
+  font-family: var(--display);
+  font-weight: 600;
+  font-size: 1rem;
+  background: var(--surface-2);
+  color: var(--text);
+  border: 1.5px solid var(--border-bright);
+  padding: 1rem 1.6rem;
+  border-radius: 14px;
+  cursor: pointer;
+  letter-spacing: -0.01em;
+  transition: all 0.2s;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+.btn-preview:hover:not(:disabled) {
+  transform: scale(1.03);
+  border-color: var(--accent);
+  color: var(--accent);
+  background: rgba(196, 245, 58, 0.08);
+}
+.btn-preview:disabled {
+  opacity: 0.4; cursor: not-allowed;
+}
 .btn-generate {
   font-family: var(--display);
   font-weight: 700; font-size: 1.15rem;
@@ -530,6 +669,14 @@ kura	chicken</div>
       <div class="sec-title">Typy zadań</div>
     </div>
     <div class="sec-desc">Wybierz, które sekcje mają znaleźć się na karcie pracy. <strong>Przeciągnij kafelki</strong>, żeby zmienić kolejność na karcie. Każda sekcja używa tych samych słówek.</div>
+
+    <div class="instr-master">
+      <button type="button" class="instr-master-btn active" id="instrMasterBtn">
+        <span class="instr-master-icon">📋</span>
+        <span class="instr-master-label">Instrukcje pod tytułem sekcji</span>
+        <span class="instr-master-state" id="instrMasterState">wszystkie włączone</span>
+      </button>
+    </div>
 
     <div class="task-grid" id="taskGrid">
       <div class="task-card" data-task="flashcards">
@@ -745,9 +892,14 @@ kura	chicken</div>
   </div>
 
   <div class="generate-area">
-    <button type="button" id="btnGenerate" class="btn-generate" disabled>
-      Generuj &amp; pobierz HTML <span class="arrow">→</span>
-    </button>
+    <div class="generate-btns">
+      <button type="button" id="btnPreview" class="btn-preview" disabled>
+        👁 Podgląd w przeglądarce
+      </button>
+      <button type="button" id="btnGenerate" class="btn-generate" disabled>
+        Generuj &amp; pobierz HTML <span class="arrow">→</span>
+      </button>
+    </div>
     <div class="gen-hint" id="genHint">Wklej dane, żeby aktywować przycisk</div>
   </div>
 
@@ -768,6 +920,7 @@ const STATE = {
   customBg: null,
   customText: null,
   tasks: { flashcards: true, matching: true, scramble: true, quiz: false, unscramble: false, cornell: false, gapfill: false, translate: false, writing: false },
+  taskInstructions: { flashcards: true, matching: true, scramble: true, quiz: true, unscramble: true, cornell: true, gapfill: true, translate: true, writing: true },
   taskOrder: ['flashcards', 'matching', 'scramble', 'quiz', 'unscramble', 'cornell', 'gapfill', 'translate', 'writing'],
   quizOptions: 4,
   ttsEnabled: true,
@@ -891,6 +1044,7 @@ function updateTSVStatus() {
   const text = document.getElementById('tsv').value;
   const status = document.getElementById('tsvStatus');
   const btn = document.getElementById('btnGenerate');
+  const previewBtn = document.getElementById('btnPreview');
   const hint = document.getElementById('genHint');
 
   if (!text.trim()) {
@@ -899,6 +1053,7 @@ function updateTSVStatus() {
     STATE.rows = [];
     STATE.headers = [];
     btn.disabled = true;
+    previewBtn.disabled = true;
     hint.textContent = 'Wklej dane, żeby aktywować przycisk';
     updateTaskAvailability();
     return;
@@ -911,6 +1066,7 @@ function updateTSVStatus() {
     STATE.rows = [];
     STATE.headers = [];
     btn.disabled = true;
+    previewBtn.disabled = true;
     hint.textContent = 'Popraw dane, żeby aktywować';
     updateTaskAvailability();
     return;
@@ -1007,20 +1163,24 @@ function updateTaskAvailability() {
 
 function validateGenerate() {
   const btn = document.getElementById('btnGenerate');
+  const previewBtn = document.getElementById('btnPreview');
   const hint = document.getElementById('genHint');
   const anyTask = Object.values(STATE.tasks).some(v => v);
 
   if (STATE.rows.length === 0) {
     btn.disabled = true;
+    previewBtn.disabled = true;
     hint.textContent = 'Wklej dane, żeby aktywować przycisk';
     return;
   }
   if (!anyTask) {
     btn.disabled = true;
+    previewBtn.disabled = true;
     hint.textContent = 'Wybierz przynajmniej jeden typ zadania';
     return;
   }
   btn.disabled = false;
+  previewBtn.disabled = false;
   const taskCount = Object.values(STATE.tasks).filter(v => v).length;
   hint.textContent = `Gotowe · ${STATE.rows.length} słów · ${taskCount} ${taskCount === 1 ? 'sekcja' : 'sekcje'}`;
 }
@@ -1034,13 +1194,65 @@ document.getElementById('tsvExampleToggle').addEventListener('click', () => {
   document.getElementById('tsvExampleBox').classList.toggle('show');
 });
 
+// Aktualizuje wygląd master toggle na podstawie stanu wszystkich per-task toggli
+function updateInstrMaster() {
+  const master = document.getElementById('instrMasterBtn');
+  const state = document.getElementById('instrMasterState');
+  if (!master || !state) return;
+  const values = Object.values(STATE.taskInstructions);
+  const allOn = values.every(v => v);
+  const allOff = values.every(v => !v);
+  master.classList.remove('active', 'mixed', 'off');
+  if (allOn) {
+    master.classList.add('active');
+    state.textContent = 'wszystkie włączone';
+  } else if (allOff) {
+    master.classList.add('off');
+    state.textContent = 'wszystkie wyłączone';
+  } else {
+    master.classList.add('mixed');
+    const onCount = values.filter(v => v).length;
+    state.textContent = `${onCount}/${values.length} włączone`;
+  }
+}
+
+// Klik na master: jeśli choć jedna włączona -> wyłącz wszystkie; jeśli wszystkie wyłączone -> włącz wszystkie
+document.getElementById('instrMasterBtn').addEventListener('click', () => {
+  const values = Object.values(STATE.taskInstructions);
+  const allOff = values.every(v => !v);
+  const newState = allOff;  // jeśli wszystko wyłączone -> włącz; w innym wypadku -> wyłącz
+  Object.keys(STATE.taskInstructions).forEach(t => {
+    STATE.taskInstructions[t] = newState;
+  });
+  // Zsynchronizuj wszystkie per-task toggle
+  document.querySelectorAll('.task-instr-toggle').forEach(tg => {
+    tg.classList.toggle('active', newState);
+  });
+  updateInstrMaster();
+});
+
 document.querySelectorAll('.task-card').forEach(card => {
   card.setAttribute('draggable', 'true');
+  // Dodaj toggle "pokaż instrukcję w karcie pracy" - per typ zadania
+  const task = card.dataset.task;
+  const instrToggle = document.createElement('button');
+  instrToggle.type = 'button';
+  instrToggle.className = 'task-instr-toggle active';
+  instrToggle.title = 'Pokaż/ukryj instrukcję pod tytułem sekcji';
+  instrToggle.innerHTML = '<span class="task-instr-icon">📋</span><span class="task-instr-label">Instrukcja</span>';
+  instrToggle.addEventListener('click', e => {
+    e.stopPropagation();
+    const isActive = instrToggle.classList.toggle('active');
+    STATE.taskInstructions[task] = isActive;
+    updateInstrMaster();
+  });
+  card.appendChild(instrToggle);
   card.addEventListener('click', e => {
     // Tylko jeśli nie jesteśmy w trakcie drag-a
     if (_draggedTaskCard) return;
     if (card.classList.contains('disabled')) return;
     if (e.target.closest('.suboption-buttons')) return;
+    if (e.target.closest('.task-instr-toggle')) return;
     const cb = card.querySelector('input');
     cb.checked = !cb.checked;
     card.classList.toggle('checked', cb.checked);
@@ -1171,6 +1383,21 @@ document.querySelectorAll('.color-reset').forEach(btn => {
 document.getElementById('btnGenerate').addEventListener('click', () => {
   const html = buildWorksheetHTML();
   downloadHTML(html);
+});
+
+document.getElementById('btnPreview').addEventListener('click', () => {
+  const html = buildWorksheetHTML();
+  // Tworzymy Blob URL i otwieramy w nowej karcie. Nic nie zapisuje się na dysk.
+  const blob = new Blob([html], { type: 'text/html;charset=utf-8' });
+  const url = URL.createObjectURL(blob);
+  const win = window.open(url, '_blank');
+  // Sprzątanie URL po chwili (dajemy czas na załadowanie strony). Po revokeObjectURL
+  // strona w nowej karcie zostaje normalnie - URL nie jest już potrzebny do dalszej nawigacji.
+  setTimeout(() => URL.revokeObjectURL(url), 10000);
+  // Jeśli popup blocker zablokował, daj znać użytkownikowi
+  if (!win) {
+    alert('Przeglądarka zablokowała otwarcie nowej karty. Pozwól na popupy z tej strony i spróbuj ponownie.');
+  }
 });
 
 // ============================================================
@@ -1446,6 +1673,13 @@ function buildWorksheetHTML() {
 // SECTION BUILDERS - return HTML strings for the worksheet
 // ============================================================
 
+// Renderuje <p class="ws-sec-desc">…</p> tylko gdy w generatorze włączono
+// przełącznik "Instrukcja" dla danego typu zadania (default: true).
+function sectionInstr(taskName, text) {
+  if (STATE.taskInstructions[taskName] === false) return '';
+  return `<p class="ws-sec-desc">${text}</p>`;
+}
+
 function buildFlashcardsSection(num) {
   const rows = rowsForTask('flashcards');
   const cards = rows.map((r, i) => {
@@ -1489,7 +1723,7 @@ function buildFlashcardsSection(num) {
         <div class="ws-sec-num">0${num}</div>
         <h2 class="ws-sec-title">Flashcards</h2>
       </div>
-      <p class="ws-sec-desc">Kliknij kartę, żeby odsłonić tłumaczenie. Spróbuj najpierw zgadnąć w głowie!</p>
+      ${sectionInstr('flashcards', 'Kliknij kartę, żeby odsłonić tłumaczenie. Spróbuj najpierw zgadnąć w głowie!')}
       <div class="flashcards-grid">${cards}</div>
       <div class="ws-actions">
         <button class="ws-btn-solve" onclick="solveFlashcards()">Pokaż wszystkie odpowiedzi</button>
@@ -1552,7 +1786,7 @@ function buildMatchingSection(num, options = {}) {
         <h2 class="ws-sec-title">Matching · Połącz w pary</h2>
         ${partBadge}
       </div>
-      <p class="ws-sec-desc">Kliknij słowo z lewej strony, potem jego tłumaczenie z prawej.</p>
+      ${sectionInstr('matching', 'Kliknij słowo z lewej strony, potem jego tłumaczenie z prawej.')}
       <div class="match-grid">
         <div class="match-col">
           ${plList}
@@ -1711,7 +1945,7 @@ function buildScrambleSection(num, options = {}) {
         <div class="scramble-prompt">
           <span class="scramble-pl">${escapeHtml(r.pl)}</span>
           <button class="scramble-show-jumbled" onclick="toggleJumbled_${num}(this, ${num}, ${i})">
-            <span class="scramble-jumbled-hidden">🔤 Pokaż rozsypankę</span>
+            <span class="scramble-jumbled-hidden">Pokaż rozsypankę</span>
             <span class="scramble-jumbled-shown" data-jumbled="${escapeHtml(scrambled)}">${escapeHtml(scrambled)}</span>
           </button>
         </div>
@@ -1730,7 +1964,7 @@ function buildScrambleSection(num, options = {}) {
         <div class="ws-sec-num">0${num}</div>
         <h2 class="ws-sec-title">Word Scramble · Ułóż litery</h2>
       </div>
-      <p class="ws-sec-desc">Wpisz angielskie słowo (Enter sprawdza). Kliknij rozsypankę, żeby zobaczyć pomieszane litery. Kliknij "?" żeby wstawić kolejną literę odpowiedzi.</p>
+      ${sectionInstr('scramble', 'Wpisz angielskie słowo (Enter sprawdza). Kliknij rozsypankę, żeby zobaczyć pomieszane litery. Kliknij "?" żeby wstawić kolejną literę odpowiedzi.')}
       <div class="scramble-grid">${items}</div>
       <div class="ws-actions">
         <button class="ws-btn-solve" onclick="solveScramble_${num}()">Pokaż wszystkie odpowiedzi</button>
@@ -1837,7 +2071,7 @@ function buildQuizSection(num) {
           <span class="quiz-q-num">${i + 1}.</span>
           <span class="quiz-q-text">${escapeHtml(r.pl)}</span>
         </div>
-        <div class="quiz-options">${optHTML}</div>
+        <div class="quiz-options" data-opts="${numOpts}">${optHTML}</div>
       </div>`;
   }).join('');
 
@@ -1847,7 +2081,7 @@ function buildQuizSection(num) {
         <div class="ws-sec-num">0${num}</div>
         <h2 class="ws-sec-title">Quiz · Wybierz tłumaczenie</h2>
       </div>
-      <p class="ws-sec-desc">Wybierz prawidłowe tłumaczenie polskiego słowa. Tylko jedna odpowiedź jest poprawna.</p>
+      ${sectionInstr('quiz', 'Wybierz prawidłowe tłumaczenie polskiego słowa. Tylko jedna odpowiedź jest poprawna.')}
       <div class="quiz-grid">${items}</div>
       <div class="ws-actions">
         <button class="ws-btn-solve" onclick="solveQuiz(${num})">Pokaż odpowiedzi</button>
@@ -1945,7 +2179,7 @@ function buildUnscrambleSection(num) {
         <div class="ws-sec-num">0${num}</div>
         <h2 class="ws-sec-title">Sentence Unscramble · Ułóż zdanie</h2>
       </div>
-      <p class="ws-sec-desc">Kliknij słowa, żeby je wstawić w odpowiedniej kolejności. Możesz też przeciągnąć słowa, żeby je przestawić. Kliknij "?" żeby wstawić kolejne poprawne słowo.</p>
+      ${sectionInstr('unscramble', 'Kliknij słowa, żeby je wstawić w odpowiedniej kolejności. Możesz też przeciągnąć słowa, żeby je przestawić. Kliknij "?" żeby wstawić kolejne poprawne słowo.')}
       <div class="unsc-grid">${items}</div>
       <div class="ws-actions">
         <button class="ws-btn-solve" onclick="solveUnscramble(${num})">Pokaż wszystkie odpowiedzi</button>
@@ -2229,7 +2463,7 @@ function buildCornellSection(num) {
         <div class="ws-sec-num">0${num}</div>
         <h2 class="ws-sec-title">Pytania &amp; odpowiedzi</h2>
       </div>
-      <p class="ws-sec-desc">Kliknij pytanie, żeby odsłonić odpowiedź. Spróbuj najpierw odpowiedzieć w głowie!</p>
+      ${sectionInstr('cornell', 'Kliknij pytanie, żeby odsłonić odpowiedź. Spróbuj najpierw odpowiedzieć w głowie!')}
       <div class="cornell-grid">${items}</div>
       <div class="ws-actions">
         <button class="ws-btn-solve" onclick="solveCornell(${num})">Rozwiń wszystkie</button>
@@ -2336,7 +2570,7 @@ function buildGapfillSection(num) {
         <div class="ws-sec-num">0${num}</div>
         <h2 class="ws-sec-title">Gap Fill · Uzupełnij luki</h2>
       </div>
-      <p class="ws-sec-desc">Wpisz brakujące słowa w lukach (Enter sprawdza). Po uzupełnieniu wszystkich luk w zdaniu pojawi się polskie tłumaczenie.</p>
+      ${sectionInstr('gapfill', 'Wpisz brakujące słowa w lukach (Enter sprawdza). Po uzupełnieniu wszystkich luk w zdaniu pojawi się polskie tłumaczenie.')}
       <div class="gap-grid">${items}</div>
       <div class="ws-actions">
         <button class="ws-btn-solve" onclick="solveGap_${num}()">Pokaż wszystkie odpowiedzi</button>
@@ -2431,7 +2665,7 @@ function buildTranslateSection(num) {
           <span class="trans-pl-text">${escapeHtml(r.pl)}</span>
         </div>
         <div class="trans-input-row">
-          <textarea class="trans-input" data-answer="${escapeHtml(r.en)}" rows="2" placeholder="Wpisz tłumaczenie po angielsku..." onkeydown="if(event.key==='Enter' && !event.shiftKey){event.preventDefault();checkTranslate_${num}(this);}"></textarea>
+          <input type="text" class="trans-input" data-answer="${escapeHtml(r.en)}" placeholder="Wpisz tłumaczenie po angielsku..." onkeydown="if(event.key==='Enter'){event.preventDefault();checkTranslate_${num}(this);}">
           <div class="trans-input-actions">
             <button class="trans-check" onclick="checkTranslate_${num}(this.closest('.trans-card').querySelector('.trans-input'))" title="Sprawdź">✓</button>
             <button class="trans-hint-btn" onclick="hintTranslate_${num}(${i})" title="Podpowiedź - kolejne słowo">?</button>
@@ -2450,7 +2684,7 @@ function buildTranslateSection(num) {
         <div class="ws-sec-num">0${num}</div>
         <h2 class="ws-sec-title">Translate · Przetłumacz zdanie</h2>
       </div>
-      <p class="ws-sec-desc">Przetłumacz polskie zdanie na angielski (Enter sprawdza, Shift+Enter dodaje nową linię). Sprawdzanie pomija wielkość liter i kropkę na końcu.</p>
+      ${sectionInstr('translate', 'Przetłumacz polskie słowo, frazę lub zdanie na angielski (Enter sprawdza). Sprawdzanie pomija wielkość liter i kropkę na końcu.')}
       <div class="trans-grid">${items}</div>
       <div class="ws-actions">
         <button class="ws-btn-solve" onclick="solveTranslate_${num}()">Pokaż wszystkie odpowiedzi</button>
@@ -2575,7 +2809,7 @@ function buildWritingSection(num) {
         <div class="ws-sec-num">0${num}</div>
         <h2 class="ws-sec-title">Writing · Napisz własny tekst</h2>
       </div>
-      <p class="ws-sec-desc">Napisz odpowiedź według polecenia. Sekcja kończy się po kliknięciu "Gotowe" przy którymkolwiek poleceniu (minimum 20 słów).</p>
+      ${sectionInstr('writing', 'Napisz odpowiedź według polecenia. Kliknij "Gotowe", gdy skończysz.')}
       <div class="write-grid">${items}</div>
       <div class="ws-feedback" id="fb-${num}"></div>
     </section>`;
@@ -2597,24 +2831,10 @@ function buildWritingJS(num) {
     const counter = card.querySelector('.write-counter-num');
     const n = _writeWordCount(textarea.value);
     if (counter) counter.textContent = n;
-    const saveBtn = card.querySelector('.write-save');
-    if (saveBtn && !_writeSaved_${num}.has(parseInt(card.dataset.idx))) {
-      saveBtn.classList.toggle('write-save-ready', n >= 20);
-    }
   };
 
   window.saveWrite_${num} = function(btn) {
     const card = btn.closest('.write-card');
-    const ta = card.querySelector('.write-area');
-    const n = _writeWordCount(ta.value);
-    if (n < 20) {
-      showSectionFeedback(${num}, false, 'Napisz min. 20 słów (masz ' + n + ')');
-      setTimeout(() => {
-        const fb = document.getElementById('fb-${num}');
-        if (fb) fb.classList.remove('show');
-      }, 2200);
-      return;
-    }
     card.classList.add('done');
     btn.disabled = true;
     btn.textContent = '✓ Zapisane';
@@ -2679,7 +2899,7 @@ ${bgEffectHTML}
   </div>
 
   <footer class="ws-footer">
-    <button class="ws-btn-save" onclick="saveProgress()">💾 Zapisz postęp</button>
+    <span class="ws-save-indicator">💾 Postęp zapisywany automatycznie</span>
     <button class="ws-btn-reset-foot" onclick="resetWorksheet()">Reset</button>
   </footer>
 </div>
@@ -2687,7 +2907,16 @@ ${bgEffectHTML}
 <script>
 const WS_DATA = ${rowsJSON};
 const WS_SECTION_COUNT = ${sectionCount};
-const WS_STORAGE_KEY = 'ws-progress-' + ${JSON.stringify(title)};
+// Klucz w localStorage zawiera hash z danych - dzięki temu różne worksheety
+// (nawet z tym samym tytułem) mają osobny progress.
+function _wsHash(s) {
+  let h = 0;
+  for (let i = 0; i < s.length; i++) {
+    h = ((h << 5) - h + s.charCodeAt(i)) | 0;
+  }
+  return Math.abs(h).toString(36);
+}
+const WS_STORAGE_KEY = 'ws-progress-' + _wsHash(${JSON.stringify(title)} + '|' + ${JSON.stringify(sectionCount)} + '|' + JSON.stringify(WS_DATA));
 const WS_TTS = ${JSON.stringify(ttsConfig)};
 let _wsDone = new Set();
 let _wsVoices = [];
@@ -2744,6 +2973,8 @@ function markSectionDone(num) {
   const sec = document.querySelector('[data-section="' + num + '"]');
   if (sec) sec.classList.add('ws-done');
   updateProgress();
+  // Zapamiętaj, że sekcja została zaliczona (na wypadek, gdyby event nie został złapany)
+  if (typeof wsScheduleSave === 'function') wsScheduleSave();
 }
 
 function updateProgress() {
@@ -2787,19 +3018,392 @@ function bigCelebrate() {
   })();
 }
 
+// ── PROGRES: ZAPIS I ODCZYT ──────────────────────────
+// Strategia: stan jest zawsze w DOM (klasy, wartości pól, otwarte sekcje).
+// saveProgress() zbiera ten stan i zapisuje. loadProgress() odtwarza klasy
+// i wartości w DOM - bez duplikowania logiki budowania kart.
+// Zapis jest automatyczny (debounced 300ms) po wywołaniu wsScheduleSave().
+
+let _wsSaveTimer = null;
+function wsScheduleSave() {
+  if (_wsSaveTimer) clearTimeout(_wsSaveTimer);
+  _wsSaveTimer = setTimeout(saveProgress, 300);
+}
+
+function _wsCollectMatching() {
+  // dla każdej sekcji matching zapisujemy listę par PL idx -> EN idx oraz kolor
+  const data = {};
+  document.querySelectorAll('.ws-section').forEach(sec => {
+    const num = sec.dataset.section;
+    const pairs = [];
+    sec.querySelectorAll('.match-pl.matched').forEach(plEl => {
+      const enEl = sec.querySelector('.match-en.matched[data-pair="' + plEl.getAttribute('data-pair') + '"]');
+      if (enEl) {
+        pairs.push({
+          pl: plEl.dataset.idx,
+          en: enEl.dataset.idx,
+          pair: plEl.getAttribute('data-pair'),
+          color: plEl.style.borderColor || ''
+        });
+      }
+    });
+    if (pairs.length) data[num] = pairs;
+  });
+  return data;
+}
+
+function _wsCollectScramble() {
+  const data = {};
+  document.querySelectorAll('.ws-section').forEach(sec => {
+    const num = sec.dataset.section;
+    const items = [];
+    sec.querySelectorAll('.scramble-input').forEach(inp => {
+      if (inp.value || inp.classList.contains('correct')) {
+        items.push({
+          answer: inp.dataset.answer,
+          value: inp.value,
+          correct: inp.classList.contains('correct')
+        });
+      }
+    });
+    if (items.length) data[num] = items;
+  });
+  return data;
+}
+
+function _wsCollectQuiz() {
+  const data = {};
+  document.querySelectorAll('.ws-section').forEach(sec => {
+    const num = sec.dataset.section;
+    const answered = [];
+    sec.querySelectorAll('.quiz-card.answered').forEach(card => {
+      const picked = card.querySelector('.quiz-correct, .quiz-wrong');
+      if (picked) {
+        const opts = Array.from(card.querySelectorAll('.quiz-option'));
+        answered.push({
+          idx: card.dataset.idx,
+          pickedIdx: opts.indexOf(picked),
+          correct: picked.classList.contains('quiz-correct')
+        });
+      }
+    });
+    if (answered.length) data[num] = answered;
+  });
+  return data;
+}
+
+function _wsCollectUnscramble() {
+  const data = {};
+  document.querySelectorAll('.ws-section').forEach(sec => {
+    const num = sec.dataset.section;
+    const cards = [];
+    sec.querySelectorAll('.unsc-card').forEach(card => {
+      const answer = Array.from(card.querySelectorAll('.unsc-answer-area .unsc-word')).map(w => w.dataset.word);
+      const done = card.classList.contains('done');
+      if (answer.length > 0 || done) {
+        cards.push({ idx: card.dataset.idx, answer, done });
+      }
+    });
+    if (cards.length) data[num] = cards;
+  });
+  return data;
+}
+
+function _wsCollectCornell() {
+  const data = {};
+  document.querySelectorAll('.ws-section').forEach(sec => {
+    const num = sec.dataset.section;
+    const cards = [];
+    sec.querySelectorAll('.cornell-card').forEach(card => {
+      const open = card.classList.contains('open');
+      const writeArea = card.querySelector('.cornell-write-area');
+      const text = writeArea ? writeArea.value : '';
+      if (open || text) cards.push({ idx: card.dataset.idx, open, text });
+    });
+    if (cards.length) data[num] = cards;
+  });
+  return data;
+}
+
+function _wsCollectGapfill() {
+  const data = {};
+  document.querySelectorAll('.ws-section').forEach(sec => {
+    const num = sec.dataset.section;
+    const cards = [];
+    sec.querySelectorAll('.gap-card').forEach(card => {
+      const inputs = Array.from(card.querySelectorAll('.gap-input')).map(inp => ({
+        value: inp.value,
+        correct: inp.classList.contains('gap-correct')
+      }));
+      const done = card.classList.contains('done');
+      if (inputs.some(i => i.value) || done) {
+        cards.push({ idx: card.dataset.idx, inputs, done });
+      }
+    });
+    if (cards.length) data[num] = cards;
+  });
+  return data;
+}
+
+function _wsCollectTranslate() {
+  const data = {};
+  document.querySelectorAll('.ws-section').forEach(sec => {
+    const num = sec.dataset.section;
+    const cards = [];
+    sec.querySelectorAll('.trans-card').forEach(card => {
+      const inp = card.querySelector('.trans-input');
+      const done = card.classList.contains('done');
+      if (inp && (inp.value || done)) {
+        cards.push({
+          idx: card.dataset.idx,
+          value: inp.value,
+          correct: inp.classList.contains('trans-correct'),
+          done
+        });
+      }
+    });
+    if (cards.length) data[num] = cards;
+  });
+  return data;
+}
+
+function _wsCollectWriting() {
+  const data = {};
+  document.querySelectorAll('.ws-section').forEach(sec => {
+    const num = sec.dataset.section;
+    const cards = [];
+    sec.querySelectorAll('.write-card').forEach(card => {
+      const ta = card.querySelector('.write-area');
+      const done = card.classList.contains('done');
+      if (ta && (ta.value || done)) {
+        cards.push({ idx: card.dataset.idx, text: ta.value, done });
+      }
+    });
+    if (cards.length) data[num] = cards;
+  });
+  return data;
+}
+
 function saveProgress() {
   try {
     const state = {
+      v: 2,                                    // wersja schematu (1 = stara, 2 = nowa)
       done: Array.from(_wsDone),
       flashFlipped: Array.from(document.querySelectorAll('.flashcard.flipped')).map(c => c.dataset.idx),
-      matchedPL: Array.from(document.querySelectorAll('.match-pl.matched')).map(e => ({ idx: e.dataset.idx, color: e.style.borderColor, pair: e.getAttribute('data-pair') })),
-      scramble: Array.from(document.querySelectorAll('.scramble-input.correct')).map(e => e.dataset.answer)
+      matching: _wsCollectMatching(),
+      scramble: _wsCollectScramble(),
+      quiz: _wsCollectQuiz(),
+      unscramble: _wsCollectUnscramble(),
+      cornell: _wsCollectCornell(),
+      gapfill: _wsCollectGapfill(),
+      translate: _wsCollectTranslate(),
+      writing: _wsCollectWriting()
     };
     localStorage.setItem(WS_STORAGE_KEY, JSON.stringify(state));
-    showToast('💾 Postęp zapisany');
-  } catch (e) {
-    showToast('Nie udało się zapisać', true);
-  }
+  } catch (e) { /* localStorage może być pełny lub niedostępny */ }
+}
+
+function _wsRestoreMatching(data) {
+  if (!data) return;
+  Object.entries(data).forEach(([num, pairs]) => {
+    const sec = document.querySelector('.ws-section[data-section="' + num + '"]');
+    if (!sec) return;
+    pairs.forEach(p => {
+      const plEl = sec.querySelector('.match-pl[data-idx="' + p.pl + '"]');
+      const enEl = sec.querySelector('.match-en[data-idx="' + p.en + '"]');
+      if (plEl && enEl) {
+        [plEl, enEl].forEach(el => {
+          el.classList.add('matched');
+          el.disabled = true;
+          if (p.color) el.style.borderColor = p.color;
+          el.style.setProperty('--pair-color', p.color || '');
+          if (p.pair) el.setAttribute('data-pair', p.pair);
+          // wstaw numerek pary do ::before przez data atrybut nie zadziała,
+          // ale stylizacja matched używa data-pair przez color, więc OK
+          // dodaj klasę single-line dla krótkich treści (jak w live)
+          requestAnimationFrame(() => {
+            const lineHeight = parseFloat(getComputedStyle(el).lineHeight) || 22;
+            const cs = getComputedStyle(el);
+            const padTop = parseFloat(cs.paddingTop);
+            const padBottom = parseFloat(cs.paddingBottom);
+            const contentHeight = el.offsetHeight - padTop - padBottom;
+            if (contentHeight <= lineHeight * 1.5) el.classList.add('single-line');
+          });
+        });
+      }
+    });
+  });
+}
+
+function _wsRestoreScramble(data) {
+  if (!data) return;
+  Object.entries(data).forEach(([num, items]) => {
+    const sec = document.querySelector('.ws-section[data-section="' + num + '"]');
+    if (!sec) return;
+    sec.querySelectorAll('.scramble-input').forEach(inp => {
+      const saved = items.find(i => i.answer === inp.dataset.answer);
+      if (saved) {
+        inp.value = saved.value;
+        if (saved.correct) {
+          inp.classList.add('correct');
+          inp.disabled = true;
+        }
+      }
+    });
+  });
+}
+
+function _wsRestoreQuiz(data) {
+  if (!data) return;
+  Object.entries(data).forEach(([num, answered]) => {
+    const sec = document.querySelector('.ws-section[data-section="' + num + '"]');
+    if (!sec) return;
+    answered.forEach(a => {
+      const card = sec.querySelector('.quiz-card[data-idx="' + a.idx + '"]');
+      if (!card) return;
+      const opts = card.querySelectorAll('.quiz-option');
+      const picked = opts[a.pickedIdx];
+      if (!picked) return;
+      card.classList.add('answered');
+      picked.classList.add(a.correct ? 'quiz-correct' : 'quiz-wrong');
+      // jeśli odpowiedź była zła, pokażmy też prawidłową
+      if (!a.correct) {
+        const correctBtn = card.querySelector('.quiz-option[data-correct="1"]');
+        if (correctBtn) correctBtn.classList.add('quiz-correct');
+      }
+    });
+  });
+}
+
+function _wsRestoreUnscramble(data) {
+  if (!data) return;
+  Object.entries(data).forEach(([num, cards]) => {
+    const sec = document.querySelector('.ws-section[data-section="' + num + '"]');
+    if (!sec) return;
+    cards.forEach(cardData => {
+      const card = sec.querySelector('.unsc-card[data-idx="' + cardData.idx + '"]');
+      if (!card) return;
+      const pool = card.querySelector('.unsc-pool');
+      const answerArea = card.querySelector('.unsc-answer-area');
+      // przenieś każde słowo z zapisanej kolejności z poola do answer-area
+      cardData.answer.forEach(word => {
+        // znajdź wolny token z tym data-word w karcie
+        const tokens = Array.from(card.querySelectorAll('.unsc-word:not(.in-answer)'));
+        const token = tokens.find(t => t.dataset.word === word);
+        if (token) {
+          token.classList.add('in-answer');
+          if (cardData.done) token.classList.add('correct-pos', 'used');
+          answerArea.appendChild(token);
+        }
+      });
+      if (cardData.done) {
+        card.classList.add('done');
+        card.querySelectorAll('.unsc-word').forEach(w => w.setAttribute('draggable', 'false'));
+      }
+    });
+  });
+}
+
+function _wsRestoreCornell(data) {
+  if (!data) return;
+  Object.entries(data).forEach(([num, cards]) => {
+    const sec = document.querySelector('.ws-section[data-section="' + num + '"]');
+    if (!sec) return;
+    cards.forEach(cardData => {
+      const card = sec.querySelector('.cornell-card[data-idx="' + cardData.idx + '"]');
+      if (!card) return;
+      if (cardData.open) {
+        card.classList.add('open');
+        const btn = card.querySelector('.cornell-q');
+        if (btn) btn.setAttribute('aria-expanded', 'true');
+      }
+      if (cardData.text) {
+        const ta = card.querySelector('.cornell-write-area');
+        if (ta) ta.value = cardData.text;
+      }
+    });
+  });
+}
+
+function _wsRestoreGapfill(data) {
+  if (!data) return;
+  Object.entries(data).forEach(([num, cards]) => {
+    const sec = document.querySelector('.ws-section[data-section="' + num + '"]');
+    if (!sec) return;
+    cards.forEach(cardData => {
+      const card = sec.querySelector('.gap-card[data-idx="' + cardData.idx + '"]');
+      if (!card) return;
+      const inputs = card.querySelectorAll('.gap-input');
+      cardData.inputs.forEach((inpData, i) => {
+        if (!inputs[i]) return;
+        inputs[i].value = inpData.value || '';
+        if (inpData.correct) {
+          inputs[i].classList.add('gap-correct');
+          inputs[i].disabled = true;
+        }
+      });
+      if (cardData.done) {
+        card.classList.add('done');
+        const tr = card.querySelector('.gap-translation');
+        if (tr) tr.classList.add('show');
+      }
+    });
+  });
+}
+
+function _wsRestoreTranslate(data) {
+  if (!data) return;
+  Object.entries(data).forEach(([num, cards]) => {
+    const sec = document.querySelector('.ws-section[data-section="' + num + '"]');
+    if (!sec) return;
+    cards.forEach(cardData => {
+      const card = sec.querySelector('.trans-card[data-idx="' + cardData.idx + '"]');
+      if (!card) return;
+      const inp = card.querySelector('.trans-input');
+      if (inp) {
+        inp.value = cardData.value || '';
+        if (cardData.correct) {
+          inp.classList.add('trans-correct');
+          inp.disabled = true;
+        }
+      }
+      if (cardData.done) {
+        card.classList.add('done');
+        const correct = card.querySelector('.trans-correct');
+        if (correct) correct.classList.add('show');
+      }
+    });
+  });
+}
+
+function _wsRestoreWriting(data) {
+  if (!data) return;
+  Object.entries(data).forEach(([num, cards]) => {
+    const sec = document.querySelector('.ws-section[data-section="' + num + '"]');
+    if (!sec) return;
+    cards.forEach(cardData => {
+      const card = sec.querySelector('.write-card[data-idx="' + cardData.idx + '"]');
+      if (!card) return;
+      const ta = card.querySelector('.write-area');
+      if (ta) {
+        ta.value = cardData.text || '';
+        // odśwież licznik
+        const counter = card.querySelector('.write-counter-num');
+        if (counter) {
+          const n = ta.value.trim() ? ta.value.trim().split(/\\s+/).length : 0;
+          counter.textContent = n;
+        }
+      }
+      if (cardData.done) {
+        card.classList.add('done');
+        const btn = card.querySelector('.write-save');
+        if (btn) {
+          btn.disabled = true;
+          btn.textContent = '✓ Zapisane';
+        }
+      }
+    });
+  });
 }
 
 function loadProgress() {
@@ -2807,17 +3411,33 @@ function loadProgress() {
     const raw = localStorage.getItem(WS_STORAGE_KEY);
     if (!raw) return;
     const state = JSON.parse(raw);
-    // Restore flashcards
+
+    // Flashcards - odwróć karty
     if (state.flashFlipped) {
       state.flashFlipped.forEach(idx => {
         const c = document.querySelector('.flashcard[data-idx="' + idx + '"]');
         if (c) c.classList.add('flipped');
       });
     }
-    // Mark sections done
-    if (state.done) state.done.forEach(num => markSectionDone(num));
-  } catch (e) { /* ignore */ }
+    _wsRestoreMatching(state.matching);
+    _wsRestoreScramble(state.scramble);
+    _wsRestoreQuiz(state.quiz);
+    _wsRestoreUnscramble(state.unscramble);
+    _wsRestoreCornell(state.cornell);
+    _wsRestoreGapfill(state.gapfill);
+    _wsRestoreTranslate(state.translate);
+    _wsRestoreWriting(state.writing);
+
+    // Sekcje oznaczone jako "done" - na końcu, bo niektóre restore funkcje
+    // mogą same dodawać sekcje do done w trakcie (np. unscramble).
+    if (state.done) state.done.forEach(num => markSectionDone(parseInt(num)));
+  } catch (e) { /* zignoruj uszkodzony stan */ }
 }
+
+// Globalny zapis po każdym kliku / inputcie - debounced, więc tani.
+document.addEventListener('click', () => wsScheduleSave(), true);
+document.addEventListener('input', () => wsScheduleSave(), true);
+document.addEventListener('change', () => wsScheduleSave(), true);
 
 function resetWorksheet() {
   if (!confirm('Wyczyścić wszystkie odpowiedzi?')) return;
@@ -2899,7 +3519,10 @@ function getVintageTheme(accent, bg, textColor) {
     repeating-linear-gradient(90deg, transparent, transparent 28px, rgba(31,26,20,0.04) 28px, rgba(31,26,20,0.04) 29px);
 }`,
     cardBg: '#fbf8f0',
-    cardShadow: '0 1px 3px rgba(31,26,20,0.08), 0 8px 24px rgba(31,26,20,0.05)'
+    cardShadow: '0 1px 3px rgba(31,26,20,0.08), 0 8px 24px rgba(31,26,20,0.05)',
+    // Fiszki - gradient frontu (tył używa standardowego tła z akcentem)
+    flashGradient: 'linear-gradient(135deg, #fdf6e6 0%, #f3e4c8 100%)',
+    flashBorder: '#d4b896'
   };
 }
 
@@ -2935,7 +3558,11 @@ function getDarkTheme(accent, bg, textColor) {
   50% { opacity: 1; transform: scale(1.3); }
 }`,
     cardBg: shiftColor(bg, 0.05),
-    cardShadow: '0 4px 12px rgba(0,0,0,0.3)'
+    cardShadow: '0 4px 12px rgba(0,0,0,0.3)',
+    // Fiszki - gradient frontu (tył używa standardowego tła z akcentem)
+    flashGradient: 'linear-gradient(135deg, #2a4360 0%, #1a2f4a 100%)',
+    flashGloss: 'rgba(255,255,255,0.32)',
+    flashBorder: '#142336'
   };
 }
 
@@ -2965,7 +3592,10 @@ function getPastelTheme(accent, bg, textColor) {
     radial-gradient(ellipse 30% 30% at 80% 20%, rgba(126, 181, 212, 0.18), transparent 50%);
 }`,
     cardBg: '#ffffff',
-    cardShadow: '0 2px 6px rgba(58, 44, 51, 0.05), 0 12px 32px rgba(58, 44, 51, 0.07)'
+    cardShadow: '0 2px 6px rgba(58, 44, 51, 0.05), 0 12px 32px rgba(58, 44, 51, 0.07)',
+    // Fiszki - gradient frontu (tył używa standardowego tła z akcentem)
+    flashGradient: 'linear-gradient(135deg, #fff4f8 0%, #fce4ed 100%)',
+    flashBorder: '#f0b8cd'
   };
 }
 
@@ -2994,6 +3624,8 @@ function buildWorksheetCSS(t) {
   --ws-body: ${t.bodyFont};
   --ws-mono: ${t.monoFont};
   --ws-shadow: ${t.cardShadow};
+  --ws-flash-gradient: ${t.flashGradient};
+  --ws-flash-gloss: ${t.flashGloss || 'rgba(255,255,255,0.28)'};
   --ws-ok: #16a34a;
   --ws-ok-bg: rgba(22, 163, 74, 0.1);
   --ws-no: #dc2626;
@@ -3224,6 +3856,10 @@ ${t.extraBgCSS}
   aspect-ratio: 4/3;
   perspective: 1200px;
   cursor: pointer;
+  transition: transform 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+.flashcard:hover {
+  transform: scale(1.04);
 }
 .flashcard.fc-size-s, .flashcard.fc-size-xs { aspect-ratio: 4/3.4; }
 .flashcard-inner {
@@ -3241,10 +3877,45 @@ ${t.extraBgCSS}
   display: flex; flex-direction: column; align-items: center; justify-content: center;
   padding: 1.5rem 1.85rem;
   text-align: center;
-  border: 1.5px solid var(--ws-border-strong);
-  background: var(--ws-surface);
-  box-shadow: 0 2px 8px rgba(0,0,0,0.04);
-  transition: transform 0.18s, box-shadow 0.18s;
+  background: var(--ws-flash-gradient);
+  border: 1.5px solid ${t.flashBorder};
+  box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+  transition: box-shadow 0.25s;
+  overflow: hidden;
+}
+/* Shine sweep - jeden wąski, ukośny pasek światła przelatuje przez kartę
+   raz, kiedy najedziesz myszą. Bez powtórek. */
+.flashcard-face::before {
+  content: '';
+  position: absolute;
+  top: -50%;
+  left: 0;
+  width: 35%;
+  height: 200%;
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    rgba(255,255,255,0.6) 50%,
+    transparent 100%
+  );
+  pointer-events: none;
+  z-index: 1;
+  opacity: 0;
+  transform: translateX(-150%) skewX(-22deg);
+}
+/* Treść fiszki musi być nad shine */
+.flashcard-face > * {
+  position: relative;
+  z-index: 2;
+}
+@keyframes flashShineSweep {
+  0%   { transform: translateX(-150%) skewX(-22deg); opacity: 0; }
+  10%  { opacity: 1; }
+  90%  { opacity: 1; }
+  100% { transform: translateX(400%) skewX(-22deg); opacity: 0; }
+}
+.flashcard:hover .flashcard-face::before {
+  animation: flashShineSweep 0.35s ease-out 1 forwards;
 }
 /* Dłuższe teksty - lewo zamiast center, większy padding */
 .flashcard.fc-size-s .flashcard-face,
@@ -3272,12 +3943,11 @@ ${t.extraBgCSS}
   hyphens: auto;
 }
 .flashcard:hover .flashcard-face {
-  box-shadow: 0 6px 18px rgba(0,0,0,0.08);
+  box-shadow: 0 10px 28px rgba(0,0,0,0.14);
 }
 .flashcard-back {
   transform: rotateY(180deg);
   background: ${rgba(t.accent, 0.07)};
-  border-color: var(--ws-accent);
 }
 .flash-lang {
   font-family: var(--ws-mono);
@@ -3589,9 +4259,17 @@ ${t.extraBgCSS}
 
 /* FOOTER */
 .ws-footer {
-  display: flex; justify-content: center; gap: 0.7rem;
+  display: flex; justify-content: center; align-items: center; gap: 1rem;
   margin-top: 2.5rem; padding-top: 2rem;
   border-top: 1px solid var(--ws-border);
+  flex-wrap: wrap;
+}
+.ws-save-indicator {
+  font-family: var(--ws-mono);
+  font-size: 0.78rem;
+  color: var(--ws-text-dim);
+  opacity: 0.7;
+  letter-spacing: 0.03em;
 }
 .ws-btn-save, .ws-btn-reset-foot {
   font-family: var(--ws-body); font-size: 0.82rem; font-weight: 500;
@@ -4029,8 +4707,24 @@ ${t.extraBgCSS}
 }
 .quiz-options {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
   gap: 0.55rem;
+  /* Domyślnie auto-fill - fallback gdyby brakowało data-opts */
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+}
+/* 4 opcje -> 2x2 (najczęstszy przypadek, równo wypełnia box) */
+.quiz-options[data-opts="4"] { grid-template-columns: repeat(2, 1fr); }
+/* 6 opcji -> 3x2 */
+.quiz-options[data-opts="6"] { grid-template-columns: repeat(3, 1fr); }
+/* 3 opcje -> 3 kolumny w jednym rzędzie (lub 1 kolumna na wąskich) */
+.quiz-options[data-opts="3"] { grid-template-columns: repeat(3, 1fr); }
+/* 5 opcji -> 3 kolumny (3+2) - mniej "sieroce" niż 2 (2+2+1) */
+.quiz-options[data-opts="5"] { grid-template-columns: repeat(3, 1fr); }
+/* 2 opcje -> obok siebie */
+.quiz-options[data-opts="2"] { grid-template-columns: repeat(2, 1fr); }
+/* Mobile: wszystko w jednej kolumnie */
+@media (max-width: 600px) {
+  .quiz-options,
+  .quiz-options[data-opts] { grid-template-columns: 1fr; }
 }
 .quiz-option {
   display: flex; align-items: center; gap: 0.7rem;
@@ -4272,7 +4966,7 @@ ${t.extraBgCSS}
 .trans-input-row {
   display: flex;
   gap: 0.6rem;
-  align-items: stretch;
+  align-items: center;
 }
 .trans-input {
   flex: 1;
@@ -4283,9 +4977,8 @@ ${t.extraBgCSS}
   border: 1.5px solid var(--ws-border-strong);
   border-radius: 9px;
   color: var(--ws-text);
-  resize: vertical;
-  min-height: 3rem;
-  line-height: 1.45;
+  line-height: 1.4;
+  min-width: 0;
   transition: border-color 0.18s, background 0.18s;
 }
 .trans-input:focus {
@@ -4306,7 +4999,7 @@ ${t.extraBgCSS}
 }
 .trans-input-actions {
   display: flex;
-  flex-direction: column;
+  flex-direction: row;
   gap: 0.4rem;
   flex-shrink: 0;
 }
@@ -4449,18 +5142,13 @@ ${t.extraBgCSS}
   font-weight: 600;
   padding: 0.55rem 1.1rem;
   border-radius: 8px;
-  border: 1.5px solid var(--ws-border-strong);
-  background: var(--ws-bg);
-  color: var(--ws-text-dim);
-  cursor: pointer;
-  transition: transform 0.15s, border-color 0.15s, background 0.15s, color 0.15s;
-}
-.write-save.write-save-ready {
-  border-color: var(--ws-accent);
-  color: var(--ws-accent);
+  border: 1.5px solid var(--ws-accent);
   background: var(--ws-accent-soft);
+  color: var(--ws-accent);
+  cursor: pointer;
+  transition: transform 0.15s, background 0.15s, color 0.15s;
 }
-.write-save.write-save-ready:hover {
+.write-save:hover {
   background: var(--ws-accent);
   color: var(--ws-bg);
   transform: scale(1.03);
