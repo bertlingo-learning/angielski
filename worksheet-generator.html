@@ -407,15 +407,6 @@ body::before {
   content: 'Aa'; font-family: 'Fraunces', serif; font-weight: 900; font-style: italic;
   font-size: 3.5rem; color: #c0392b; line-height: 1;
 }
-.thumb-dark {
-  background: #0d1b2a;
-  background-image: radial-gradient(circle at 20% 30%, rgba(86, 207, 178, 0.15), transparent 40%),
-                    radial-gradient(circle at 80% 70%, rgba(255, 184, 0, 0.1), transparent 40%);
-}
-.thumb-dark::before {
-  content: 'Aa'; font-family: 'Fraunces', serif; font-weight: 900;
-  font-size: 3.5rem; color: #56cfb2; line-height: 1;
-}
 .thumb-pastel {
   background: linear-gradient(135deg, #fef3f0 0%, #f0f4ff 100%);
 }
@@ -778,10 +769,6 @@ kura	chicken</div>
           <div class="preset-thumb thumb-vintage"></div>
           <div class="preset-name">Vintage Paper</div>
         </div>
-        <div class="preset-card" data-preset="dark">
-          <div class="preset-thumb thumb-dark"></div>
-          <div class="preset-name">Dark Neon</div>
-        </div>
         <div class="preset-card" data-preset="pastel">
           <div class="preset-thumb thumb-pastel"></div>
           <div class="preset-name">Soft Pastel</div>
@@ -933,7 +920,6 @@ const STATE = {
 // Default colors per preset (cardBg, border, textDim itp. są wyliczane z akcentu w themach)
 const PRESET_DEFAULTS = {
   vintage: { accent: '#c0392b', bg: '#f5f1e8', text: '#1f1a14' },
-  dark:    { accent: '#56cfb2', bg: '#0d1b2a', text: '#e8f4fd' },
   pastel:  { accent: '#d65a8a', bg: '#fef6f3', text: '#3a2c33' }
 };
 
@@ -1540,6 +1526,14 @@ function escapeHtml(s) {
     .replace(/"/g, '&quot;')
     .replace(/'/g, '&#39;');
 }
+
+// SVG flagi z OpenMoji (CC BY-SA 4.0) - inline żeby nie zależeć od CDN.
+// viewBox dopasowany do rzeczywistego prostokąta flagi (bez paddingu), żeby
+// obramowanie CSS przylegało dokładnie do krawędzi flagi.
+// Używane jako oznaczenia językowe PL / EN w typach zadań które tego potrzebują (translate, writing).
+const FLAG_PL_SVG = '<svg viewBox="5 17 62 38" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg" aria-label="PL"><rect x="5" y="17" width="62" height="19" fill="#fff"/><rect x="5" y="36" width="62" height="19" fill="#d22f27"/></svg>';
+const FLAG_UK_SVG = '<svg viewBox="5 17 62 38" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg" aria-label="EN"><rect x="5" y="17" width="62" height="38" fill="#1e50a0"/><polygon fill="#fff" points="40 28.856 40 32 50.181 32 67 21.691 67 17 59.346 17 40 28.856"/><polygon fill="#d22f27" points="67 17 67 17 63.173 17 40 31.203 40 32 43.482 32 67 17.586 67 17"/><polygon fill="#fff" points="59.347 55 67 55 67 55 67 50.308 50.182 40 40 40 40 43.143 59.347 55"/><polygon fill="#d22f27" points="67 55 67 52.653 46.355 40 41.568 40 66.042 55 67 55 67 55"/><polygon fill="#fff" points="32 43.144 32 40 21.819 40 5 50.309 5 55 12.654 55 32 43.144"/><polygon fill="#d22f27" points="5 55 5 55 8.827 55 32 40.797 32 40 28.518 40 5 54.414 5 55"/><polygon fill="#fff" points="12.653 17 5 17 5 17 5 21.692 21.818 32 32 32 32 28.857 12.653 17"/><polygon fill="#d22f27" points="5 17 5 19.347 25.646 32 30.432 32 5.958 17 5 17 5 17"/><rect x="5" y="31" width="62" height="10" fill="#fff"/><rect x="31" y="17" width="10" height="38" fill="#fff"/><rect x="5" y="33" width="62" height="6" fill="#d22f27"/><rect x="33" y="17" width="6" height="38" fill="#d22f27"/></svg>';
+
 
 // Hex to RGB tuple
 function hexToRgb(hex) {
@@ -2559,7 +2553,7 @@ function buildGapfillSection(num) {
           <button class="tts-btn tts-btn-gap" onclick="ttsBtnClick(event, ${JSON.stringify(enClean).replace(/"/g, '&quot;')})" title="Posłuchaj całego zdania" aria-label="Czytaj">🔊</button>
         </div>
         <div class="gap-translation" id="gap-tr-${num}-${i}">
-          <span class="gap-translation-label">PL:</span> <span class="gap-translation-text">${escapeHtml(r.pl)}</span>
+          <span class="gap-translation-label">${FLAG_PL_SVG}</span> <span class="gap-translation-text">${escapeHtml(r.pl)}</span>
         </div>
       </div>`;
   }).join('');
@@ -2661,7 +2655,7 @@ function buildTranslateSection(num) {
     return `
       <div class="trans-card" data-idx="${i}">
         <div class="trans-pl">
-          <span class="trans-pl-label">PL</span>
+          <span class="trans-pl-label">${FLAG_PL_SVG}</span>
           <span class="trans-pl-text">${escapeHtml(r.pl)}</span>
         </div>
         <div class="trans-input-row">
@@ -2787,8 +2781,8 @@ function buildTranslateJS(num) {
 function buildWritingSection(num) {
   const rows = rowsForTask('writing');
   const items = rows.map((r, i) => {
-    const plBlock = r.pl ? `<div class="write-prompt-pl"><span class="write-prompt-flag">PL</span> ${escapeHtml(r.pl)}</div>` : '';
-    const enBlock = r.en ? `<div class="write-prompt-en"><span class="write-prompt-flag">EN</span> ${escapeHtml(r.en)} <button class="tts-btn tts-btn-write" onclick="ttsBtnClick(event, ${JSON.stringify(r.en).replace(/"/g, '&quot;')})" title="Posłuchaj polecenia" aria-label="Czytaj">🔊</button></div>` : '';
+    const plBlock = r.pl ? `<div class="write-prompt-pl"><span class="write-prompt-flag">${FLAG_PL_SVG}</span> ${escapeHtml(r.pl)}</div>` : '';
+    const enBlock = r.en ? `<div class="write-prompt-en"><span class="write-prompt-flag">${FLAG_UK_SVG}</span> ${escapeHtml(r.en)} <button class="tts-btn tts-btn-write" onclick="ttsBtnClick(event, ${JSON.stringify(r.en).replace(/"/g, '&quot;')})" title="Posłuchaj polecenia" aria-label="Czytaj">🔊</button></div>` : '';
     return `
       <div class="write-card" data-idx="${i}">
         <div class="write-prompt">
@@ -3462,23 +3456,6 @@ ${sectionsJS}
 
 // Load saved progress
 window.addEventListener('load', loadProgress);
-
-// Generate stars for dark theme (no-op if container missing)
-(function generateStars() {
-  const container = document.getElementById('wsBgStars');
-  if (!container) return;
-  const count = 80;
-  let html = '';
-  for (let i = 0; i < count; i++) {
-    const size = Math.random() * 2 + 0.5;
-    const x = Math.random() * 100;
-    const y = Math.random() * 100;
-    const delay = Math.random() * 4;
-    const dur = 2 + Math.random() * 3;
-    html += '<div class="ws-star" style="width:' + size + 'px;height:' + size + 'px;left:' + x + '%;top:' + y + '%;--delay:' + delay + 's;--d:' + dur + 's;"></div>';
-  }
-  container.innerHTML = html;
-})();
 <\/script>
 </body>
 </html>`;
@@ -3489,7 +3466,6 @@ window.addEventListener('load', loadProgress);
 // ============================================================
 function getPresetTheme(preset, accent, bg, textColor) {
   if (preset === 'vintage') return getVintageTheme(accent, bg, textColor);
-  if (preset === 'dark') return getDarkTheme(accent, bg, textColor);
   if (preset === 'pastel') return getPastelTheme(accent, bg, textColor);
   return getVintageTheme(accent, bg, textColor);
 }
@@ -3499,16 +3475,19 @@ function getVintageTheme(accent, bg, textColor) {
   return {
     name: 'vintage',
     accent,
+    accentSecondary: '#d97a3c',      // ciepły pomarańcz
+    accentTertiary: '#8b2c4f',       // bordo-różowy
+    accentVibrant: '#e8b54a',        // ciepły bursztyn (dekoracje)
     bg,
     text,
     textDim: '#6b5d44',
     surface: '#fbf8f0',
     border: 'rgba(31, 26, 20, 0.22)',
     borderStrong: 'rgba(31, 26, 20, 0.42)',
-    confettiColors: [accent, '#b8761a', '#1a6b6b', '#c8341a', '#1f1a14'],
-    fontImports: '<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,wght@0,400;0,700;0,900;1,400&family=DM+Mono:wght@300;400;500&family=Lora:ital,wght@0,400;0,500;0,600;1,400&display=swap" rel="stylesheet">',
+    confettiColors: [accent, '#d97a3c', '#8b2c4f', '#e8b54a', '#1a6b6b', '#1f1a14'],
+    fontImports: '<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,wght@0,400;0,700;0,900;1,400&family=DM+Mono:wght@300;400;500&family=Merriweather+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">',
     displayFont: "'Fraunces', serif",
-    bodyFont: "'Lora', serif",
+    bodyFont: "'Merriweather Sans', sans-serif",
     monoFont: "'DM Mono', monospace",
     bgEffect: `<div class="ws-bg-pattern"></div>`,
     extraBgCSS: `
@@ -3516,53 +3495,18 @@ function getVintageTheme(accent, bg, textColor) {
   position: fixed; inset: 0; pointer-events: none; z-index: 0;
   background-image:
     repeating-linear-gradient(0deg, transparent, transparent 28px, rgba(31,26,20,0.06) 28px, rgba(31,26,20,0.06) 29px),
-    repeating-linear-gradient(90deg, transparent, transparent 28px, rgba(31,26,20,0.04) 28px, rgba(31,26,20,0.04) 29px);
+    repeating-linear-gradient(90deg, transparent, transparent 28px, rgba(31,26,20,0.04) 28px, rgba(31,26,20,0.04) 29px),
+    radial-gradient(ellipse 80% 60% at 50% 0%, ${rgba(accent, 0.06)}, transparent 60%),
+    radial-gradient(ellipse 60% 50% at 100% 100%, rgba(217, 122, 60, 0.05), transparent 60%);
 }`,
     cardBg: '#fbf8f0',
     cardShadow: '0 1px 3px rgba(31,26,20,0.08), 0 8px 24px rgba(31,26,20,0.05)',
     // Fiszki - gradient frontu (tył używa standardowego tła z akcentem)
     flashGradient: 'linear-gradient(135deg, #fdf6e6 0%, #f3e4c8 100%)',
-    flashBorder: '#d4b896'
-  };
-}
-
-function getDarkTheme(accent, bg, textColor) {
-  const text = textColor || '#e8f4fd';
-  return {
-    name: 'dark',
-    accent,
-    bg,
-    text,
-    textDim: '#7a9bbf',
-    surface: shiftColor(bg, 0.08),
-    border: 'rgba(255,255,255,0.14)',
-    borderStrong: 'rgba(255,255,255,0.28)',
-    confettiColors: [accent, '#4fc3f7', '#ffb800', '#ff6b6b', '#ffffff'],
-    fontImports: '<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,500;12..96,600;12..96,700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">',
-    displayFont: "'Syne', sans-serif",
-    bodyFont: "'Bricolage Grotesque', sans-serif",
-    monoFont: "'JetBrains Mono', monospace",
-    bgEffect: `<div class="ws-bg-stars" id="wsBgStars"></div>`,
-    extraBgCSS: `
-.ws-bg-stars {
-  position: fixed; inset: 0; pointer-events: none; z-index: 0; overflow: hidden;
-  background: linear-gradient(180deg, ${bg} 0%, ${shiftColor(bg, 0.08)} 60%, ${bg} 100%);
-}
-.ws-star {
-  position: absolute; border-radius: 50%; background: white;
-  animation: wsTwinkle var(--d, 3s) ease-in-out infinite;
-  animation-delay: var(--delay, 0s);
-}
-@keyframes wsTwinkle {
-  0%, 100% { opacity: 0.2; transform: scale(1); }
-  50% { opacity: 1; transform: scale(1.3); }
-}`,
-    cardBg: shiftColor(bg, 0.05),
-    cardShadow: '0 4px 12px rgba(0,0,0,0.3)',
-    // Fiszki - gradient frontu (tył używa standardowego tła z akcentem)
-    flashGradient: 'linear-gradient(135deg, #2a4360 0%, #1a2f4a 100%)',
-    flashGloss: 'rgba(255,255,255,0.32)',
-    flashBorder: '#142336'
+    flashBorder: '#d4b896',
+    // Tło dla wszystkich boxów zadań - jeden wspólny jasny kolor.
+    // Możesz go zmienić tutaj, żeby zmienić tło wszystkich sekcji w motywie Vintage.
+    boxBg: '#fff4e5'           // jasny kremowo-piaskowy
   };
 }
 
@@ -3571,31 +3515,38 @@ function getPastelTheme(accent, bg, textColor) {
   return {
     name: 'pastel',
     accent,
+    accentSecondary: '#a87bc8',      // lawendowy fiolet
+    accentTertiary: '#7eb5d4',       // pudrowy błękit
+    accentVibrant: '#f4a8a8',        // koral
     bg,
     text,
     textDim: '#7a6a72',
     surface: '#ffffff',
     border: 'rgba(58, 44, 51, 0.18)',
     borderStrong: 'rgba(58, 44, 51, 0.36)',
-    confettiColors: [accent, '#7eb5d4', '#e8c4a4', '#a87bc8', '#7bc89d'],
-    fontImports: '<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,wght@0,400;0,600;0,700;1,400&family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,500;12..96,600;12..96,700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">',
-    displayFont: "'Fraunces', serif",
-    bodyFont: "'Bricolage Grotesque', sans-serif",
+    confettiColors: [accent, '#a87bc8', '#7eb5d4', '#f4a8a8', '#7bc89d', '#e8c4a4'],
+    fontImports: '<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,600;12..96,700;12..96,800&family=Montserrat:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">',
+    displayFont: "'Bricolage Grotesque', sans-serif",
+    bodyFont: "'Montserrat', sans-serif",
     monoFont: "'JetBrains Mono', monospace",
     bgEffect: `<div class="ws-bg-blobs"></div>`,
     extraBgCSS: `
 .ws-bg-blobs {
   position: fixed; inset: 0; pointer-events: none; z-index: 0;
   background:
-    radial-gradient(ellipse 50% 40% at 10% 20%, ${rgba(accent, 0.14)}, transparent 50%),
-    radial-gradient(ellipse 40% 30% at 90% 80%, ${rgba(accent, 0.10)}, transparent 50%),
-    radial-gradient(ellipse 30% 30% at 80% 20%, rgba(126, 181, 212, 0.18), transparent 50%);
+    radial-gradient(ellipse 55% 45% at 8% 18%, ${rgba(accent, 0.22)}, transparent 55%),
+    radial-gradient(ellipse 45% 35% at 92% 78%, rgba(168, 123, 200, 0.20), transparent 55%),
+    radial-gradient(ellipse 35% 30% at 80% 15%, rgba(126, 181, 212, 0.22), transparent 55%),
+    radial-gradient(ellipse 40% 35% at 15% 85%, rgba(244, 168, 168, 0.18), transparent 55%);
 }`,
     cardBg: '#ffffff',
     cardShadow: '0 2px 6px rgba(58, 44, 51, 0.05), 0 12px 32px rgba(58, 44, 51, 0.07)',
     // Fiszki - gradient frontu (tył używa standardowego tła z akcentem)
     flashGradient: 'linear-gradient(135deg, #fff4f8 0%, #fce4ed 100%)',
-    flashBorder: '#f0b8cd'
+    flashBorder: '#f0b8cd',
+    // Tło dla wszystkich boxów zadań - jeden wspólny jasny kolor.
+    // Możesz go zmienić tutaj, żeby zmienić tło wszystkich sekcji w motywie Pastel.
+    boxBg: '#fdeef8'           // bardzo bladzy pudrowy róż
   };
 }
 
@@ -3614,6 +3565,11 @@ function buildWorksheetCSS(t) {
   --ws-text: ${t.text};
   --ws-text-dim: ${t.textDim};
   --ws-accent: ${t.accent};
+  --ws-accent-2: ${t.accentSecondary || t.accent};
+  --ws-accent-3: ${t.accentTertiary || t.accent};
+  --ws-accent-vibrant: ${t.accentVibrant || t.accent};
+  --ws-accent-gradient: linear-gradient(135deg, ${t.accent} 0%, ${t.accentSecondary || t.accent} 100%);
+  --ws-accent-gradient-3: linear-gradient(135deg, ${t.accent} 0%, ${t.accentSecondary || t.accent} 50%, ${t.accentTertiary || t.accent} 100%);
   --ws-accent-soft: ${accentRgba(0.1)};
   --ws-accent-strong: ${accentRgba(0.25)};
   --ws-surface: ${t.surface};
@@ -3626,6 +3582,8 @@ function buildWorksheetCSS(t) {
   --ws-shadow: ${t.cardShadow};
   --ws-flash-gradient: ${t.flashGradient};
   --ws-flash-gloss: ${t.flashGloss || 'rgba(255,255,255,0.28)'};
+  /* Wspólne tło dla wszystkich boxów zadań w karcie pracy. */
+  --ws-box-bg: ${t.boxBg || t.surface};
   --ws-ok: #16a34a;
   --ws-ok-bg: rgba(22, 163, 74, 0.1);
   --ws-no: #dc2626;
@@ -3685,13 +3643,21 @@ ${t.extraBgCSS}
   font-size: 0.78rem; letter-spacing: 0.25em; text-transform: uppercase;
   color: var(--ws-accent); margin-bottom: 0.8rem;
   font-weight: 600;
+  display: inline-block;
+  padding: 0.3rem 0.85rem;
+  background: var(--ws-accent-soft);
+  border-radius: 999px;
 }
 .ws-title {
   font-family: var(--ws-display);
   font-size: clamp(2.1rem, 5.5vw, 3.2rem);
   font-weight: 700;
   line-height: 1.1; letter-spacing: -0.02em;
-  color: var(--ws-text);
+  background: var(--ws-accent-gradient-3);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  -webkit-text-fill-color: transparent;
 }
 .ws-subtitle {
   color: var(--ws-text-dim);
@@ -3699,10 +3665,10 @@ ${t.extraBgCSS}
   font-size: 1.15rem;
 }
 .ws-line {
-  width: 50px; height: 3px;
-  background: var(--ws-accent);
-  margin: 1.2rem auto 0;
-  border-radius: 2px;
+  width: 90px; height: 4px;
+  background: var(--ws-accent-gradient);
+  margin: 1.4rem auto 0;
+  border-radius: 4px;
 }
 
 /* PROGRESS */
@@ -3726,20 +3692,25 @@ ${t.extraBgCSS}
   font-family: var(--ws-mono); font-size: 0.65rem; letter-spacing: 0.2em;
   text-transform: uppercase; color: var(--ws-text-dim);
 }
-.ws-progress-score {
-  font-family: var(--ws-display); font-weight: 700; font-size: 0.95rem;
-  color: var(--ws-accent);
-}
 .ws-progress-track {
-  height: 5px; border-radius: 3px;
+  height: 6px; border-radius: 4px;
   background: var(--ws-border);
   overflow: hidden;
 }
 .ws-progress-fill {
   height: 100%; width: 0%;
-  background: var(--ws-accent);
-  border-radius: 3px;
+  background: var(--ws-accent-gradient-3);
+  border-radius: 4px;
   transition: width 0.6s cubic-bezier(0.16,1,0.3,1);
+  box-shadow: 0 0 8px ${accentRgba(0.4)};
+}
+.ws-progress-score {
+  font-family: var(--ws-display); font-weight: 700; font-size: 1rem;
+  background: var(--ws-accent-gradient);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  -webkit-text-fill-color: transparent;
 }
 
 /* SECTIONS */
@@ -3750,7 +3721,7 @@ ${t.extraBgCSS}
   padding: clamp(1.5rem, 3.5vw, 2.4rem);
   margin-bottom: 1.5rem;
   box-shadow: var(--ws-shadow);
-  transition: border-color 0.4s;
+  transition: border-color 0.4s, box-shadow 0.3s;
   animation: wsFadeUp 0.7s cubic-bezier(0.16,1,0.3,1) both;
   animation-delay: 0.1s;
 }
@@ -3758,7 +3729,10 @@ ${t.extraBgCSS}
   from { opacity: 0; transform: translateY(15px); }
   to { opacity: 1; transform: translateY(0); }
 }
-.ws-section.ws-done { border-color: var(--ws-accent); }
+.ws-section.ws-done {
+  border-color: var(--ws-accent);
+  box-shadow: 0 4px 16px ${accentRgba(0.12)}, 0 1px 3px rgba(0,0,0,0.05);
+}
 
 .ws-sec-head {
   display: flex;
@@ -3794,9 +3768,9 @@ ${t.extraBgCSS}
   font-family: var(--ws-mono);
   font-size: 0.95rem; font-weight: 700;
   width: 48px; height: 48px;
-  border-radius: 11px;
-  background: var(--ws-accent);
-  color: ${isDarkTheme ? t.bg : '#fff'};
+  border-radius: 12px;
+  background: var(--ws-accent-gradient);
+  color: #fff;
   display: grid; place-items: center;
   letter-spacing: -0.03em;
   flex-shrink: 0;
@@ -3805,6 +3779,11 @@ ${t.extraBgCSS}
   font-family: var(--ws-display); font-weight: 700;
   font-size: clamp(1.5rem, 2.8vw, 1.85rem);
   letter-spacing: -0.02em;
+  background: var(--ws-accent-gradient);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  -webkit-text-fill-color: transparent;
 }
 .ws-sec-desc {
   color: var(--ws-text-dim);
@@ -4100,7 +4079,7 @@ ${t.extraBgCSS}
   display: grid; gap: 0.85rem;
 }
 .scramble-card {
-  background: var(--ws-surface);
+  background: var(--ws-box-bg);
   border: 1px solid var(--ws-border-strong);
   border-radius: 13px;
   padding: 1.15rem 1.3rem;
@@ -4207,42 +4186,64 @@ ${t.extraBgCSS}
   display: none;
   text-align: center;
   margin: 2rem 0;
-  padding: 2rem 1.5rem;
+  padding: 2.5rem 1.8rem;
   background: var(--ws-card);
-  border: 2px solid var(--ws-accent);
-  border-radius: 18px;
-  box-shadow: 0 8px 32px ${accentRgba(0.15)};
+  border: 2.5px solid transparent;
+  background-image: linear-gradient(var(--ws-card), var(--ws-card)), var(--ws-accent-gradient-3);
+  background-origin: border-box;
+  background-clip: padding-box, border-box;
+  border-radius: 22px;
+  box-shadow: 0 12px 40px ${accentRgba(0.18)};
   animation: wsFinaleIn 0.7s cubic-bezier(0.16,1,0.3,1);
+  position: relative;
+  overflow: hidden;
 }
+.ws-finale::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(ellipse 60% 50% at 20% 0%, ${accentRgba(0.12)}, transparent 60%),
+    radial-gradient(ellipse 50% 40% at 80% 100%, rgba(0,0,0,0.04), transparent 60%);
+  pointer-events: none;
+  z-index: 0;
+}
+.ws-finale > * { position: relative; z-index: 1; }
 .ws-finale.show { display: block; }
 @keyframes wsFinaleIn {
   from { opacity: 0; transform: scale(0.95) translateY(20px); }
   to { opacity: 1; transform: scale(1) translateY(0); }
 }
-.ws-finale-icon { font-size: 3.5rem; line-height: 1; margin-bottom: 0.7rem; }
+.ws-finale-icon { font-size: 3.8rem; line-height: 1; margin-bottom: 0.85rem; }
 .ws-finale-title {
   font-family: var(--ws-display);
-  font-weight: 700; font-size: 1.7rem;
-  color: var(--ws-text);
-  margin-bottom: 0.4rem;
+  font-weight: 700; font-size: 1.95rem;
+  background: var(--ws-accent-gradient);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  -webkit-text-fill-color: transparent;
+  margin-bottom: 0.45rem;
+  letter-spacing: -0.01em;
 }
-.ws-finale-text { color: var(--ws-text-dim); margin-bottom: 1.4rem; }
+.ws-finale-text { color: var(--ws-text-dim); margin-bottom: 1.5rem; }
 .ws-btn-celebrate {
   font-family: var(--ws-display);
-  font-weight: 700; font-size: 1rem;
-  padding: 0.85rem 2rem;
-  background: var(--ws-accent);
-  color: ${isDarkTheme ? t.bg : '#fff'};
+  font-weight: 700; font-size: 1.05rem;
+  padding: 0.95rem 2.2rem;
+  background: var(--ws-accent-gradient-3);
+  color: #fff;
   border: none;
-  border-radius: 12px;
+  border-radius: 14px;
   cursor: pointer;
   transition: all 0.2s;
   margin: 0 0.4rem 0.5rem;
-  box-shadow: 0 6px 20px ${accentRgba(0.3)};
+  box-shadow: 0 8px 24px ${accentRgba(0.35)};
+  letter-spacing: -0.01em;
 }
 .ws-btn-celebrate:hover {
   transform: scale(1.04);
-  box-shadow: 0 10px 28px ${accentRgba(0.45)};
+  box-shadow: 0 12px 32px ${accentRgba(0.5)};
 }
 .ws-btn-reset {
   font-family: var(--ws-body); font-size: 0.85rem;
@@ -4372,7 +4373,7 @@ ${t.extraBgCSS}
   display: grid; gap: 1rem;
 }
 .unsc-card {
-  background: var(--ws-surface);
+  background: var(--ws-box-bg);
   border: 1px solid var(--ws-border-strong);
   border-radius: 13px;
   padding: 1.2rem 1.3rem;
@@ -4531,7 +4532,7 @@ ${t.extraBgCSS}
   display: grid; gap: 0.65rem;
 }
 .cornell-card {
-  background: var(--ws-surface);
+  background: var(--ws-box-bg);
   border: 1.5px solid var(--ws-border-strong);
   border-radius: 12px;
   overflow: hidden;
@@ -4679,7 +4680,7 @@ ${t.extraBgCSS}
   display: grid; gap: 1rem;
 }
 .quiz-card {
-  background: var(--ws-surface);
+  background: var(--ws-box-bg);
   border: 1px solid var(--ws-border-strong);
   border-radius: 13px;
   padding: 1.3rem 1.4rem;
@@ -4837,7 +4838,7 @@ ${t.extraBgCSS}
   gap: 1rem;
 }
 .gap-card {
-  background: var(--ws-surface);
+  background: var(--ws-box-bg);
   border: 1.5px solid var(--ws-border);
   border-radius: 12px;
   padding: 1.25rem 1.4rem;
@@ -4907,13 +4908,20 @@ ${t.extraBgCSS}
 }
 .gap-translation.show { display: block; }
 .gap-translation-label {
-  font-family: var(--ws-mono);
-  font-size: 0.78rem;
-  font-weight: 700;
-  color: var(--ws-accent);
-  text-transform: uppercase;
-  letter-spacing: 0.06em;
-  margin-right: 0.35rem;
+  display: inline-flex;
+  align-items: center;
+  vertical-align: middle;
+  width: 1.5rem;
+  height: 1.05rem;
+  border-radius: 3px;
+  overflow: hidden;
+  border: 1px solid var(--ws-border-strong);
+  margin-right: 0.4rem;
+}
+.gap-translation-label svg {
+  width: 100%;
+  height: 100%;
+  display: block;
 }
 .gap-translation-text {
   color: var(--ws-text);
@@ -4927,7 +4935,7 @@ ${t.extraBgCSS}
   gap: 1.1rem;
 }
 .trans-card {
-  background: var(--ws-surface);
+  background: var(--ws-box-bg);
   border: 1.5px solid var(--ws-border);
   border-radius: 12px;
   padding: 1.25rem 1.4rem;
@@ -4944,17 +4952,19 @@ ${t.extraBgCSS}
   margin-bottom: 0.85rem;
 }
 .trans-pl-label {
-  font-family: var(--ws-mono);
-  font-size: 0.72rem;
-  font-weight: 700;
-  color: var(--ws-accent);
-  background: var(--ws-accent-soft);
-  border: 1px solid var(--ws-accent);
-  border-radius: 4px;
-  padding: 0.18rem 0.45rem;
-  text-transform: uppercase;
-  letter-spacing: 0.08em;
+  display: inline-flex;
+  align-items: center;
   flex-shrink: 0;
+  width: 1.7rem;
+  height: 1.2rem;
+  border-radius: 3px;
+  overflow: hidden;
+  border: 1px solid var(--ws-border-strong);
+}
+.trans-pl-label svg {
+  width: 100%;
+  height: 100%;
+  display: block;
 }
 .trans-pl-text {
   font-family: var(--ws-body);
@@ -5050,7 +5060,7 @@ ${t.extraBgCSS}
   gap: 1.5rem;
 }
 .write-card {
-  background: var(--ws-surface);
+  background: var(--ws-box-bg);
   border: 1.5px solid var(--ws-border);
   border-radius: 14px;
   padding: 1.6rem 1.7rem;
@@ -5084,18 +5094,20 @@ ${t.extraBgCSS}
   font-size: 1.18rem;
 }
 .write-prompt-flag {
-  font-family: var(--ws-mono);
-  font-size: 0.72rem;
-  font-weight: 700;
-  color: var(--ws-accent);
-  background: var(--ws-accent-soft);
-  border: 1px solid var(--ws-accent);
-  border-radius: 4px;
-  padding: 0.18rem 0.45rem;
-  text-transform: uppercase;
-  letter-spacing: 0.08em;
+  display: inline-flex;
+  align-items: center;
   flex-shrink: 0;
   align-self: center;
+  width: 1.7rem;
+  height: 1.2rem;
+  border-radius: 3px;
+  overflow: hidden;
+  border: 1px solid var(--ws-border-strong);
+}
+.write-prompt-flag svg {
+  width: 100%;
+  height: 100%;
+  display: block;
 }
 .write-area {
   width: 100%;
