@@ -172,9 +172,12 @@ body::before {
 .tsv-status.orphan-warn strong { color: #7a3f08; }
 
 /* CHECKBOX TASK TYPES */
-.task-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 0.7rem; }
+.task-grid { display: grid; grid-template-columns: 1fr; gap: 0.7rem; }
 .task-card {
-  display: flex; align-items: flex-start; gap: 0.7rem;
+  display: flex;
+  /* Pol-na-pol: lewa kolumna = checkbox + opis (w task-card-main), prawa = pola edycji */
+  align-items: stretch;
+  gap: 1.2rem;
   padding: 0.95rem 1rem 0.95rem 1rem;
   padding-top: 2.5rem;
   background: var(--surface-2);
@@ -183,6 +186,44 @@ body::before {
   cursor: grab;
   transition: border-color 0.18s, background 0.18s, opacity 0.18s, box-shadow 0.18s;
   position: relative;
+}
+/* Wrapper na lewa strone (dodawany przez JS przy inicjalizacji kafelka).
+   Lewa strona to flex w pionie: gora = checkbox+info, dol = suboption (opcjonalne). */
+.task-card-main {
+  flex: 1 1 50%;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+.task-card-main-top {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.7rem;
+}
+/* Pola edycji - prawa polowa z pionowym separatorem */
+.task-card > .task-edit-fields {
+  flex: 1 1 50%;
+  min-width: 0;
+  margin-top: 0;
+  padding-top: 0;
+  border-top: none;
+  padding-left: 1.2rem;
+  border-left: 1px solid var(--border);
+}
+/* Wąski ekran - powrot do ukladu jednokolumnowego */
+@media (max-width: 760px) {
+  .task-card {
+    flex-direction: column;
+    gap: 0.75rem;
+  }
+  .task-card > .task-edit-fields {
+    flex-basis: auto;
+    padding-left: 0;
+    padding-top: 0.75rem;
+    border-left: none;
+    border-top: 1px solid var(--border);
+  }
 }
 .task-card:active { cursor: grabbing; }
 .task-card.dragging {
@@ -215,7 +256,8 @@ body::before {
   border-color: var(--accent);
   border-style: solid;
 }
-.task-card input { display: none; }
+
+.task-card > input[type="checkbox"] { display: none; }
 .task-checkbox {
   width: 18px; height: 18px; border: 1.5px solid var(--border-bright); border-radius: 5px;
   flex-shrink: 0; margin-top: 2px;
@@ -228,15 +270,129 @@ body::before {
 .task-card.checked .task-checkbox::after {
   content: '✓'; color: var(--bg); font-size: 0.85rem; font-weight: 900;
 }
-.task-info { flex: 1; }
+.task-info { min-width: 0; }
 .task-info-name { font-weight: 600; font-size: 0.92rem; }
 .task-info-desc { color: var(--text-muted); font-size: 0.78rem; margin-top: 0.2rem; line-height: 1.35; }
 .task-card.disabled .task-info-desc { color: var(--warn); }
+
+/* === EDYCJA TYTULU / INSTRUKCJI PER ZADANIE === */
+.task-edit-fields {
+  display: grid;
+  gap: 0.5rem;
+  margin-top: 0.75rem;
+  padding-top: 0.75rem;
+  border-top: 1px solid var(--border);
+  /* przerywamy drag&drop wewnatrz pol edycji */
+  cursor: default;
+}
+.task-edit-field {
+  display: grid;
+  /* Label po lewej, ale waski - input dostaje wiekszosc szerokosci */
+  grid-template-columns: 4.5rem 1fr;
+  gap: 0.55rem;
+  align-items: center;
+}
+.task-edit-label {
+  font-family: var(--mono);
+  font-size: 0.64rem;
+  font-weight: 600;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+  color: var(--text-dim);
+}
+.task-edit-input,
+.task-edit-textarea {
+  font-family: inherit;
+  font-size: 0.83rem;
+  padding: 0.45rem 0.65rem;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 7px;
+  color: var(--text);
+  transition: border-color 0.15s, background 0.15s;
+  width: 100%;
+  min-width: 0;
+}
+.task-edit-textarea {
+  resize: vertical;
+  min-height: 2.2rem;
+  line-height: 1.4;
+  font-family: var(--body, inherit);
+}
+/* Dla field zawierajacego textarea label dosuniety do gory zamiast srodkowania */
+.task-edit-field:has(.task-edit-textarea) {
+  align-items: start;
+}
+.task-edit-field:has(.task-edit-textarea) .task-edit-label {
+  padding-top: 0.5rem;
+}
+.task-edit-input:focus,
+.task-edit-textarea:focus {
+  outline: none;
+  border-color: var(--accent);
+  background: var(--surface-2);
+}
+.task-edit-input::placeholder,
+.task-edit-textarea::placeholder {
+  color: var(--text-muted);
+  opacity: 0.7;
+}
+.task-edit-reset {
+  background: none;
+  border: none;
+  color: var(--text-dim);
+  font-family: var(--mono);
+  font-size: 0.66rem;
+  letter-spacing: 0.05em;
+  cursor: pointer;
+  padding: 0.2rem 0.4rem;
+  margin-left: 0.3rem;
+  border-radius: 4px;
+  transition: color 0.15s, background 0.15s;
+  flex-shrink: 0;
+}
+.task-edit-reset:hover {
+  color: var(--accent);
+  background: rgba(196, 245, 58, 0.08);
+}
+.task-edit-field-row {
+  display: flex;
+  align-items: center;
+  gap: 0;
+  min-width: 0;
+}
+.task-edit-image-preview {
+  margin-top: 0.4rem;
+  border-radius: 6px;
+  overflow: hidden;
+  border: 1px solid var(--border);
+  max-height: 90px;
+  background: var(--bg);
+}
+.task-edit-image-preview img {
+  display: block;
+  width: 100%;
+  max-height: 90px;
+  object-fit: cover;
+}
+.task-edit-image-preview.error img {
+  display: none;
+}
+.task-edit-image-preview.error::after {
+  content: '⚠ Nie udało się załadować obrazka z tego URL';
+  display: block;
+  padding: 0.6rem 0.8rem;
+  font-size: 0.78rem;
+  color: var(--warn);
+  font-family: var(--mono);
+}
 
 .instr-master {
   margin: 0 0 0.9rem 0;
   display: flex;
   justify-content: flex-end;
+  flex-wrap: wrap;
+  gap: 0.5rem;
 }
 .instr-master-btn {
   display: inline-flex;
@@ -483,6 +639,77 @@ body::before {
   margin-top: 1rem;
 }
 .tts-test-input { flex: 1; }
+.tts-rate-row {
+  margin-top: 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+.tts-rate-controls {
+  display: flex;
+  align-items: center;
+  gap: 0.7rem;
+}
+.tts-rate-slider {
+  flex: 1;
+  min-width: 0;
+  height: 4px;
+  -webkit-appearance: none;
+  appearance: none;
+  background: var(--border);
+  border-radius: 2px;
+  outline: none;
+  cursor: pointer;
+}
+.tts-rate-slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: var(--accent);
+  cursor: pointer;
+  border: 2px solid var(--bg);
+  box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+  transition: transform 0.1s;
+}
+.tts-rate-slider::-webkit-slider-thumb:hover {
+  transform: scale(1.15);
+}
+.tts-rate-slider::-moz-range-thumb {
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: var(--accent);
+  cursor: pointer;
+  border: 2px solid var(--bg);
+  box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+}
+.tts-rate-value {
+  font-family: var(--mono);
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--accent);
+  min-width: 3.2rem;
+  text-align: right;
+}
+.tts-rate-reset {
+  background: none;
+  border: 1px solid var(--border);
+  color: var(--text-dim);
+  font-family: var(--mono);
+  font-size: 0.66rem;
+  font-weight: 600;
+  letter-spacing: 0.05em;
+  padding: 0.3rem 0.6rem;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+.tts-rate-reset:hover {
+  color: var(--accent);
+  border-color: var(--accent);
+}
 .tts-test-btn {
   font-family: var(--body); font-weight: 600; font-size: 0.9rem;
   padding: 0 1.2rem;
@@ -568,7 +795,7 @@ body::before {
 
 .gen-hint { color: var(--text-muted); font-size: 0.82rem; margin-top: 0.85rem; font-family: var(--mono); }
 
-/* TSV EXAMPLE LINK */
+/* TSV EXAMPLE */
 .tsv-example-toggle {
   font-family: var(--mono); font-size: 0.75rem;
   color: var(--accent);
@@ -577,8 +804,59 @@ body::before {
   margin-top: 0.6rem;
   padding: 0;
 }
-.tsv-example-box {
+.tsv-example-wrap {
   margin-top: 0.8rem;
+  display: none;
+}
+.tsv-example-wrap.show { display: block; }
+.tsv-example-head {
+  display: flex;
+  gap: 1rem;
+  align-items: flex-start;
+  margin-bottom: 0.6rem;
+  flex-wrap: wrap;
+}
+.tsv-example-info {
+  flex: 1;
+  min-width: 0;
+  font-size: 0.78rem;
+  color: var(--text-dim);
+  line-height: 1.55;
+}
+.tsv-example-info code {
+  font-family: var(--mono);
+  font-size: 0.78rem;
+  background: var(--surface-2);
+  padding: 0.05em 0.35em;
+  border-radius: 4px;
+  color: var(--text);
+}
+.tsv-example-info strong {
+  color: var(--text);
+}
+.tsv-example-use {
+  flex-shrink: 0;
+  font-family: var(--body);
+  font-size: 0.85rem;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  padding: 0.55rem 1.1rem;
+  background: var(--accent);
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: opacity 0.15s;
+  white-space: nowrap;
+}
+.tsv-example-use:hover {
+  opacity: 0.85;
+}
+.tsv-example-use.copied {
+  background: var(--ok, #16a34a);
+  color: #fff;
+}
+.tsv-example-box {
   padding: 0.85rem 1rem;
   background: var(--bg);
   border: 1px solid var(--border);
@@ -587,9 +865,9 @@ body::before {
   color: var(--text-dim);
   white-space: pre;
   overflow-x: auto;
-  display: none;
+  max-height: 280px;
+  overflow-y: auto;
 }
-.tsv-example-box.show { display: block; }
 
 /* FOOTER */
 .foot {
@@ -637,15 +915,41 @@ kot	cat
 pies	dog
 ..."></textarea>
       <button type="button" class="tsv-example-toggle" id="tsvExampleToggle">▸ Pokaż przykładowe dane</button>
-      <div class="tsv-example-box" id="tsvExampleBox">pl	en
-kot	cat
-pies	dog
-ptak	bird
-ryba	fish
-koń	horse
-krowa	cow
-owca	sheep
-kura	chicken</div>
+      <div class="tsv-example-wrap" id="tsvExampleBox">
+        <div class="tsv-example-head">
+          <div class="tsv-example-info">
+            <strong>Przykładowe dane TSV</strong> dopasowane do wszystkich typów zadań. Kolumna <code>tasks</code> (opcjonalna) ogranicza wiersz do konkretnych typów. Puste = wiersz idzie do wszystkich zaznaczonych typów. Skróty: <code>f</code>=flashcards, <code>m</code>=matching, <code>s</code>=scramble, <code>q</code>=quiz, <code>u</code>=unscramble, <code>c</code>=cornell, <code>g</code>=gapfill, <code>t</code>=translate, <code>w</code>=writing.
+          </div>
+          <button type="button" class="tsv-example-use" id="tsvExampleUse" title="Wklej te dane do pola">📋 Użyj tych danych</button>
+        </div>
+        <div class="tsv-example-box" id="tsvExampleData">pl	en	tasks
+kot	cat	
+pies	dog	
+ptak	bird	
+ryba	fish	
+koń	horse	
+krowa	cow	
+owca	sheep	
+kura	chicken	
+słońce	sun	f,m,s,q
+księżyc	moon	f,m,s,q
+gwiazda	star	f,m,s,q
+chmura	cloud	f,m,s,q
+Lubię uczyć się angielskiego.	I like learning English.	u,t
+Gdzie jest najbliższa stacja?	Where is the nearest station?	u,t
+Mój brat mieszka w Krakowie.	My brother lives in Krakow.	u,t
+Wczoraj padał deszcz cały dzień.	Yesterday it rained all day.	u,t
+Mam dwa koty i jednego psa.	I have two cats and one dog.	u,t
+Idę do szkoły o ósmej rano.	I {go} to school at eight in the morning.	g
+Ona pije kawę każdego ranka.	She {drinks} coffee every morning.	g
+Oni mieszkają w dużym domu.	They {live} in a {big} house.	g
+Czytam książkę przed snem.	I {read} a book before bed.	g
+Co lubisz robić w wolnym czasie?	I like reading books and listening to music.	c
+Jaka jest twoja ulubiona pora roku?	My favourite season is spring because everything wakes up.	c
+Dlaczego uczysz się języków obcych?	Languages open doors to new cultures and friendships.	c
+Opisz swój idealny dzień.	Write 5-8 sentences about how you would spend your perfect day.	w
+Napisz krótki email do przyjaciela o ostatnim weekendzie.	Use past simple. Include at least 3 things you did.	w</div>
+      </div>
       <div class="tsv-status" id="tsvStatus">
         <span class="icon">ⓘ</span> Wklej dane, żeby zobaczyć dostępne typy zadań.
       </div>
@@ -662,6 +966,11 @@ kura	chicken</div>
     <div class="sec-desc">Wybierz, które sekcje mają znaleźć się na karcie pracy. <strong>Przeciągnij kafelki</strong>, żeby zmienić kolejność na karcie. Każda sekcja używa tych samych słówek.</div>
 
     <div class="instr-master">
+      <button type="button" class="instr-master-btn" id="selectAllBtn">
+        <span class="instr-master-icon">☑</span>
+        <span class="instr-master-label">Zaznacz wszystkie</span>
+        <span class="instr-master-state" id="selectAllState">dostępne</span>
+      </button>
       <button type="button" class="instr-master-btn active" id="instrMasterBtn">
         <span class="instr-master-icon">📋</span>
         <span class="instr-master-label">Instrukcje pod tytułem sekcji</span>
@@ -788,10 +1097,10 @@ kura	chicken</div>
           <button type="button" class="color-reset" data-target="accent">RESET</button>
         </div>
         <div class="color-field">
-          <input type="color" id="colorBg" value="#f5f1e8">
+          <input type="color" id="colorBg" value="#fffaf0">
           <div class="color-field-info">
             <div class="color-field-label">Tło karty</div>
-            <div class="color-field-hex" id="colorBgHex">#f5f1e8</div>
+            <div class="color-field-hex" id="colorBgHex">#fffaf0</div>
           </div>
           <button type="button" class="color-reset" data-target="bg">RESET</button>
         </div>
@@ -842,6 +1151,14 @@ kura	chicken</div>
           <select id="ttsVoice" class="input">
             <option value="">Domyślny (auto-wybór Google jeśli dostępny)</option>
           </select>
+        </div>
+      </div>
+      <div class="tts-rate-row">
+        <label class="label" for="ttsRate">Prędkość mowy</label>
+        <div class="tts-rate-controls">
+          <input type="range" id="ttsRate" min="0.5" max="1.5" step="0.05" value="1.0" class="tts-rate-slider">
+          <span class="tts-rate-value" id="ttsRateValue">1.00x</span>
+          <button type="button" class="tts-rate-reset" id="ttsRateReset" title="Przywróć domyślną prędkość (1.0x)">RESET</button>
         </div>
       </div>
       <div class="tts-test-row">
@@ -909,18 +1226,52 @@ const STATE = {
   tasks: { flashcards: true, matching: true, scramble: true, quiz: false, unscramble: false, cornell: false, gapfill: false, translate: false, writing: false },
   taskInstructions: { flashcards: true, matching: true, scramble: true, quiz: true, unscramble: true, cornell: true, gapfill: true, translate: true, writing: true },
   taskOrder: ['flashcards', 'matching', 'scramble', 'quiz', 'unscramble', 'cornell', 'gapfill', 'translate', 'writing'],
+  // Edytowalne tytuly sekcji w wygenerowanej karcie pracy.
+  // Domyslnie sama nazwa zadania (bez "· polecenia"), zeby nie dublowac instrukcji ktora jest pod spodem.
+  taskTitles: {
+    flashcards: 'Flashcards',
+    matching:   'Matching',
+    scramble:   'Word Scramble',
+    quiz:       'Quiz',
+    unscramble: 'Sentence Unscramble',
+    cornell:    'Pytania & odpowiedzi',
+    gapfill:    'Gap Fill',
+    translate:  'Translate',
+    writing:    'Writing'
+  },
+  // Edytowalne instrukcje. Pusty string = uzyj domyslnej z kodu.
+  taskCustomInstr: { flashcards: '', matching: '', scramble: '', quiz: '', unscramble: '', cornell: '', gapfill: '', translate: '', writing: '' },
+  // URL obrazka prezentujacego sekcje. Pusty = bez obrazka.
+  taskImages: { flashcards: '', matching: '', scramble: '', quiz: '', unscramble: '', cornell: '', gapfill: '', translate: '', writing: '' },
   quizOptions: 4,
   ttsEnabled: true,
   ttsLang: 'en-GB',
   ttsVoice: '',
+  // Predkosc mowy TTS (0.5 - 1.5, domyslnie 1.0). Wartosc przekazywana do utterance.rate
+  // w wygenerowanej karcie + uzywana w teście w generatorze.
+  ttsRate: 1.0,
   logoEnabled: true,
   logoUrl: 'https://bertlingo-learning.github.io/Angielski/Obrazki/loga/ewr-logo.svg'
 };
 
+// Domyslne instrukcje per zadanie - uzywane jako placeholder w generatorze
+// i jako fallback w sectionInstr() gdy uzytkownik nic nie wpisal.
+const DEFAULT_INSTRUCTIONS = {
+  flashcards: 'Kliknij kartę, żeby odsłonić tłumaczenie. Spróbuj najpierw zgadnąć w głowie!',
+  matching:   'Kliknij słowo z lewej strony, potem jego tłumaczenie z prawej.',
+  scramble:   'Wpisz angielskie słowo (Enter sprawdza). Kliknij rozsypankę, żeby zobaczyć pomieszane litery. Kliknij "?" żeby wstawić kolejną literę odpowiedzi.',
+  quiz:       'Wybierz prawidłowe tłumaczenie polskiego słowa. Tylko jedna odpowiedź jest poprawna.',
+  unscramble: 'Kliknij słowa, żeby je wstawić w odpowiedniej kolejności. Możesz też przeciągnąć słowa, żeby je przestawić. Kliknij "?" żeby wstawić kolejne poprawne słowo.',
+  cornell:    'Kliknij pytanie, żeby odsłonić odpowiedź. Spróbuj najpierw odpowiedzieć w głowie!',
+  gapfill:    'Wpisz brakujące słowa w lukach (Enter sprawdza). Po uzupełnieniu wszystkich luk w zdaniu pojawi się polskie tłumaczenie.',
+  translate:  'Przetłumacz polskie słowo, frazę lub zdanie na angielski (Enter sprawdza). Sprawdzanie pomija wielkość liter i kropkę na końcu.',
+  writing:    'Napisz odpowiedź według polecenia. Kliknij "Gotowe", gdy skończysz.'
+};
+
 // Default colors per preset (cardBg, border, textDim itp. są wyliczane z akcentu w themach)
 const PRESET_DEFAULTS = {
-  vintage: { accent: '#c0392b', bg: '#f5f1e8', text: '#1f1a14' },
-  pastel:  { accent: '#d65a8a', bg: '#fef6f3', text: '#3a2c33' }
+  vintage: { accent: '#c0392b', bg: '#fffaf0', text: '#1f1a14' },
+  pastel:  { accent: '#d65a8a', bg: '#fffaff', text: '#3a2c33' }
 };
 
 // ============================================================
@@ -1038,10 +1389,8 @@ function updateTSVStatus() {
     status.innerHTML = '<span class="icon">ⓘ</span> Wklej dane, żeby zobaczyć dostępne typy zadań.';
     STATE.rows = [];
     STATE.headers = [];
-    btn.disabled = true;
-    previewBtn.disabled = true;
-    hint.textContent = 'Wklej dane, żeby aktywować przycisk';
     updateTaskAvailability();
+    validateGenerate();
     return;
   }
 
@@ -1051,10 +1400,8 @@ function updateTSVStatus() {
     status.innerHTML = `<span class="icon">⚠</span> <strong>Błąd:</strong> ${result.error}<span class="hint">Format: nagłówek "pl⇥en" w pierwszym wierszu, potem dane oddzielone tabulatorem.</span>`;
     STATE.rows = [];
     STATE.headers = [];
-    btn.disabled = true;
-    previewBtn.disabled = true;
-    hint.textContent = 'Popraw dane, żeby aktywować';
     updateTaskAvailability();
+    validateGenerate();
     return;
   }
 
@@ -1094,7 +1441,7 @@ function updateTaskAvailability() {
   cards.forEach(card => {
     const task = card.dataset.task;
     const taskRows = STATE.rows.length > 0 ? rowsForTask(task) : [];
-    const cb = card.querySelector('input');
+    const cb = card.querySelector(':scope > input[type="checkbox"]');
     let ok = taskRows.length > 0;
     let reason = '';
 
@@ -1145,6 +1492,8 @@ function updateTaskAvailability() {
       desc.textContent = desc.dataset.original + ` · ${taskRows.length} wierszy`;
     }
   });
+  // Po kazdej zmianie dostepnosci odswiez stan przycisku "Zaznacz wszystkie"
+  if (typeof updateSelectAllState === 'function') updateSelectAllState();
 }
 
 function validateGenerate() {
@@ -1177,7 +1526,30 @@ function validateGenerate() {
 document.getElementById('tsv').addEventListener('input', updateTSVStatus);
 
 document.getElementById('tsvExampleToggle').addEventListener('click', () => {
-  document.getElementById('tsvExampleBox').classList.toggle('show');
+  const wrap = document.getElementById('tsvExampleBox');
+  const btn = document.getElementById('tsvExampleToggle');
+  const isOpen = wrap.classList.toggle('show');
+  btn.textContent = isOpen ? '▾ Ukryj przykładowe dane' : '▸ Pokaż przykładowe dane';
+});
+
+// "Użyj tych danych" - wkleja przykład do pola TSV
+document.getElementById('tsvExampleUse').addEventListener('click', () => {
+  const exampleData = document.getElementById('tsvExampleData').textContent;
+  const tsvField = document.getElementById('tsv');
+  tsvField.value = exampleData;
+  // Trigger input event zeby updateTSVStatus sie odpalil
+  tsvField.dispatchEvent(new Event('input', { bubbles: true }));
+  // Krotki feedback wizualny na przycisku
+  const btn = document.getElementById('tsvExampleUse');
+  const original = btn.textContent;
+  btn.classList.add('copied');
+  btn.textContent = '✓ Wklejone';
+  setTimeout(() => {
+    btn.classList.remove('copied');
+    btn.textContent = original;
+  }, 1400);
+  // Scroll do pola TSV
+  tsvField.scrollIntoView({ behavior: 'smooth', block: 'center' });
 });
 
 // Aktualizuje wygląd master toggle na podstawie stanu wszystkich per-task toggli
@@ -1217,6 +1589,60 @@ document.getElementById('instrMasterBtn').addEventListener('click', () => {
   updateInstrMaster();
 });
 
+// ============================================================
+// SELECT ALL TASKS - zaznacz wszystkie DOSTEPNE typy zadan
+// ============================================================
+function updateSelectAllState() {
+  const btn = document.getElementById('selectAllBtn');
+  const state = document.getElementById('selectAllState');
+  if (!btn || !state) return;
+  // Liczymy tylko dostepne karty (te ktore nie maja klasy 'disabled')
+  const allCards = Array.from(document.querySelectorAll('.task-card'));
+  const availableCards = allCards.filter(c => !c.classList.contains('disabled'));
+  const availableTasks = availableCards.map(c => c.dataset.task);
+  const checkedAvailable = availableTasks.filter(t => STATE.tasks[t]).length;
+  const total = availableTasks.length;
+
+  btn.classList.remove('active', 'mixed', 'off');
+  if (total === 0) {
+    btn.classList.add('off');
+    state.textContent = 'brak dostępnych';
+    return;
+  }
+  if (checkedAvailable === total) {
+    btn.classList.add('active');
+    state.textContent = `wszystkie ${total}/${total}`;
+  } else if (checkedAvailable === 0) {
+    btn.classList.add('off');
+    state.textContent = `0/${total}`;
+  } else {
+    btn.classList.add('mixed');
+    state.textContent = `${checkedAvailable}/${total}`;
+  }
+}
+
+document.getElementById('selectAllBtn').addEventListener('click', () => {
+  const allCards = Array.from(document.querySelectorAll('.task-card'));
+  const availableCards = allCards.filter(c => !c.classList.contains('disabled'));
+  const availableTasks = availableCards.map(c => c.dataset.task);
+  if (availableTasks.length === 0) return;
+
+  const allChecked = availableTasks.every(t => STATE.tasks[t]);
+  const newState = !allChecked;  // wszystkie zaznaczone -> odznacz; inaczej -> zaznacz
+
+  availableCards.forEach(card => {
+    const task = card.dataset.task;
+    STATE.tasks[task] = newState;
+    card.classList.toggle('checked', newState);
+    const cb = card.querySelector(':scope > input[type="checkbox"]');
+    if (cb) cb.checked = newState;
+  });
+
+  updateSelectAllState();
+  updateOrphanWarning();
+  validateGenerate();
+});
+
 document.querySelectorAll('.task-card').forEach(card => {
   card.setAttribute('draggable', 'true');
   // Dodaj toggle "pokaż instrukcję w karcie pracy" - per typ zadania
@@ -1233,20 +1659,155 @@ document.querySelectorAll('.task-card').forEach(card => {
     updateInstrMaster();
   });
   card.appendChild(instrToggle);
+
+  // === OPAKOWANIE LEWEJ STRONY w task-card-main ===
+  // Robimy z karty 2-kolumnowy uklad: lewa polowa = oryginalna zawartosc (checkbox + info + suboption),
+  // prawa polowa = pola edycji ponizej. Toggle instrukcji (.task-instr-toggle) jest absolute,
+  // wiec zostawiamy go poza wrapperem.
+  const mainWrap = document.createElement('div');
+  mainWrap.className = 'task-card-main';
+  const mainTop = document.createElement('div');
+  mainTop.className = 'task-card-main-top';
+  // Checkbox + task-info ida do .task-card-main-top, suboption do .task-card-main bezposrednio
+  const checkboxEl = card.querySelector(':scope > .task-checkbox');
+  const infoEl = card.querySelector(':scope > .task-info');
+  const subOptEl = card.querySelector(':scope > .task-suboption');
+  if (checkboxEl) mainTop.appendChild(checkboxEl);
+  if (infoEl) mainTop.appendChild(infoEl);
+  mainWrap.appendChild(mainTop);
+  if (subOptEl) mainWrap.appendChild(subOptEl);
+  // Wstawiamy wrapper przed toggle (zeby toggle pozostal ostatni w drzewie - choc i tak jest absolute)
+  card.insertBefore(mainWrap, instrToggle);
+
+  // === POLA EDYCJI: tytul + instrukcja + obrazek ===
+  // Dodajemy dynamicznie, zeby nie powielac HTML w 9 miejscach.
+  const editFields = document.createElement('div');
+  editFields.className = 'task-edit-fields';
+  editFields.innerHTML = `
+    <div class="task-edit-field">
+      <span class="task-edit-label">Tytuł</span>
+      <div class="task-edit-field-row">
+        <input type="text" class="task-edit-input task-edit-title" placeholder="${escapeHtml(STATE.taskTitles[task] || '')}">
+        <button type="button" class="task-edit-reset" data-reset="title" title="Przywróć domyślny tytuł">RESET</button>
+      </div>
+    </div>
+    <div class="task-edit-field">
+      <span class="task-edit-label">Instrukcja</span>
+      <div class="task-edit-field-row">
+        <textarea class="task-edit-textarea task-edit-instr" rows="2" placeholder="${escapeHtml(DEFAULT_INSTRUCTIONS[task] || '')}"></textarea>
+        <button type="button" class="task-edit-reset" data-reset="instr" title="Przywróć domyślną instrukcję">RESET</button>
+      </div>
+    </div>
+    <div class="task-edit-field">
+      <span class="task-edit-label">Obrazek</span>
+      <div class="task-edit-field-row">
+        <input type="url" class="task-edit-input task-edit-image" placeholder="URL obrazka (https://...)">
+        <button type="button" class="task-edit-reset" data-reset="image" title="Usuń obrazek">RESET</button>
+      </div>
+    </div>
+    <div class="task-edit-image-preview" hidden>
+      <img alt="Podgląd obrazka">
+    </div>
+  `;
+  card.appendChild(editFields);
+
+  // Wartosci poczatkowe (jesli STATE zostal np. zaladowany z localStorage)
+  const titleInput = editFields.querySelector('.task-edit-title');
+  const instrInput = editFields.querySelector('.task-edit-instr');
+  const imageInput = editFields.querySelector('.task-edit-image');
+  const imagePreview = editFields.querySelector('.task-edit-image-preview');
+  const imagePreviewImg = imagePreview.querySelector('img');
+  const defaultTitle = STATE.taskTitles[task] || '';
+  if ((STATE.taskTitles[task] || '') !== defaultTitle) {
+    titleInput.value = STATE.taskTitles[task] || '';
+  }
+  if (STATE.taskCustomInstr[task]) {
+    instrInput.value = STATE.taskCustomInstr[task];
+  }
+  if (STATE.taskImages[task]) {
+    imageInput.value = STATE.taskImages[task];
+    imagePreviewImg.src = STATE.taskImages[task];
+    imagePreview.hidden = false;
+  }
+
+  // Listenery zapisu
+  titleInput.addEventListener('input', e => {
+    const v = e.target.value.trim();
+    // pusty string -> wroc do domyslnego z placeholdera
+    STATE.taskTitles[task] = v || defaultTitle;
+  });
+  instrInput.addEventListener('input', e => {
+    STATE.taskCustomInstr[task] = e.target.value;
+  });
+  imageInput.addEventListener('input', e => {
+    const v = e.target.value.trim();
+    STATE.taskImages[task] = v;
+    if (v) {
+      imagePreviewImg.src = v;
+      imagePreview.hidden = false;
+    } else {
+      imagePreview.hidden = true;
+      imagePreviewImg.removeAttribute('src');
+    }
+  });
+  // Jesli obrazek nie zaladuje sie - ukryj podglad ale zostaw URL w polu
+  imagePreviewImg.addEventListener('error', () => {
+    imagePreview.classList.add('error');
+  });
+  imagePreviewImg.addEventListener('load', () => {
+    imagePreview.classList.remove('error');
+  });
+
+  // Reset przyciski
+  editFields.querySelector('[data-reset="title"]').addEventListener('click', e => {
+    e.stopPropagation();
+    titleInput.value = '';
+    STATE.taskTitles[task] = defaultTitle;
+  });
+  editFields.querySelector('[data-reset="instr"]').addEventListener('click', e => {
+    e.stopPropagation();
+    instrInput.value = '';
+    STATE.taskCustomInstr[task] = '';
+  });
+  editFields.querySelector('[data-reset="image"]').addEventListener('click', e => {
+    e.stopPropagation();
+    imageInput.value = '';
+    STATE.taskImages[task] = '';
+    imagePreview.hidden = true;
+    imagePreviewImg.removeAttribute('src');
+  });
+
+  // Zablokuj propagacje zdarzen z pol edycji do karty (zeby nie togglowala checkboxa
+  // ani nie startowala draga przy probie selekcji tekstu w inpucie)
+  editFields.addEventListener('click', e => e.stopPropagation());
+  editFields.addEventListener('mousedown', e => {
+    // jesli klik w input/textarea/button - zatrzymaj propagacje do draga
+    if (e.target.matches('input, textarea, button')) {
+      e.stopPropagation();
+    }
+  });
+  // Wylacz drag na samym polu (bo cala karta ma draggable=true)
+  [titleInput, instrInput, imageInput].forEach(el => {
+    el.addEventListener('dragstart', e => e.preventDefault());
+    el.setAttribute('draggable', 'false');
+  });
+
   card.addEventListener('click', e => {
     // Tylko jeśli nie jesteśmy w trakcie drag-a
     if (_draggedTaskCard) return;
     if (card.classList.contains('disabled')) return;
     if (e.target.closest('.suboption-buttons')) return;
     if (e.target.closest('.task-instr-toggle')) return;
-    const cb = card.querySelector('input');
+    if (e.target.closest('.task-edit-fields')) return;
+    const cb = card.querySelector(':scope > input[type="checkbox"]');
     cb.checked = !cb.checked;
     card.classList.toggle('checked', cb.checked);
     STATE.tasks[card.dataset.task] = cb.checked;
     updateOrphanWarning();
     validateGenerate();
+    updateSelectAllState();
   });
-  if (card.querySelector('input').checked) card.classList.add('checked');
+  if (card.querySelector(':scope > input[type="checkbox"]').checked) card.classList.add('checked');
 
   // Drag-and-drop reorder
   card.addEventListener('dragstart', e => {
@@ -1474,10 +2035,29 @@ document.getElementById('ttsTestBtn').addEventListener('click', () => {
   window.speechSynthesis.cancel();
   const u = new SpeechSynthesisUtterance(text);
   u.lang = STATE.ttsLang;
+  u.rate = STATE.ttsRate || 1.0;
   const voice = getSelectedVoiceForSpeak();
   if (voice) u.voice = voice;
   window.speechSynthesis.speak(u);
 });
+
+// Slider predkosci TTS
+const ttsRateSlider = document.getElementById('ttsRate');
+const ttsRateValue = document.getElementById('ttsRateValue');
+const ttsRateReset = document.getElementById('ttsRateReset');
+function updateTtsRateDisplay() {
+  ttsRateValue.textContent = STATE.ttsRate.toFixed(2) + 'x';
+}
+ttsRateSlider.addEventListener('input', e => {
+  STATE.ttsRate = parseFloat(e.target.value);
+  updateTtsRateDisplay();
+});
+ttsRateReset.addEventListener('click', () => {
+  STATE.ttsRate = 1.0;
+  ttsRateSlider.value = '1.0';
+  updateTtsRateDisplay();
+});
+updateTtsRateDisplay();
 
 // Voices load asynchronicznie w niektórych przeglądarkach
 if (window.speechSynthesis) {
@@ -1505,6 +2085,7 @@ document.getElementById('logoUrl').addEventListener('input', e => {
 
 // Initialize
 updateTSVStatus();
+updateSelectAllState();
 
 // ============================================================
 // HELPERS
@@ -1654,7 +2235,8 @@ function buildWorksheetHTML() {
     ttsConfig: {
       enabled: STATE.ttsEnabled,
       lang: STATE.ttsLang,
-      voiceName: STATE.ttsVoice
+      voiceName: STATE.ttsVoice,
+      rate: STATE.ttsRate || 1.0
     },
     logoConfig: {
       show: STATE.logoEnabled,
@@ -1669,9 +2251,25 @@ function buildWorksheetHTML() {
 
 // Renderuje <p class="ws-sec-desc">…</p> tylko gdy w generatorze włączono
 // przełącznik "Instrukcja" dla danego typu zadania (default: true).
-function sectionInstr(taskName, text) {
+// Jesli uzytkownik nadpisal instrukcje (taskCustomInstr), uzywa jej zamiast domyslnej.
+function sectionInstr(taskName, defaultText) {
   if (STATE.taskInstructions[taskName] === false) return '';
-  return `<p class="ws-sec-desc">${text}</p>`;
+  const custom = (STATE.taskCustomInstr[taskName] || '').trim();
+  const text = custom || defaultText;
+  return `<p class="ws-sec-desc">${escapeHtml(text)}</p>`;
+}
+
+// Zwraca tytul sekcji - z STATE.taskTitles jesli ustawiony, inaczej fallback
+function sectionTitle(taskName, fallback) {
+  const t = (STATE.taskTitles[taskName] || '').trim();
+  return escapeHtml(t || fallback);
+}
+
+// Zwraca <div class="ws-sec-image"><img></div> jesli URL ustawiony, inaczej pusty string
+function sectionImage(taskName) {
+  const url = (STATE.taskImages[taskName] || '').trim();
+  if (!url) return '';
+  return `<div class="ws-sec-image"><img src="${escapeHtml(url)}" alt="" loading="lazy" onerror="this.parentElement.style.display='none'"></div>`;
 }
 
 function buildFlashcardsSection(num) {
@@ -1712,10 +2310,12 @@ function buildFlashcardsSection(num) {
   }).join('');
 
   return `
+    ${sectionImage('flashcards')}
+
     <section class="ws-section" data-section="${num}" id="sec-${num}">
       <div class="ws-sec-head">
         <div class="ws-sec-num">0${num}</div>
-        <h2 class="ws-sec-title">Flashcards</h2>
+        <h2 class="ws-sec-title">${sectionTitle('flashcards', 'Flashcards')}</h2>
       </div>
       ${sectionInstr('flashcards', 'Kliknij kartę, żeby odsłonić tłumaczenie. Spróbuj najpierw zgadnąć w głowie!')}
       <div class="flashcards-grid">${cards}</div>
@@ -1774,10 +2374,12 @@ function buildMatchingSection(num, options = {}) {
   const partBadge = totalParts > 1 ? `<span class="ws-part-badge">Część ${partNum}/${totalParts}</span>` : '';
 
   return `
+    ${sectionImage('matching')}
+
     <section class="ws-section" data-section="${num}" id="sec-${num}">
       <div class="ws-sec-head">
         <div class="ws-sec-num">0${num}</div>
-        <h2 class="ws-sec-title">Matching · Połącz w pary</h2>
+        <h2 class="ws-sec-title">${sectionTitle('matching', 'Matching')}</h2>
         ${partBadge}
       </div>
       ${sectionInstr('matching', 'Kliknij słowo z lewej strony, potem jego tłumaczenie z prawej.')}
@@ -1953,10 +2555,12 @@ function buildScrambleSection(num, options = {}) {
   }).join('');
 
   return `
+    ${sectionImage('scramble')}
+
     <section class="ws-section" data-section="${num}" id="sec-${num}">
       <div class="ws-sec-head">
         <div class="ws-sec-num">0${num}</div>
-        <h2 class="ws-sec-title">Word Scramble · Ułóż litery</h2>
+        <h2 class="ws-sec-title">${sectionTitle('scramble', 'Word Scramble')}</h2>
       </div>
       ${sectionInstr('scramble', 'Wpisz angielskie słowo (Enter sprawdza). Kliknij rozsypankę, żeby zobaczyć pomieszane litery. Kliknij "?" żeby wstawić kolejną literę odpowiedzi.')}
       <div class="scramble-grid">${items}</div>
@@ -2070,10 +2674,12 @@ function buildQuizSection(num) {
   }).join('');
 
   return `
+    ${sectionImage('quiz')}
+
     <section class="ws-section" data-section="${num}" id="sec-${num}">
       <div class="ws-sec-head">
         <div class="ws-sec-num">0${num}</div>
-        <h2 class="ws-sec-title">Quiz · Wybierz tłumaczenie</h2>
+        <h2 class="ws-sec-title">${sectionTitle('quiz', 'Quiz')}</h2>
       </div>
       ${sectionInstr('quiz', 'Wybierz prawidłowe tłumaczenie polskiego słowa. Tylko jedna odpowiedź jest poprawna.')}
       <div class="quiz-grid">${items}</div>
@@ -2168,10 +2774,12 @@ function buildUnscrambleSection(num) {
   }).filter(s => s.length > 0).join('');
 
   return `
+    ${sectionImage('unscramble')}
+
     <section class="ws-section" data-section="${num}" id="sec-${num}">
       <div class="ws-sec-head">
         <div class="ws-sec-num">0${num}</div>
-        <h2 class="ws-sec-title">Sentence Unscramble · Ułóż zdanie</h2>
+        <h2 class="ws-sec-title">${sectionTitle('unscramble', 'Sentence Unscramble')}</h2>
       </div>
       ${sectionInstr('unscramble', 'Kliknij słowa, żeby je wstawić w odpowiedniej kolejności. Możesz też przeciągnąć słowa, żeby je przestawić. Kliknij "?" żeby wstawić kolejne poprawne słowo.')}
       <div class="unsc-grid">${items}</div>
@@ -2452,10 +3060,12 @@ function buildCornellSection(num) {
     </div>`).join('');
 
   return `
+    ${sectionImage('cornell')}
+
     <section class="ws-section" data-section="${num}" id="sec-${num}">
       <div class="ws-sec-head">
         <div class="ws-sec-num">0${num}</div>
-        <h2 class="ws-sec-title">Pytania &amp; odpowiedzi</h2>
+        <h2 class="ws-sec-title">${sectionTitle('cornell', 'Pytania &amp; odpowiedzi')}</h2>
       </div>
       ${sectionInstr('cornell', 'Kliknij pytanie, żeby odsłonić odpowiedź. Spróbuj najpierw odpowiedzieć w głowie!')}
       <div class="cornell-grid">${items}</div>
@@ -2559,10 +3169,12 @@ function buildGapfillSection(num) {
   }).join('');
 
   return `
+    ${sectionImage('gapfill')}
+
     <section class="ws-section" data-section="${num}" id="sec-${num}">
       <div class="ws-sec-head">
         <div class="ws-sec-num">0${num}</div>
-        <h2 class="ws-sec-title">Gap Fill · Uzupełnij luki</h2>
+        <h2 class="ws-sec-title">${sectionTitle('gapfill', 'Gap Fill')}</h2>
       </div>
       ${sectionInstr('gapfill', 'Wpisz brakujące słowa w lukach (Enter sprawdza). Po uzupełnieniu wszystkich luk w zdaniu pojawi się polskie tłumaczenie.')}
       <div class="gap-grid">${items}</div>
@@ -2662,7 +3274,7 @@ function buildTranslateSection(num) {
           <input type="text" class="trans-input" data-answer="${escapeHtml(r.en)}" placeholder="Wpisz tłumaczenie po angielsku..." onkeydown="if(event.key==='Enter'){event.preventDefault();checkTranslate_${num}(this);}">
           <div class="trans-input-actions">
             <button class="trans-check" onclick="checkTranslate_${num}(this.closest('.trans-card').querySelector('.trans-input'))" title="Sprawdź">✓</button>
-            <button class="trans-hint-btn" onclick="hintTranslate_${num}(${i})" title="Podpowiedź - kolejne słowo">?</button>
+            <button class="trans-hint-btn" onclick="hintTranslate_${num}(${i})" title="Podpowiedź - kolejna litera">?</button>
             <button class="tts-btn tts-btn-trans" onclick="ttsBtnClick(event, ${JSON.stringify(r.en).replace(/"/g, '&quot;')})" title="Posłuchaj poprawnego tłumaczenia" aria-label="Czytaj">🔊</button>
           </div>
         </div>
@@ -2673,10 +3285,12 @@ function buildTranslateSection(num) {
   }).join('');
 
   return `
+    ${sectionImage('translate')}
+
     <section class="ws-section" data-section="${num}" id="sec-${num}">
       <div class="ws-sec-head">
         <div class="ws-sec-num">0${num}</div>
-        <h2 class="ws-sec-title">Translate · Przetłumacz zdanie</h2>
+        <h2 class="ws-sec-title">${sectionTitle('translate', 'Translate')}</h2>
       </div>
       ${sectionInstr('translate', 'Przetłumacz polskie słowo, frazę lub zdanie na angielski (Enter sprawdza). Sprawdzanie pomija wielkość liter i kropkę na końcu.')}
       <div class="trans-grid">${items}</div>
@@ -2733,22 +3347,23 @@ function buildTranslateJS(num) {
     const ta = card.querySelector('.trans-input');
     if (ta.disabled) return;
     const ans = ta.dataset.answer;
-    const ansWords = ans.trim().split(/\\s+/);
-    const userWords = ta.value.trim() ? ta.value.trim().split(/\\s+/) : [];
-    // policz ile słów user trafił w ciągu (ignoruj case i interpunkcje)
-    const norm = w => w.toLowerCase().replace(/[.,!?;:]+$/g, '');
+    const userVal = ta.value;
+    // znajdz najdluzszy prefiks ans (case-insensitive) ktory pasuje do tego co user wpisal
     let matchLen = 0;
-    for (let i = 0; i < Math.min(userWords.length, ansWords.length); i++) {
-      if (norm(userWords[i]) === norm(ansWords[i])) matchLen++;
+    for (let i = 0; i < Math.min(userVal.length, ans.length); i++) {
+      if (userVal[i].toLowerCase() === ans[i].toLowerCase()) matchLen++;
       else break;
     }
-    if (matchLen >= ansWords.length) return; // już wszystko
-    // zbuduj nową wartość: pierwsze matchLen+1 słów z odpowiedzi
-    const newVal = ansWords.slice(0, matchLen + 1).join(' ');
+    if (matchLen >= ans.length) return; // juz wszystko
+    // dodaj kolejna literke z odpowiedzi (w jej oryginalnym case)
+    const newVal = ans.slice(0, matchLen + 1);
     ta.value = newVal;
     ta.classList.remove('trans-wrong');
+    // ustaw kursor na koncu
     ta.focus();
-    if (matchLen + 1 === ansWords.length) {
+    try { ta.setSelectionRange(newVal.length, newVal.length); } catch(e) {}
+    // jesli to byla ostatnia literka, automatycznie sprawdz
+    if (matchLen + 1 === ans.length) {
       window.checkTranslate_${num}(ta);
     }
   };
@@ -2798,10 +3413,12 @@ function buildWritingSection(num) {
   }).join('');
 
   return `
+    ${sectionImage('writing')}
+
     <section class="ws-section" data-section="${num}" id="sec-${num}">
       <div class="ws-sec-head">
         <div class="ws-sec-num">0${num}</div>
-        <h2 class="ws-sec-title">Writing · Napisz własny tekst</h2>
+        <h2 class="ws-sec-title">${sectionTitle('writing', 'Writing')}</h2>
       </div>
       ${sectionInstr('writing', 'Napisz odpowiedź według polecenia. Kliknij "Gotowe", gdy skończysz.')}
       <div class="write-grid">${items}</div>
@@ -2946,6 +3563,7 @@ function speakText(text, btn) {
   window.speechSynthesis.cancel();
   const u = new SpeechSynthesisUtterance(text);
   u.lang = WS_TTS.lang || 'en-US';
+  u.rate = typeof WS_TTS.rate === 'number' ? WS_TTS.rate : 1.0;
   const voice = _wsGetVoice();
   if (voice) u.voice = voice;
   if (btn) {
@@ -3506,7 +4124,9 @@ function getVintageTheme(accent, bg, textColor) {
     flashBorder: '#d4b896',
     // Tło dla wszystkich boxów zadań - jeden wspólny jasny kolor.
     // Możesz go zmienić tutaj, żeby zmienić tło wszystkich sekcji w motywie Vintage.
-    boxBg: '#fff4e5'           // jasny kremowo-piaskowy
+    boxBg: '#fff4e5',           // jasny kremowo-piaskowy
+    // Pasek postępu - bez jaskrawego pomarańczu w środku, łagodne przejście czerwone→bordo
+    progressGradient: `linear-gradient(90deg, ${accent} 0%, #a83255 100%)`
   };
 }
 
@@ -3570,6 +4190,7 @@ function buildWorksheetCSS(t) {
   --ws-accent-vibrant: ${t.accentVibrant || t.accent};
   --ws-accent-gradient: linear-gradient(135deg, ${t.accent} 0%, ${t.accentSecondary || t.accent} 100%);
   --ws-accent-gradient-3: linear-gradient(135deg, ${t.accent} 0%, ${t.accentSecondary || t.accent} 50%, ${t.accentTertiary || t.accent} 100%);
+  --ws-progress-gradient: ${t.progressGradient || `linear-gradient(135deg, ${t.accent} 0%, ${t.accentSecondary || t.accent} 50%, ${t.accentTertiary || t.accent} 100%)`};
   --ws-accent-soft: ${accentRgba(0.1)};
   --ws-accent-strong: ${accentRgba(0.25)};
   --ws-surface: ${t.surface};
@@ -3699,7 +4320,7 @@ ${t.extraBgCSS}
 }
 .ws-progress-fill {
   height: 100%; width: 0%;
-  background: var(--ws-accent-gradient-3);
+  background: var(--ws-progress-gradient);
   border-radius: 4px;
   transition: width 0.6s cubic-bezier(0.16,1,0.3,1);
   box-shadow: 0 0 8px ${accentRgba(0.4)};
@@ -3732,6 +4353,59 @@ ${t.extraBgCSS}
 .ws-section.ws-done {
   border-color: var(--ws-accent);
   box-shadow: 0 4px 16px ${accentRgba(0.12)}, 0 1px 3px rgba(0,0,0,0.05);
+}
+
+/* Obrazek prezentujacy sekcje - odseparowany element NAD sekcja.
+   Czysty kadr, zaokrąglone rogi, pusta przestrzen pod obrazem oddziela go od sekcji. */
+.ws-sec-image {
+  margin: 0 0 clamp(0.9rem, 2vw, 1.4rem) 0;
+  border-radius: 14px;
+  overflow: hidden;
+  background: var(--ws-box-bg);
+  position: relative;
+}
+.ws-sec-image img {
+  display: block;
+  width: 100%;
+  height: 150px;
+  object-fit: cover;
+  /* Punkt wyjsciowy dla parallax: lekko powiekszony, zeby pozniej mial gdzie sie "ruszyc" */
+  transform: scale(1.12) translateY(0);
+  transform-origin: center center;
+  will-change: transform;
+}
+
+/* Parallax: gdy obrazek wchodzi w viewport, transformacja sie zmienia.
+   Uzywamy nowych CSS scroll-driven animations - bez JS. */
+@supports (animation-timeline: view()) {
+  .ws-sec-image img {
+    animation: wsImageParallax linear both;
+    animation-timeline: view();
+    animation-range: cover 0% cover 100%;
+  }
+  @keyframes wsImageParallax {
+    /* Gdy obraz wchodzi w viewport od dolu */
+    from { transform: scale(1.12) translateY(-18px); }
+    /* W srodku viewportu */
+    50%  { transform: scale(1.12) translateY(0); }
+    /* Gdy wychodzi w gore */
+    to   { transform: scale(1.12) translateY(18px); }
+  }
+}
+
+/* Hover na obrazku celowo wylaczony - obraz pozostaje statyczny */
+
+@media (max-width: 640px) {
+  .ws-sec-image img { height: 110px; }
+}
+
+/* Szanuj prefers-reduced-motion - wylacz parallax */
+@media (prefers-reduced-motion: reduce) {
+  .ws-sec-image img {
+    transform: scale(1) translateY(0) !important;
+    animation: none !important;
+    transition: none !important;
+  }
 }
 
 .ws-sec-head {
@@ -4020,9 +4694,7 @@ ${t.extraBgCSS}
   cursor: default;
   font-weight: 700;
   padding-left: 3.6rem;
-  /* Min wysokość, żeby kreska pod numerkiem miała sensowną długość.
-     Dla 1-liniowych treści klasa .single-line chowa kreskę. */
-  min-height: 5rem;
+  animation: wsBounce 0.5s cubic-bezier(0.34, 1.56, 0.64, 1), wsCorrectGlow 0.9s ease-out;
 }
 .match-item.matched::before {
   content: attr(data-pair);
@@ -4037,38 +4709,87 @@ ${t.extraBgCSS}
   display: grid; place-items: center;
   letter-spacing: 0;
 }
-.match-item.matched::after {
-  content: '';
-  position: absolute;
-  /* Numerek ma top 0.95rem i wysokość 32px (~2rem) -> kończy się na ~2.95rem.
-     Kreska startuje 0.1rem pod nim i schodzi do dolnego paddingu (1rem od dołu).
-     Min-height 5rem na kafelku gwarantuje min ~1rem wysokości kreski. */
-  top: 3.05rem;
-  bottom: 1rem;
-  left: 3.05rem;
-  width: 2px;
-  border-radius: 1px;
-  background: var(--pair-color, currentColor);
-  opacity: 0.55;
-}
 /* Jeśli treść jest jednoliniowa (krótka), numerek się centruje */
 .match-item.matched.single-line::before {
   top: 50%;
   transform: translateY(-50%);
 }
-.match-item.matched.single-line::after {
-  display: none;
-}
 .match-item.wrong {
   border-color: var(--ws-no);
   background: var(--ws-no-bg);
   color: var(--ws-no);
-  animation: wsShake 0.4s;
+  animation: wsBuzz 0.5s, wsFlashWrong 0.6s ease-out;
 }
 @keyframes wsShake {
   0%, 100% { transform: translateX(0); }
   25% { transform: translateX(-4px); }
   75% { transform: translateX(4px); }
+}
+/* === FEEDBACK ANIMATIONS === */
+/* Pop dla poprawnych odpowiedzi - delikatne powiekszenie z powrotem */
+@keyframes wsPop {
+  0%   { transform: scale(1); }
+  40%  { transform: scale(1.08); }
+  70%  { transform: scale(0.98); }
+  100% { transform: scale(1); }
+}
+/* Subtelniejszy pop dla mniejszych elementow lub gdy nie chcemy duzego skoku */
+@keyframes wsPopSubtle {
+  0%   { transform: scale(1); }
+  50%  { transform: scale(1.025); }
+  100% { transform: scale(1); }
+}
+/* Mocniejszy bounce dla wiekszych elementow (np. quiz-option, match-item) */
+@keyframes wsBounce {
+  0%   { transform: scale(1) translateY(0); }
+  30%  { transform: scale(1.04) translateY(-3px); }
+  60%  { transform: scale(0.99) translateY(0); }
+  100% { transform: scale(1) translateY(0); }
+}
+/* Pulsujaca poswiata sukcesu */
+@keyframes wsCorrectGlow {
+  0%   { box-shadow: 0 0 0 0 rgba(34, 197, 94, 0); }
+  40%  { box-shadow: 0 0 0 6px rgba(34, 197, 94, 0.18); }
+  100% { box-shadow: 0 0 0 0 rgba(34, 197, 94, 0); }
+}
+/* Wzmocnione drganie dla bledu (mocniejsze niz wsShake) */
+@keyframes wsBuzz {
+  0%, 100% { transform: translateX(0) rotate(0); }
+  15% { transform: translateX(-5px) rotate(-0.5deg); }
+  30% { transform: translateX(5px) rotate(0.5deg); }
+  45% { transform: translateX(-4px) rotate(-0.4deg); }
+  60% { transform: translateX(4px) rotate(0.4deg); }
+  75% { transform: translateX(-2px) rotate(0); }
+}
+/* Czerwony blysk tla dla bledu */
+@keyframes wsFlashWrong {
+  0%   { box-shadow: 0 0 0 0 rgba(220, 38, 38, 0); }
+  35%  { box-shadow: 0 0 0 6px rgba(220, 38, 38, 0.22); }
+  100% { box-shadow: 0 0 0 0 rgba(220, 38, 38, 0); }
+}
+/* Tick - delikatny "stempel" dla pojawiajacego sie checkmarka */
+@keyframes wsTickIn {
+  0%   { transform: scale(0.5) rotate(-12deg); opacity: 0; }
+  60%  { transform: scale(1.15) rotate(2deg); opacity: 1; }
+  100% { transform: scale(1) rotate(0); opacity: 1; }
+}
+/* Respekt dla preferencji uzytkownika - wylacz mocne animacje */
+@media (prefers-reduced-motion: reduce) {
+  .match-item.matched,
+  .match-item.wrong,
+  .scramble-input.correct,
+  .scramble-input.wrong,
+  .unsc-word.correct-pos,
+  .unsc-word.wrong-pos,
+  .quiz-option.quiz-correct,
+  .quiz-option.quiz-correct .quiz-opt-letter,
+  .quiz-option.quiz-wrong,
+  .gap-input.gap-correct,
+  .gap-input.gap-wrong,
+  .trans-input.trans-correct,
+  .trans-input.trans-wrong {
+    animation: none !important;
+  }
 }
 @media (max-width: 540px) {
   .match-grid { grid-template-columns: 1fr; gap: 1.5rem; }
@@ -4153,10 +4874,11 @@ ${t.extraBgCSS}
 .scramble-input.correct {
   border-color: var(--ws-ok); color: var(--ws-ok);
   background: var(--ws-ok-bg);
+  animation: wsPopSubtle 0.35s ease-out, wsCorrectGlow 0.9s ease-out;
 }
 .scramble-input.wrong {
   border-color: var(--ws-no); color: var(--ws-no);
-  animation: wsShake 0.4s;
+  animation: wsBuzz 0.5s, wsFlashWrong 0.6s ease-out;
 }
 .scramble-check, .scramble-hint-btn {
   font-family: var(--ws-body); font-weight: 600;
@@ -4486,12 +5208,13 @@ ${t.extraBgCSS}
   background: var(--ws-ok-bg);
   border-color: var(--ws-ok);
   color: var(--ws-ok);
+  animation: wsPop 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
 }
 .unsc-word.wrong-pos {
   background: var(--ws-no-bg);
   border-color: var(--ws-no);
   color: var(--ws-no);
-  animation: wsShake 0.3s;
+  animation: wsBuzz 0.45s, wsFlashWrong 0.55s ease-out;
 }
 .unsc-card.done .unsc-word {
   cursor: default;
@@ -4767,15 +5490,17 @@ ${t.extraBgCSS}
   border-color: var(--ws-ok);
   background: var(--ws-ok-bg);
   color: var(--ws-ok);
+  animation: wsBounce 0.5s cubic-bezier(0.34, 1.56, 0.64, 1), wsCorrectGlow 0.9s ease-out;
 }
 .quiz-option.quiz-correct .quiz-opt-letter {
   background: var(--ws-ok); color: #fff;
+  animation: wsTickIn 0.45s cubic-bezier(0.34, 1.56, 0.64, 1);
 }
 .quiz-option.quiz-wrong {
   border-color: var(--ws-no);
   background: var(--ws-no-bg);
   color: var(--ws-no);
-  animation: wsShake 0.4s;
+  animation: wsBuzz 0.5s, wsFlashWrong 0.6s ease-out;
 }
 .quiz-option.quiz-wrong .quiz-opt-letter {
   background: var(--ws-no); color: #fff;
@@ -4885,12 +5610,13 @@ ${t.extraBgCSS}
   background: var(--ws-ok-bg);
   border-bottom-color: var(--ws-ok);
   color: var(--ws-ok);
+  animation: wsPop 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
 }
 .gap-input.gap-wrong {
   background: var(--ws-no-bg);
   border-bottom-color: var(--ws-no);
   color: var(--ws-no);
-  animation: wsShake 0.4s;
+  animation: wsBuzz 0.45s, wsFlashWrong 0.55s ease-out;
 }
 .gap-input::placeholder {
   color: var(--ws-text-dim);
@@ -4900,7 +5626,7 @@ ${t.extraBgCSS}
 .gap-translation {
   margin-top: 1rem;
   padding-top: 0.85rem;
-  border-top: 1px dashed var(--ws-border);
+  border-top: 1px solid var(--ws-border);
   font-size: 0.98rem;
   color: var(--ws-text-dim);
   display: none;
@@ -5000,12 +5726,13 @@ ${t.extraBgCSS}
   border-color: var(--ws-ok);
   color: var(--ws-ok);
   font-weight: 600;
+  animation: wsPopSubtle 0.35s ease-out, wsCorrectGlow 0.9s ease-out;
 }
 .trans-input.trans-wrong {
   border-color: var(--ws-no);
   background: var(--ws-no-bg);
   color: var(--ws-no);
-  animation: wsShake 0.4s;
+  animation: wsBuzz 0.5s, wsFlashWrong 0.6s ease-out;
 }
 .trans-input-actions {
   display: flex;
@@ -5032,7 +5759,7 @@ ${t.extraBgCSS}
 .trans-correct {
   margin-top: 1rem;
   padding-top: 0.85rem;
-  border-top: 1px dashed var(--ws-border);
+  border-top: 1px solid var(--ws-border);
   font-size: 0.98rem;
   color: var(--ws-text-dim);
   display: none;
