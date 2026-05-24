@@ -617,6 +617,23 @@ body::before {
   content: 'Aa'; font-family: 'Fraunces', serif; font-weight: 700;
   font-size: 3.5rem; color: #e8a4b0; line-height: 1;
 }
+/* Atelier: czysta biel/kosc sloniowa, ostre rogi, granatowe Aa w wytwornym serifie.
+   Cienka kreska na dole sugeruje editorial layout.
+   UWAGA: nadpisujemy flex z .preset-thumb na grid, zeby ::before bylo wycentrowane,
+   a ::after (linia) moglo siedziec absolutnie bez zaburzania ukladu. */
+.thumb-atelier {
+  background: #fafaf7;
+}
+.thumb-atelier::before {
+  content: 'Aa';
+  font-family: 'Fraunces', Georgia, serif;
+  font-weight: 500;
+  font-style: italic;
+  font-size: 3.4rem;
+  color: #1a2847;
+  line-height: 1;
+  letter-spacing: -0.02em;
+}
 
 /* COLOR PICKERS */
 .color-row { display: grid; grid-template-columns: repeat(3, 1fr); gap: 0.8rem; }
@@ -1129,6 +1146,10 @@ Napisz krótki email do przyjaciela o ostatnim weekendzie.	Use past simple. Incl
           <div class="preset-thumb thumb-pastel"></div>
           <div class="preset-name">Soft Pastel</div>
         </div>
+        <div class="preset-card" data-preset="atelier">
+          <div class="preset-thumb thumb-atelier"></div>
+          <div class="preset-name">Atelier</div>
+        </div>
       </div>
     </div>
 
@@ -1321,7 +1342,10 @@ const DEFAULT_INSTRUCTIONS = {
 // Default colors per preset (cardBg, border, textDim itp. są wyliczane z akcentu w themach)
 const PRESET_DEFAULTS = {
   vintage: { accent: '#c0392b', bg: '#fffaf0', text: '#1f1a14' },
-  pastel:  { accent: '#d65a8a', bg: '#fffaff', text: '#3a2c33' }
+  pastel:  { accent: '#d65a8a', bg: '#fffaff', text: '#3a2c33' },
+  // Atelier: gleboki granat na cieplej kremowo-bialej (papier dokumentowy).
+  // Tekst niemal czarny, ale lekko cieplejszy niz #000 zeby pasowal do koloru tla.
+  atelier: { accent: '#1a2847', bg: '#fafaf7', text: '#1a1a1a' }
 };
 
 // ============================================================
@@ -1357,8 +1381,12 @@ function parseTSV(text) {
 }
 
 // Parse "f,m" -> ['flashcards','matching']. Empty -> [] (means: include in all selected types).
+// Obsluga numerow instancji: "F2,M" -> ['flashcards:2', 'matching']. F bez numeru = instancja 1 (klucz: 'flashcards').
+// F2 = instancja 2 (klucz: 'flashcards:2'), F3 = instancja 3 (klucz: 'flashcards:3').
+// Format taga: litera lub pelna nazwa, opcjonalnie cyfra na koncu.
 function parseTaskTags(s) {
   if (!s.trim()) return [];
+  // Mapa nazw - klucz to "podstawa" taga (bez cyfry), wartosc to nazwa zadania.
   const map = {
     f: 'flashcards', flashcard: 'flashcards', flashcards: 'flashcards',
     m: 'matching', match: 'matching', matching: 'matching',
@@ -1372,35 +1400,131 @@ function parseTaskTags(s) {
   };
   const result = [];
   s.split(/[,;|]/).forEach(tag => {
-    const t = tag.trim().toLowerCase();
-    if (map[t]) result.push(map[t]);
+    const raw = tag.trim().toLowerCase();
+    if (!raw) return;
+    // Wyodrebnij podstawe (litery) i opcjonalny numer (cyfry na koncu).
+    const match = raw.match(/^([a-z]+)(\d+)?$/);
+    if (!match) return;
+    const base = match[1];
+    const num = match[2] ? parseInt(match[2], 10) : 1;
+    if (!map[base]) return;
+    const taskName = map[base];
+    // Instancja 1 -> sam taskName (kompatybilnosc wsteczna z istniejacymi danymi).
+    // Instancja 2+ -> taskName + ':' + numer (np. 'flashcards:2').
+    const key = num <= 1 ? taskName : (taskName + ':' + num);
+    if (!result.includes(key)) result.push(key);
   });
   return result;
 }
 
-// Filter rows for a given task type. If row has no tags -> belongs to all selected types. If row has tags -> only if task is in tags.
-function rowsForTask(taskName) {
-  return STATE.rows.filter(r => r._tasks.length === 0 || r._tasks.includes(taskName));
+// Helpery do pracy z taskKey (np. 'flashcards' lub 'flashcards:2'):
+// taskKeyBase('flashcards:2') -> 'flashcards'
+// taskKeyNum('flashcards:2') -> 2,  taskKeyNum('flashcards') -> 1
+function taskKeyBase(key) {
+  const i = key.indexOf(':');
+  return i === -1 ? key : key.slice(0, i);
+}
+function taskKeyNum(key) {
+  const i = key.indexOf(':');
+  return i === -1 ? 1 : parseInt(key.slice(i + 1), 10);
+}
+function makeTaskKey(base, num) {
+  return num <= 1 ? base : (base + ':' + num);
+}
+
+// Skanuje STATE.rows i zwraca wszystkie wykryte instancje danego typu zadania.
+// Zwraca array obiektow { key, num, count } - klucze posortowane po numerze,
+// numeracja skompresowana (jesli sa tylko F1 i F3, F3 traktowane jest jako F2 w UI).
+// Wynik to mapa { 'flashcards': [{key:'flashcards', num:1, count:5}, {key:'flashcards:2', num:2, count:3}], ... }
+function detectTaskInstances() {
+  const instancesByBase = {};
+  // Zbierz wszystkie unikalne taskKey z wierszy.
+  const usedKeys = new Set();
+  STATE.rows.forEach(r => {
+    r._tasks.forEach(k => usedKeys.add(k));
+  });
+  // Pogrupuj po bazie i posortuj numery rosnaco.
+  usedKeys.forEach(key => {
+    const base = taskKeyBase(key);
+    const num = taskKeyNum(key);
+    if (!instancesByBase[base]) instancesByBase[base] = [];
+    instancesByBase[base].push({ origKey: key, origNum: num });
+  });
+  // Dla wierszy bez tagow - kazdy typ podstawowy ma niejawnie instancje 1.
+  const hasUntagged = STATE.rows.some(r => r._tasks.length === 0);
+  if (hasUntagged) {
+    ['flashcards','matching','scramble','quiz','unscramble','cornell','gapfill','translate','writing'].forEach(base => {
+      if (!instancesByBase[base]) instancesByBase[base] = [];
+      if (!instancesByBase[base].some(x => x.origNum === 1)) {
+        instancesByBase[base].push({ origKey: base, origNum: 1 });
+      }
+    });
+  }
+  // Skompresuj numery - jesli sa luki, przemapuj na 1,2,3,...
+  const compressed = {};
+  Object.keys(instancesByBase).forEach(base => {
+    const arr = instancesByBase[base].sort((a, b) => a.origNum - b.origNum);
+    compressed[base] = arr.map((item, idx) => {
+      const num = idx + 1;
+      const key = makeTaskKey(base, num);
+      return { key, num, origKey: item.origKey, origNum: item.origNum };
+    });
+  });
+  return compressed;
+}
+
+// Filter rows for a given task type. Akceptuje pelny taskKey:
+// - 'flashcards' (instancja 1) lub 'flashcards:2' (instancja 2).
+// Dla instancji 1: wiersze bez tagow + wiersze z tagiem instancji 1.
+// Dla instancji 2+: tylko wiersze z odpowiednim tagiem (zmapowanym z origKey z parsera).
+function rowsForTask(taskKey) {
+  const base = taskKeyBase(taskKey);
+  const num = taskKeyNum(taskKey);
+  // Zmapuj kompresowany numer instancji na origKey w danych.
+  // Np. uzytkownik wpisal F1 i F3, a UI pokazuje to jako Flashcards 1 i 2.
+  // taskKey 'flashcards:2' (UI) -> w danych odpowiada 'flashcards:3' (origKey).
+  const instances = detectTaskInstances()[base] || [];
+  const inst = instances.find(x => x.num === num);
+  const origKey = inst ? inst.origKey : taskKey;
+  return STATE.rows.filter(r => {
+    // Brak tagow = wiersz idzie do KAZDEJ instancji 1 (kompatybilnosc wsteczna).
+    if (r._tasks.length === 0) return num === 1;
+    return r._tasks.includes(origKey);
+  });
 }
 
 // Sprawdza, czy są wiersze z tagami dla nieaktywnych typów zadań
 function getOrphanedTagWarnings() {
-  const taskNames = ['flashcards', 'matching', 'scramble', 'quiz', 'unscramble', 'cornell', 'gapfill', 'translate', 'writing'];
+  // Zamiast bazowych nazw, iterujemy po wszystkich rzeczywistych taskKey w taskOrder
+  // (zawiera tez instancje 2+ wykryte z tagow). Dzieki temu warning dziala dla F2/M3 itd.
+  const allKeys = STATE.taskOrder.slice();
   const warnings = [];
-  taskNames.forEach(task => {
-    if (STATE.tasks[task]) return; // typ jest aktywny, OK
-    // znajdź wiersze które mają wyłącznie ten tag (i może inne nieaktywne)
+  // Wstecznie tlumaczymy taskKey (kompresowany w UI) na origKey (w danych) - tak jak rowsForTask.
+  const instances = (typeof detectTaskInstances === 'function') ? detectTaskInstances() : {};
+  allKeys.forEach(task => {
+    if (STATE.tasks[task]) return;
+    const base = (typeof taskKeyBase === 'function') ? taskKeyBase(task) : task;
+    const num = (typeof taskKeyNum === 'function') ? taskKeyNum(task) : 1;
+    const inst = (instances[base] || []).find(x => x.num === num);
+    const origKey = inst ? inst.origKey : task;
     const orphans = STATE.rows.filter(r => {
-      if (r._tasks.length === 0) return false; // pusty tag = idzie wszędzie, więc trafi gdziekolwiek
-      // czy wszystkie tagi tego wiersza są nieaktywne?
-      return r._tasks.every(t => !STATE.tasks[t]);
+      if (r._tasks.length === 0) return false;
+      return r._tasks.every(t => {
+        // wiersz "orphan" gdy wszystkie jego tagi sa nieaktywne (po przemapowaniu)
+        const tBase = taskKeyBase(t);
+        const tNum = taskKeyNum(t);
+        // znajdz UI-key (kompresowany)
+        const uiInst = (instances[tBase] || []).find(x => x.origNum === tNum);
+        const uiKey = uiInst ? uiInst.key : t;
+        return !STATE.tasks[uiKey];
+      });
     });
     if (orphans.length > 0) {
-      // tylko te które mają TEN konkretny tag
-      const withThisTag = orphans.filter(r => r._tasks.includes(task));
+      const withThisTag = orphans.filter(r => r._tasks.includes(origKey));
       if (withThisTag.length > 0) {
         const labels = { flashcards: 'Flashcards', matching: 'Matching', scramble: 'Word Scramble', quiz: 'Quiz', unscramble: 'Sentence Unscramble', cornell: 'Pytania & odpowiedzi', gapfill: 'Gap Fill', translate: 'Translate', writing: 'Writing' };
-        warnings.push({ task, count: withThisTag.length, label: labels[task] });
+        const label = labels[base] + (num > 1 ? ' ' + num : '');
+        warnings.push({ task, count: withThisTag.length, label });
       }
     }
   });
@@ -1459,6 +1583,11 @@ function updateTSVStatus() {
   STATE.rows = result.rows;
   STATE.headers = result.headers;
 
+  // Wykryj instancje 2+ z tagow i zsynchronizuj UI generatora (dodaj/usun karty).
+  // To musi sie wydarzyc PRZED updateTaskAvailability, zeby nowe karty istnialy
+  // i mialy szanse byc zaznaczone.
+  if (typeof syncTaskInstancesUI === 'function') syncTaskInstancesUI();
+
   // Stats per task type
   const counts = {
     flashcards: rowsForTask('flashcards').length,
@@ -1479,7 +1608,7 @@ function updateTSVStatus() {
   if (hasTagsCol && taggedRows > 0) {
     msg += `<span class="hint">Klasyfikacja: flashcards: ${counts.flashcards}, matching: ${counts.matching}, scramble: ${counts.scramble}, quiz: ${counts.quiz}, unscramble: ${counts.unscramble}, cornell: ${counts.cornell}, gapfill: ${counts.gapfill}, translate: ${counts.translate}, writing: ${counts.writing} (${taggedRows} wierszy ze specyficznymi tagami)</span>`;
   } else {
-    msg += `<span class="hint">Wszystkie wiersze trafią do każdego zaznaczonego typu zadania. Aby przypisać wiersze do konkretnych typów, dodaj kolumnę <code>tasks</code> z tagami: f, m, s, q, u, c, g, t, w (lub kombinacje typu f,m).</span>`;
+    msg += `<span class="hint">Wszystkie wiersze trafią do każdego zaznaczonego typu zadania. Aby przypisać wiersze do konkretnych typów, dodaj kolumnę <code>tasks</code> z tagami: f, m, s, q, u, c, g, t, w (możesz powielić sekcje numerując: f2, m2 itd.).</span>`;
   }
   status.innerHTML = msg;
   updateTaskAvailability();
@@ -1492,24 +1621,26 @@ function updateTaskAvailability() {
   cards.forEach(card => {
     const task = card.dataset.task;
     const taskRows = STATE.rows.length > 0 ? rowsForTask(task) : [];
+    // Dla instancji 2+ porownujemy baze (np. 'matching:2' -> 'matching').
+    const taskBase = (typeof taskKeyBase === 'function') ? taskKeyBase(task) : task;
     const cb = card.querySelector(':scope > input[type="checkbox"]');
     let ok = taskRows.length > 0;
     let reason = '';
 
-    if (task === 'matching' && taskRows.length < 3) {
+    if (taskBase === 'matching' && taskRows.length < 3) {
       ok = false;
       reason = `Potrzeba min. 3 wiersze (jest ${taskRows.length})`;
     }
-    if (task === 'quiz' && taskRows.length < STATE.quizOptions) {
+    if (taskBase === 'quiz' && taskRows.length < STATE.quizOptions) {
       ok = false;
       reason = `Potrzeba min. ${STATE.quizOptions} wiersze dla quizu (jest ${taskRows.length})`;
     }
     // unscramble - bez minimum, ale wiersz musi mieć przynajmniej 2 słowa w en
-    if (task === 'unscramble' && taskRows.length === 0) {
+    if (taskBase === 'unscramble' && taskRows.length === 0) {
       ok = false;
     }
     // gapfill: tylko wiersze z klamrami {...} w en mają sens
-    if (task === 'gapfill') {
+    if (taskBase === 'gapfill') {
       const validGapRows = taskRows.filter(r => /\{[^}]+\}/.test(r.en));
       if (validGapRows.length === 0) {
         ok = false;
@@ -1519,7 +1650,7 @@ function updateTaskAvailability() {
       }
     }
     // translate / writing: wystarczy 1+ wiersz
-    if ((task === 'translate' || task === 'writing') && taskRows.length === 0) {
+    if ((taskBase === 'translate' || taskBase === 'writing') && taskRows.length === 0) {
       ok = false;
     }
 
@@ -1704,6 +1835,13 @@ document.getElementById('selectAllBtn').addEventListener('click', () => {
 });
 
 document.querySelectorAll('.task-card').forEach(card => {
+  initTaskCard(card);
+});
+
+// Inicjalizacja jednej karty zadania w gridzie. Funkcja wyciagnieta z petli,
+// zeby mozna ja bylo wywolac rowniez dla dynamicznie wstrzykiwanych kart
+// instancji 2+ (np. Flashcards 2, Matching 3, ...).
+function initTaskCard(card) {
   card.setAttribute('draggable', 'true');
   const task = card.dataset.task;
 
@@ -1762,14 +1900,10 @@ document.querySelectorAll('.task-card').forEach(card => {
   card.appendChild(instrToggle);
 
   // === OPAKOWANIE LEWEJ STRONY w task-card-main ===
-  // Robimy z karty 2-kolumnowy uklad: lewa polowa = oryginalna zawartosc (checkbox + info + suboption),
-  // prawa polowa = pola edycji ponizej. Toggle instrukcji (.task-instr-toggle) jest absolute,
-  // wiec zostawiamy go poza wrapperem.
   const mainWrap = document.createElement('div');
   mainWrap.className = 'task-card-main';
   const mainTop = document.createElement('div');
   mainTop.className = 'task-card-main-top';
-  // Checkbox + task-info ida do .task-card-main-top, suboption do .task-card-main bezposrednio
   const checkboxEl = card.querySelector(':scope > .task-checkbox');
   const infoEl = card.querySelector(':scope > .task-info');
   const subOptEl = card.querySelector(':scope > .task-suboption');
@@ -1777,11 +1911,9 @@ document.querySelectorAll('.task-card').forEach(card => {
   if (infoEl) mainTop.appendChild(infoEl);
   mainWrap.appendChild(mainTop);
   if (subOptEl) mainWrap.appendChild(subOptEl);
-  // Wstawiamy wrapper przed toggle (zeby toggle pozostal ostatni w drzewie - choc i tak jest absolute)
   card.insertBefore(mainWrap, instrToggle);
 
   // === POLA EDYCJI: tytul + instrukcja + obrazek ===
-  // Dodajemy dynamicznie, zeby nie powielac HTML w 9 miejscach.
   const editFields = document.createElement('div');
   editFields.className = 'task-edit-fields';
   editFields.innerHTML = `
@@ -1795,7 +1927,7 @@ document.querySelectorAll('.task-card').forEach(card => {
     <div class="task-edit-field">
       <span class="task-edit-label">Instrukcja</span>
       <div class="task-edit-field-row">
-        <textarea class="task-edit-textarea task-edit-instr" rows="2" placeholder="${escapeHtml(DEFAULT_INSTRUCTIONS[task] || '')}"></textarea>
+        <textarea class="task-edit-textarea task-edit-instr" rows="2" placeholder="${escapeHtml(DEFAULT_INSTRUCTIONS[taskKeyBase(task)] || '')}"></textarea>
         <button type="button" class="task-edit-reset" data-reset="instr" title="Przywróć domyślną instrukcję">RESET</button>
       </div>
     </div>
@@ -1812,7 +1944,6 @@ document.querySelectorAll('.task-card').forEach(card => {
   `;
   card.appendChild(editFields);
 
-  // Wartosci poczatkowe (jesli STATE zostal np. zaladowany z localStorage)
   const titleInput = editFields.querySelector('.task-edit-title');
   const instrInput = editFields.querySelector('.task-edit-instr');
   const imageInput = editFields.querySelector('.task-edit-image');
@@ -1831,10 +1962,8 @@ document.querySelectorAll('.task-card').forEach(card => {
     imagePreview.hidden = false;
   }
 
-  // Listenery zapisu
   titleInput.addEventListener('input', e => {
     const v = e.target.value.trim();
-    // pusty string -> wroc do domyslnego z placeholdera
     STATE.taskTitles[task] = v || defaultTitle;
   });
   instrInput.addEventListener('input', e => {
@@ -1851,15 +1980,9 @@ document.querySelectorAll('.task-card').forEach(card => {
       imagePreviewImg.removeAttribute('src');
     }
   });
-  // Jesli obrazek nie zaladuje sie - ukryj podglad ale zostaw URL w polu
-  imagePreviewImg.addEventListener('error', () => {
-    imagePreview.classList.add('error');
-  });
-  imagePreviewImg.addEventListener('load', () => {
-    imagePreview.classList.remove('error');
-  });
+  imagePreviewImg.addEventListener('error', () => { imagePreview.classList.add('error'); });
+  imagePreviewImg.addEventListener('load', () => { imagePreview.classList.remove('error'); });
 
-  // Reset przyciski
   editFields.querySelector('[data-reset="title"]').addEventListener('click', e => {
     e.stopPropagation();
     titleInput.value = '';
@@ -1878,23 +2001,18 @@ document.querySelectorAll('.task-card').forEach(card => {
     imagePreviewImg.removeAttribute('src');
   });
 
-  // Zablokuj propagacje zdarzen z pol edycji do karty (zeby nie togglowala checkboxa
-  // ani nie startowala draga przy probie selekcji tekstu w inpucie)
   editFields.addEventListener('click', e => e.stopPropagation());
   editFields.addEventListener('mousedown', e => {
-    // jesli klik w input/textarea/button - zatrzymaj propagacje do draga
     if (e.target.matches('input, textarea, button')) {
       e.stopPropagation();
     }
   });
-  // Wylacz drag na samym polu (bo cala karta ma draggable=true)
   [titleInput, instrInput, imageInput].forEach(el => {
     el.addEventListener('dragstart', e => e.preventDefault());
     el.setAttribute('draggable', 'false');
   });
 
   card.addEventListener('click', e => {
-    // Tylko jeśli nie jesteśmy w trakcie drag-a
     if (_draggedTaskCard) return;
     if (card.classList.contains('disabled')) return;
     if (e.target.closest('.suboption-buttons')) return;
@@ -1922,7 +2040,7 @@ document.querySelectorAll('.task-card').forEach(card => {
   card.addEventListener('dragend', () => {
     card.classList.remove('dragging');
     document.querySelectorAll('.task-card.drag-over').forEach(c => c.classList.remove('drag-over'));
-    setTimeout(() => { _draggedTaskCard = null; }, 50); // mała zwłoka żeby click nie wystrzelił
+    setTimeout(() => { _draggedTaskCard = null; }, 50);
   });
   card.addEventListener('dragover', e => {
     if (!_draggedTaskCard || _draggedTaskCard === card) return;
@@ -1940,7 +2058,6 @@ document.querySelectorAll('.task-card').forEach(card => {
     const grid = document.getElementById('taskGrid');
     const draggedRect = _draggedTaskCard.getBoundingClientRect();
     const targetRect = card.getBoundingClientRect();
-    // Wstaw przed lub po w zależności od pozycji
     if (draggedRect.top < targetRect.top) {
       grid.insertBefore(_draggedTaskCard, card.nextSibling);
     } else {
@@ -1948,9 +2065,115 @@ document.querySelectorAll('.task-card').forEach(card => {
     }
     updateTaskOrder();
   });
-});
+}
 
 let _draggedTaskCard = null;
+
+// Metadane statycznych kart - emoji + nazwa + opis. Bedziemy ich uzywac do
+// budowy kart instancji 2+ (np. "Flashcards 2"). Pobieramy raz przy starcie
+// z DOM, zeby nie hardcodowac w JS.
+const TASK_BASE_META = {};
+document.querySelectorAll('#taskGrid > .task-card').forEach(card => {
+  const base = card.dataset.task;
+  TASK_BASE_META[base] = {
+    nameHTML: card.querySelector('.task-info-name').innerHTML,
+    descHTML: card.querySelector('.task-info-desc').innerHTML,
+    suboptionHTML: card.querySelector('.task-suboption') ? card.querySelector('.task-suboption').outerHTML : ''
+  };
+});
+
+// Wykrywa instancje z STATE.rows i synchronizuje z UI:
+// - tworzy karty dla nowych instancji 2+,
+// - usuwa karty instancji, ktore juz nie maja zadnego wiersza w danych,
+// - aktualizuje STATE.taskOrder o nowe klucze i usuwa wyrzucone,
+// - aktualizuje STATE.tasks defaultami.
+function syncTaskInstancesUI() {
+  const instances = detectTaskInstances();
+  const grid = document.getElementById('taskGrid');
+  const allTaskKeys = new Set();
+  // Zbierz wszystkie aktualnie istniejace taskKey z gridu (statyczne + dynamiczne).
+  grid.querySelectorAll('.task-card').forEach(c => allTaskKeys.add(c.dataset.task));
+
+  // Dla kazdego typu i kazdej instancji 2+, sprawdz czy karta istnieje. Jesli nie, stworz.
+  Object.keys(instances).forEach(base => {
+    instances[base].forEach(inst => {
+      if (inst.num === 1) return; // instancja 1 to statyczna karta
+      const key = inst.key;
+      if (grid.querySelector('.task-card[data-task="' + key + '"]')) return; // juz istnieje
+
+      // Tworzymy nowa karte klonujac strukture instancji 1.
+      const meta = TASK_BASE_META[base];
+      if (!meta) return;
+      const newCard = document.createElement('div');
+      newCard.className = 'task-card task-card-instance';
+      newCard.dataset.task = key;
+      // Numer instancji w UI nazwie (np. "📇 Flashcards 2")
+      const nameWithNum = meta.nameHTML.replace(/(<[^>]+>)?([^<]+)$/, (m, prefix, txt) => {
+        return (prefix || '') + txt.trim() + ' ' + inst.num;
+      });
+      newCard.innerHTML = `
+        <input type="checkbox" hidden>
+        <div class="task-checkbox"></div>
+        <div class="task-info">
+          <div class="task-info-name">${nameWithNum}</div>
+          <div class="task-info-desc">${meta.descHTML}</div>
+        </div>
+      `;
+      // Uwaga: suboption (np. liczba opcji w quizie) zostaje TYLKO na karcie instancji 1.
+      // Ustawienie jest globalne (STATE.quizOptions), wiec nie ma sensu duplikowac kontrolki.
+      grid.appendChild(newCard);
+
+      // Dopisz do taskOrder na koncu jesli go tam jeszcze nie ma.
+      if (!STATE.taskOrder.includes(key)) {
+        STATE.taskOrder.push(key);
+      }
+      // Domyslnie: tytuly/instrukcje/obrazki nie sa ustawione, taskInstructions defaultowo true.
+      if (!(key in STATE.taskInstructions)) STATE.taskInstructions[key] = true;
+      if (!(key in STATE.taskTitles)) {
+        // Domyslny tytul: bazowy + " " + numer (np. "Word scramble 2")
+        const baseTitleMatch = (STATE.taskTitles[base] || '').match(/^(.+)$/);
+        STATE.taskTitles[key] = baseTitleMatch ? (baseTitleMatch[1] + ' ' + inst.num) : '';
+      }
+      if (!(key in STATE.taskCustomInstr)) STATE.taskCustomInstr[key] = '';
+      if (!(key in STATE.taskImages)) STATE.taskImages[key] = '';
+
+      // Zainicjalizuj karte (dodaje order-input, toggle instrukcji, edit-fields, drag-drop)
+      initTaskCard(newCard);
+    });
+  });
+
+  // Usun karty instancji 2+, ktore nie maja juz wierszy w danych (znikly tagi).
+  grid.querySelectorAll('.task-card-instance').forEach(card => {
+    const key = card.dataset.task;
+    const base = taskKeyBase(key);
+    const exists = (instances[base] || []).some(x => x.key === key);
+    if (!exists) {
+      card.remove();
+      // Usun z taskOrder.
+      const idx = STATE.taskOrder.indexOf(key);
+      if (idx !== -1) STATE.taskOrder.splice(idx, 1);
+      // Wyczysc stan tej instancji.
+      delete STATE.tasks[key];
+      delete STATE.taskTitles[key];
+      delete STATE.taskCustomInstr[key];
+      delete STATE.taskImages[key];
+      delete STATE.taskInstructions[key];
+    }
+  });
+
+  // Po zmianach w gridzie przesun karty do kolejnosci z STATE.taskOrder.
+  // (Drag-drop i auto-add moga nie zachowac wlasciwego porzadku.)
+  STATE.taskOrder.forEach(t => {
+    const c = grid.querySelector('.task-card[data-task="' + t + '"]');
+    if (c) grid.appendChild(c);
+  });
+
+  // Zsynchronizuj atrybut max w order-inputach (zmienila sie liczba kart).
+  document.querySelectorAll('#taskGrid .task-card .task-order-num').forEach(inp => {
+    inp.max = String(STATE.taskOrder.length);
+  });
+  syncOrderInputs();
+}
 
 function updateTaskOrder() {
   const cards = document.querySelectorAll('#taskGrid .task-card');
@@ -2388,23 +2611,25 @@ function buildWorksheetHTML() {
     writing: { html: buildWritingSection, js: buildWritingJS }
   };
 
-  STATE.taskOrder.forEach(taskName => {
-    if (!STATE.tasks[taskName]) return;
+  STATE.taskOrder.forEach(taskKey => {
+    if (!STATE.tasks[taskKey]) return;
+    const taskName = taskKeyBase(taskKey);
     if (!builders[taskName]) return;
     // Matching dzielimy na sekcje po max 8 par. Word Scramble idzie w jednej sekcji bez limitu.
     if (taskName === 'matching') {
-      const allRows = rowsForTask(taskName);
+      const allRows = rowsForTask(taskKey);
       const totalParts = Math.max(1, Math.ceil(allRows.length / 8));
       for (let part = 0; part < totalParts; part++) {
         sectionCount++;
-        const opts = { startIdx: part * 8, partNum: part + 1, totalParts };
+        const opts = { startIdx: part * 8, partNum: part + 1, totalParts, taskKey };
         sectionsHTML.push(builders[taskName].html(sectionCount, opts));
         sectionsJS.push(builders[taskName].js(sectionCount, opts));
       }
     } else {
       sectionCount++;
-      sectionsHTML.push(builders[taskName].html(sectionCount));
-      sectionsJS.push(builders[taskName].js(sectionCount));
+      const opts = { taskKey };
+      sectionsHTML.push(builders[taskName].html(sectionCount, opts));
+      sectionsJS.push(builders[taskName].js(sectionCount, opts));
     }
   });
 
@@ -2465,8 +2690,9 @@ function sectionImage(taskName) {
   return `<div class="ws-sec-image"><img src="${escapeHtml(url)}" alt="" loading="lazy" onerror="this.parentElement.style.display='none'"></div>`;
 }
 
-function buildFlashcardsSection(num) {
-  const rows = rowsForTask('flashcards');
+function buildFlashcardsSection(num, options = {}) {
+  const taskKey = options.taskKey || 'flashcards';
+  const rows = rowsForTask(taskKey);
   const cards = rows.map((r, i) => {
     // Niezależna autoskalą per strona
     function pickSize(text) {
@@ -2503,30 +2729,34 @@ function buildFlashcardsSection(num) {
   }).join('');
 
   return `
-    ${sectionImage('flashcards')}
+    ${sectionImage(taskKey)}
 
     <section class="ws-section" data-section="${num}" id="sec-${num}">
       <div class="ws-sec-head">
-        <div class="ws-sec-num">0${num}</div>
-        <h2 class="ws-sec-title">${sectionTitle('flashcards', 'Flashcards')}</h2>
+        <div class="ws-sec-num">${num < 10 ? "0" + num : num}</div>
+        <h2 class="ws-sec-title">${sectionTitle(taskKey, 'Flashcards')}</h2>
       </div>
-      ${sectionInstr('flashcards', 'Kliknij kartę, żeby odsłonić tłumaczenie. Spróbuj najpierw zgadnąć w głowie!')}
+      ${sectionInstr(taskKey, 'Kliknij kartę, żeby odsłonić tłumaczenie. Spróbuj najpierw zgadnąć w głowie!')}
       <div class="flashcards-grid">${cards}</div>
       <div class="ws-actions">
-        <button class="ws-btn-solve" onclick="solveFlashcards()">Pokaż wszystkie odpowiedzi</button>
+        <button class="ws-btn-solve" onclick="solveFlashcards_${num}()">Pokaż wszystkie odpowiedzi</button>
       </div>
       <div class="ws-feedback" id="fb-${num}"></div>
     </section>`;
 }
 
-function buildFlashcardsJS(num) {
-  const rows = rowsForTask('flashcards');
+function buildFlashcardsJS(num, options = {}) {
+  const taskKey = options.taskKey || 'flashcards';
+  const rows = rowsForTask(taskKey);
   return `
   // ── FLASHCARDS (section ${num}) ──
   const _flashTotal_${num} = ${rows.length};
   let _flashFlipped_${num} = new Set();
 
-  window.flipCard = function(el) {
+  // Per-section state update (zob. komentarz przy solveFlashcards_).
+  // flipCard musi byc globalna (jest na onclick wielu kart), wiec robimy
+  // jedna globalna ktora po DOM dispatchuje do per-num implementacji.
+  window._flipCardImpl_${num} = function(el) {
     el.classList.toggle('flipped');
     const idx = parseInt(el.dataset.idx);
     if (!_flashFlipped_${num}.has(idx)) {
@@ -2537,8 +2767,21 @@ function buildFlashcardsJS(num) {
       }
     }
   };
+  if (typeof window.flipCard !== 'function' || window.flipCard.__isDispatcher !== true) {
+    window.flipCard = function(el) {
+      const sec = el.closest('.ws-section');
+      if (!sec) return;
+      const n = sec.dataset.section;
+      const impl = window['_flipCardImpl_' + n];
+      if (impl) impl(el);
+    };
+    window.flipCard.__isDispatcher = true;
+  }
 
-  window.solveFlashcards = function() {
+  // Per-section function name dzieki ${num} - inaczej druga instancja
+  // nadpisalaby globalny window.solveFlashcards. Buttony "Pokaz odpowiedzi"
+  // wywoluja solveFlashcards_${num} dzieki interpolacji w HTML sekcji.
+  window.solveFlashcards_${num} = function() {
     document.querySelectorAll('#sec-${num} .flashcard').forEach((c, i) => {
       c.classList.add('flipped');
       _flashFlipped_${num}.add(i);
@@ -2550,7 +2793,8 @@ function buildFlashcardsJS(num) {
 }
 
 function buildMatchingSection(num, options = {}) {
-  const allRows = rowsForTask('matching');
+  const taskKey = options.taskKey || 'matching';
+  const allRows = rowsForTask(taskKey);
   const startIdx = options.startIdx || 0;
   const endIdx = Math.min(startIdx + 8, allRows.length);
   const partNum = options.partNum;
@@ -2571,15 +2815,15 @@ function buildMatchingSection(num, options = {}) {
   const partBadge = totalParts > 1 ? `<span class="ws-part-badge">Część ${partNum}/${totalParts}</span>` : '';
 
   return `
-    ${sectionImage('matching')}
+    ${sectionImage(taskKey)}
 
     <section class="ws-section" data-section="${num}" id="sec-${num}">
       <div class="ws-sec-head">
-        <div class="ws-sec-num">0${num}</div>
-        <h2 class="ws-sec-title">${sectionTitle('matching', 'Matching')}</h2>
+        <div class="ws-sec-num">${num < 10 ? "0" + num : num}</div>
+        <h2 class="ws-sec-title">${sectionTitle(taskKey, 'Matching')}</h2>
         ${partBadge}
       </div>
-      ${sectionInstr('matching', 'Kliknij słowo z lewej strony, potem jego tłumaczenie z prawej.')}
+      ${sectionInstr(taskKey, 'Kliknij słowo z lewej strony, potem jego tłumaczenie z prawej.')}
       <div class="match-grid">
         <div class="match-col">
           ${plList}
@@ -2596,7 +2840,8 @@ function buildMatchingSection(num, options = {}) {
 }
 
 function buildMatchingJS(num, options = {}) {
-  const allRows = rowsForTask('matching');
+  const taskKey = options.taskKey || 'matching';
+  const allRows = rowsForTask(taskKey);
   const startIdx = options.startIdx || 0;
   const endIdx = Math.min(startIdx + 8, allRows.length);
   const total = endIdx - startIdx;
@@ -2757,7 +3002,8 @@ function buildMatchingJS(num, options = {}) {
 }
 
 function buildScrambleSection(num, options = {}) {
-  const words = rowsForTask('scramble');
+  const taskKey = options.taskKey || 'scramble';
+  const words = rowsForTask(taskKey);
   const items = words.map((r, i) => {
     const letters = r.en.split('');
     let scrambled;
@@ -2781,7 +3027,7 @@ function buildScrambleSection(num, options = {}) {
         </div>
         <div class="scramble-input-row">
           <input type="text" class="scramble-input" data-answer="${escapeHtml(r.en.toLowerCase())}" placeholder="Wpisz słowo..." onkeydown="if(event.key==='Enter') checkScramble_${num}(this)">
-          <button class="scramble-check" onclick="checkScramble_${num}(this.previousElementSibling)" title="Sprawdź" aria-label="Sprawdź">✓</button>
+          <button class="scramble-check" onclick="checkScramble_${num}(this.previousElementSibling)" title="Sprawdź" aria-label="Sprawdź">✅</button>
           <button class="scramble-hint-btn" onclick="hintScramble_${num}(${i})" title="Podpowiedź - wstaw kolejną literę" aria-label="Podpowiedź">💡</button>
           <button class="scramble-solve-btn" onclick="solveScrambleOne_${num}(${i})" title="Rozwiąż to słowo" aria-label="Rozwiąż">✨</button>
           <button class="scramble-tts-btn tts-btn" onclick="ttsBtnClick(event, ${JSON.stringify(r.en).replace(/"/g, '&quot;')})" title="Posłuchaj" aria-label="Czytaj">🔊</button>
@@ -2790,14 +3036,14 @@ function buildScrambleSection(num, options = {}) {
   }).join('');
 
   return `
-    ${sectionImage('scramble')}
+    ${sectionImage(taskKey)}
 
     <section class="ws-section" data-section="${num}" id="sec-${num}">
       <div class="ws-sec-head">
-        <div class="ws-sec-num">0${num}</div>
-        <h2 class="ws-sec-title">${sectionTitle('scramble', 'Word Scramble')}</h2>
+        <div class="ws-sec-num">${num < 10 ? "0" + num : num}</div>
+        <h2 class="ws-sec-title">${sectionTitle(taskKey, 'Word Scramble')}</h2>
       </div>
-      ${sectionInstr('scramble', 'Wpisz angielskie słowo (Enter sprawdza). Kliknij rozsypankę, żeby zobaczyć pomieszane litery. Kliknij 💡, żeby wstawić kolejną literę odpowiedzi, lub ✨, żeby rozwiązać od razu.')}
+      ${sectionInstr(taskKey, 'Wpisz angielskie słowo (Enter sprawdza). Kliknij rozsypankę, żeby zobaczyć pomieszane litery. Kliknij 💡, żeby wstawić kolejną literę odpowiedzi, lub ✨, żeby rozwiązać od razu.')}
       <div class="scramble-grid">${items}</div>
       <div class="ws-actions">
         <button class="ws-btn-solve" onclick="solveScramble_${num}()">Pokaż wszystkie odpowiedzi</button>
@@ -2807,7 +3053,8 @@ function buildScrambleSection(num, options = {}) {
 }
 
 function buildScrambleJS(num, options = {}) {
-  const rows = rowsForTask('scramble');
+  const taskKey = options.taskKey || 'scramble';
+  const rows = rowsForTask(taskKey);
   const wordsJSON = JSON.stringify(rows.map(r => ({ pl: r.pl, en: r.en })));
   return `
   // ── SCRAMBLE (section ${num}) ──
@@ -2892,8 +3139,9 @@ function buildScrambleJS(num, options = {}) {
 // ============================================================
 // QUIZ
 // ============================================================
-function buildQuizSection(num) {
-  const rows = rowsForTask('quiz');
+function buildQuizSection(num, options = {}) {
+  const taskKey = options.taskKey || 'quiz';
+  const rows = rowsForTask(taskKey);
   const numOpts = STATE.quizOptions;
   // Generate questions: each row's EN as correct, others as distractors
   const items = rows.map((r, i) => {
@@ -2902,7 +3150,7 @@ function buildQuizSection(num) {
     const correctIdx = options.indexOf(r.en);
     const optHTML = options.map((opt, oi) => `
       <div class="quiz-opt-wrap">
-        <button class="quiz-option" data-correct="${oi === correctIdx ? '1' : '0'}" onclick="pickQuiz(this, ${num}, ${i})">
+        <button class="quiz-option" data-correct="${oi === correctIdx ? '1' : '0'}" onclick="pickQuiz_${num}(this, ${i})">
           <span class="quiz-opt-letter">${String.fromCharCode(65 + oi)}</span>
           <span class="quiz-opt-text">${escapeHtml(opt)}</span>
         </button>
@@ -2920,30 +3168,32 @@ function buildQuizSection(num) {
   }).join('');
 
   return `
-    ${sectionImage('quiz')}
+    ${sectionImage(taskKey)}
 
     <section class="ws-section" data-section="${num}" id="sec-${num}">
       <div class="ws-sec-head">
-        <div class="ws-sec-num">0${num}</div>
-        <h2 class="ws-sec-title">${sectionTitle('quiz', 'Quiz')}</h2>
+        <div class="ws-sec-num">${num < 10 ? "0" + num : num}</div>
+        <h2 class="ws-sec-title">${sectionTitle(taskKey, 'Quiz')}</h2>
       </div>
-      ${sectionInstr('quiz', 'Wybierz prawidłowe tłumaczenie polskiego słowa. Tylko jedna odpowiedź jest poprawna.')}
+      ${sectionInstr(taskKey, 'Wybierz prawidłowe tłumaczenie polskiego słowa. Tylko jedna odpowiedź jest poprawna.')}
       <div class="quiz-grid">${items}</div>
       <div class="ws-actions">
-        <button class="ws-btn-solve" onclick="solveQuiz(${num})">Pokaż odpowiedzi</button>
+        <button class="ws-btn-solve" onclick="solveQuiz_${num}()">Pokaż odpowiedzi</button>
       </div>
       <div class="ws-feedback" id="fb-${num}"></div>
     </section>`;
 }
 
-function buildQuizJS(num) {
-  const total = rowsForTask('quiz').length;
+function buildQuizJS(num, options = {}) {
+  const taskKey = options.taskKey || 'quiz';
+  const total = rowsForTask(taskKey).length;
   return `
   // ── QUIZ (section ${num}) ──
   let _quizDone_${num} = new Set();
   const _quizTotal_${num} = ${total};
 
-  window.pickQuiz = function(btn, secNum, qIdx) {
+  // Per-section nazwy (zob. komentarz przy solveFlashcards_).
+  window.pickQuiz_${num} = function(btn, qIdx) {
     const card = btn.closest('.quiz-card');
     if (card.classList.contains('answered')) return;
     const correct = btn.dataset.correct === '1';
@@ -2963,7 +3213,8 @@ function buildQuizJS(num) {
     }
   };
 
-  window.solveQuiz = function(secNum) {
+  // Per-section function name (zob. komentarz przy solveFlashcards_).
+  window.solveQuiz_${num} = function() {
     document.querySelectorAll('#sec-${num} .quiz-card').forEach((card, qIdx) => {
       if (card.classList.contains('answered')) return;
       card.querySelectorAll('.quiz-option').forEach(b => {
@@ -2995,8 +3246,9 @@ function buildQuizJS(num) {
 // ============================================================
 // SENTENCE UNSCRAMBLE
 // ============================================================
-function buildUnscrambleSection(num) {
-  const rows = rowsForTask('unscramble');
+function buildUnscrambleSection(num, options = {}) {
+  const taskKey = options.taskKey || 'unscramble';
+  const rows = rowsForTask(taskKey);
   // każde zdanie -> słowa
   const items = rows.map((r, i) => {
     const words = r.en.split(/\s+/).filter(w => w.length > 0);
@@ -3032,33 +3284,34 @@ function buildUnscrambleSection(num) {
           </button>
         </div>
         <div class="unsc-controls">
-          <button class="unsc-check-btn" onclick="checkUnscramble(${num}, ${i})">Sprawdź</button>
-          <button class="unsc-hint-btn" onclick="hintUnscramble(${num}, ${i})">💡 Podpowiedź</button>
+          <button class="unsc-check-btn" onclick="checkUnscramble_${num}(${i})">Sprawdź</button>
+          <button class="unsc-hint-btn" onclick="hintUnscramble_${num}(${i})">💡 Podpowiedź</button>
           <button class="unsc-solve-btn" onclick="solveUnscrambleOne_${num}(${i})">✨ Rozwiąż</button>
-          <button class="unsc-clear-btn" onclick="clearUnscramble(${num}, ${i})">Wyczyść</button>
+          <button class="unsc-clear-btn" onclick="clearUnscramble_${num}(${i})">Wyczyść</button>
         </div>
       </div>`;
   }).filter(s => s.length > 0).join('');
 
   return `
-    ${sectionImage('unscramble')}
+    ${sectionImage(taskKey)}
 
     <section class="ws-section" data-section="${num}" id="sec-${num}">
       <div class="ws-sec-head">
-        <div class="ws-sec-num">0${num}</div>
-        <h2 class="ws-sec-title">${sectionTitle('unscramble', 'Sentence Unscramble')}</h2>
+        <div class="ws-sec-num">${num < 10 ? "0" + num : num}</div>
+        <h2 class="ws-sec-title">${sectionTitle(taskKey, 'Sentence Unscramble')}</h2>
       </div>
-      ${sectionInstr('unscramble', 'Kliknij pole "Pokaż słowa", a następnie ułóż je w odpowiedniej kolejności. Możesz też przeciągać słowa. Kliknij 💡, aby wstawić kolejne poprawne słowo, lub ✨, aby rozwiązać od razu.')}
+      ${sectionInstr(taskKey, 'Kliknij pole "Pokaż słowa", a następnie ułóż je w odpowiedniej kolejności. Możesz też przeciągać słowa. Kliknij 💡, aby wstawić kolejne poprawne słowo, lub ✨, aby rozwiązać od razu.')}
       <div class="unsc-grid">${items}</div>
       <div class="ws-actions">
-        <button class="ws-btn-solve" onclick="solveUnscramble(${num})">Pokaż wszystkie odpowiedzi</button>
+        <button class="ws-btn-solve" onclick="solveUnscramble_${num}()">Pokaż wszystkie odpowiedzi</button>
       </div>
       <div class="ws-feedback" id="fb-${num}"></div>
     </section>`;
 }
 
-function buildUnscrambleJS(num) {
-  const rows = rowsForTask('unscramble').filter(r => r.en.split(/\s+/).filter(w => w.length > 0).length >= 2);
+function buildUnscrambleJS(num, options = {}) {
+  const taskKey = options.taskKey || 'unscramble';
+  const rows = rowsForTask(taskKey).filter(r => r.en.split(/\s+/).filter(w => w.length > 0).length >= 2);
   const total = rows.length;
   return `
   // ── SENTENCE UNSCRAMBLE (section ${num}) ──
@@ -3109,10 +3362,11 @@ function buildUnscrambleJS(num) {
     return Array.from(answerArea.querySelectorAll('.unsc-word')).map(w => w.dataset.word);
   }
 
-  window.checkUnscramble = function(secNum, cardIdx) {
+  // Per-section nazwy (zob. komentarz przy solveFlashcards_).
+  window.checkUnscramble_${num} = function(cardIdx) {
     const card = document.querySelector('#sec-${num} .unsc-card[data-idx="' + cardIdx + '"]');
     const correct = JSON.parse(card.getAttribute('data-correct'));
-    const user = _unscGetUserAnswer(secNum, cardIdx);
+    const user = _unscGetUserAnswer(${num}, cardIdx);
     if (user.length === 0) return;
     const words = card.querySelectorAll('.unsc-answer-area .unsc-word');
     let allOk = user.length === correct.length;
@@ -3141,11 +3395,11 @@ function buildUnscrambleJS(num) {
 
   // Hint: znajdź najdłuższy poprawny prefix tego co użytkownik ułożył,
   // i wstaw kolejne poprawne słowo w odpowiedniej pozycji.
-  window.hintUnscramble = function(secNum, cardIdx) {
+  window.hintUnscramble_${num} = function(cardIdx) {
     const card = document.querySelector('#sec-${num} .unsc-card[data-idx="' + cardIdx + '"]');
     if (card.classList.contains('done')) return;
     const correct = JSON.parse(card.getAttribute('data-correct'));
-    const user = _unscGetUserAnswer(secNum, cardIdx);
+    const user = _unscGetUserAnswer(${num}, cardIdx);
     let matchLen = 0;
     for (let i = 0; i < Math.min(user.length, correct.length); i++) {
       if (user[i] === correct[i]) matchLen++;
@@ -3174,9 +3428,9 @@ function buildUnscrambleJS(num) {
     // przenieś candidate na pozycję matchLen w answer-area
     _unscMoveToAnswer(candidate);
     // sprawdź czy ułożone całe zdanie
-    const newUser = _unscGetUserAnswer(secNum, cardIdx);
+    const newUser = _unscGetUserAnswer(${num}, cardIdx);
     if (newUser.join(' ') === correct.join(' ')) {
-      checkUnscramble(secNum, cardIdx);
+      window.checkUnscramble_${num}(cardIdx);
     }
   };
 
@@ -3186,14 +3440,14 @@ function buildUnscrambleJS(num) {
     return s.replace(/([!"#$%&'()*+,./:;<=>?@\\\\\\[\\\\\\]^\`{|}~])/g, '\\\\\\\\$1');
   }
 
-  window.clearUnscramble = function(secNum, cardIdx) {
+  window.clearUnscramble_${num} = function(cardIdx) {
     const card = document.querySelector('#sec-${num} .unsc-card[data-idx="' + cardIdx + '"]');
     if (card.classList.contains('done')) return;
     const answerWords = Array.from(card.querySelectorAll('.unsc-answer-area .unsc-word'));
     answerWords.forEach(w => _unscMoveToPool(w));
   };
 
-  window.solveUnscramble = function(secNum) {
+  window.solveUnscramble_${num} = function() {
     document.querySelectorAll('#sec-${num} .unsc-card').forEach(card => {
       if (card.classList.contains('done')) return;
       const cardIdx = parseInt(card.dataset.idx);
@@ -3343,17 +3597,18 @@ function buildUnscrambleJS(num) {
 // ============================================================
 // CORNELL - rozwijane sekcje
 // ============================================================
-function buildCornellSection(num) {
-  const rows = rowsForTask('cornell');
+function buildCornellSection(num, options = {}) {
+  const taskKey = options.taskKey || 'cornell';
+  const rows = rowsForTask(taskKey);
   const items = rows.map((r, i) => `
     <div class="cornell-card" data-idx="${i}">
-      <button class="cornell-q" onclick="toggleCornell(${num}, ${i})" aria-expanded="false">
+      <button class="cornell-q" onclick="toggleCornell_${num}(${i})" aria-expanded="false">
         <span class="cornell-q-num">${i + 1}</span>
         <span class="cornell-q-text">${escapeHtml(r.pl)}</span>
         <span class="cornell-q-arrow">▾</span>
       </button>
       <div class="cornell-write" id="cornell-w-${num}-${i}">
-        <button class="cornell-write-toggle" onclick="toggleCornellWrite(${num}, ${i})">
+        <button class="cornell-write-toggle" onclick="toggleCornellWrite_${num}(${i})">
           <span class="cornell-write-toggle-open">✎ Napisz odpowiedź</span>
           <span class="cornell-write-toggle-close">✕ Schowaj pole</span>
         </button>
@@ -3365,30 +3620,32 @@ function buildCornellSection(num) {
     </div>`).join('');
 
   return `
-    ${sectionImage('cornell')}
+    ${sectionImage(taskKey)}
 
     <section class="ws-section" data-section="${num}" id="sec-${num}">
       <div class="ws-sec-head">
-        <div class="ws-sec-num">0${num}</div>
-        <h2 class="ws-sec-title">${sectionTitle('cornell', 'Pytania &amp; odpowiedzi')}</h2>
+        <div class="ws-sec-num">${num < 10 ? "0" + num : num}</div>
+        <h2 class="ws-sec-title">${sectionTitle(taskKey, 'Pytania &amp; odpowiedzi')}</h2>
       </div>
-      ${sectionInstr('cornell', 'Kliknij pytanie, żeby odsłonić odpowiedź. Spróbuj najpierw odpowiedzieć w głowie!')}
+      ${sectionInstr(taskKey, 'Kliknij pytanie, żeby odsłonić odpowiedź. Spróbuj najpierw odpowiedzieć w głowie!')}
       <div class="cornell-grid">${items}</div>
       <div class="ws-actions">
-        <button class="ws-btn-solve" onclick="solveCornell(${num})">Rozwiń wszystkie</button>
+        <button class="ws-btn-solve" onclick="solveCornell_${num}()">Rozwiń wszystkie</button>
       </div>
       <div class="ws-feedback" id="fb-${num}"></div>
     </section>`;
 }
 
-function buildCornellJS(num) {
-  const total = rowsForTask('cornell').length;
+function buildCornellJS(num, options = {}) {
+  const taskKey = options.taskKey || 'cornell';
+  const total = rowsForTask(taskKey).length;
   return `
   // ── CORNELL (section ${num}) ──
   let _cornellOpened_${num} = new Set();
   const _cornellTotal_${num} = ${total};
 
-  window.toggleCornell = function(secNum, idx) {
+  // Per-section nazwy (zob. komentarz przy solveFlashcards_).
+  window.toggleCornell_${num} = function(idx) {
     const card = document.querySelector('#sec-${num} .cornell-card[data-idx="' + idx + '"]');
     if (!card) return;
     const btn = card.querySelector('.cornell-q');
@@ -3403,7 +3660,7 @@ function buildCornellJS(num) {
     }
   };
 
-  window.toggleCornellWrite = function(secNum, idx) {
+  window.toggleCornellWrite_${num} = function(idx) {
     const card = document.querySelector('#sec-${num} .cornell-card[data-idx="' + idx + '"]');
     if (!card) return;
     card.classList.toggle('writing');
@@ -3413,7 +3670,7 @@ function buildCornellJS(num) {
     }
   };
 
-  window.solveCornell = function(secNum) {
+  window.solveCornell_${num} = function() {
     document.querySelectorAll('#sec-${num} .cornell-card').forEach(card => {
       card.classList.add('open');
       const btn = card.querySelector('.cornell-q');
@@ -3431,8 +3688,9 @@ function buildCornellJS(num) {
 // W kolumnie EN klamra {word} oznacza lukę (np. "I {go} to school every {day}")
 // Po uzupełnieniu wszystkich luk w danym zdaniu odsłania się tłumaczenie PL.
 // ============================================================
-function buildGapfillSection(num) {
-  const allRows = rowsForTask('gapfill');
+function buildGapfillSection(num, options = {}) {
+  const taskKey = options.taskKey || 'gapfill';
+  const allRows = rowsForTask(taskKey);
   // Filtrujemy tylko wiersze które faktycznie mają klamry w en
   const rows = allRows.filter(r => /\{[^}]+\}/.test(r.en));
   const items = rows.map((r, i) => {
@@ -3479,14 +3737,14 @@ function buildGapfillSection(num) {
   }).join('');
 
   return `
-    ${sectionImage('gapfill')}
+    ${sectionImage(taskKey)}
 
     <section class="ws-section" data-section="${num}" id="sec-${num}">
       <div class="ws-sec-head">
-        <div class="ws-sec-num">0${num}</div>
-        <h2 class="ws-sec-title">${sectionTitle('gapfill', 'Gap Fill')}</h2>
+        <div class="ws-sec-num">${num < 10 ? "0" + num : num}</div>
+        <h2 class="ws-sec-title">${sectionTitle(taskKey, 'Gap Fill')}</h2>
       </div>
-      ${sectionInstr('gapfill', 'Wpisz brakujące słowa w lukach (Enter sprawdza). Kliknij 👁, żeby zobaczyć polskie tłumaczenie zdania jako wskazówkę, 💡 - kolejna litera, ✨ - rozwiąż całe zdanie.')}
+      ${sectionInstr(taskKey, 'Wpisz brakujące słowa w lukach (Enter sprawdza). Kliknij 👁, żeby zobaczyć polskie tłumaczenie zdania jako wskazówkę, 💡 - kolejna litera, ✨ - rozwiąż całe zdanie.')}
       <div class="gap-grid">${items}</div>
       <div class="ws-actions">
         <button class="ws-btn-solve" onclick="solveGap_${num}()">Pokaż wszystkie odpowiedzi</button>
@@ -3495,7 +3753,7 @@ function buildGapfillSection(num) {
     </section>`;
 }
 
-function buildGapfillJS(num) {
+function buildGapfillJS(num, options = {}) {
   return `
   // ── GAP FILL (section ${num}) ──
   let _gapDone_${num} = new Set();
@@ -3638,8 +3896,9 @@ function buildGapfillJS(num) {
 // Sprawdzanie tolerancyjne: ignoruje wielkie/małe litery, podwójne spacje,
 // i interpunkcję na końcu (kropki, znaki zapytania).
 // ============================================================
-function buildTranslateSection(num) {
-  const rows = rowsForTask('translate');
+function buildTranslateSection(num, options = {}) {
+  const taskKey = options.taskKey || 'translate';
+  const rows = rowsForTask(taskKey);
   const items = rows.map((r, i) => {
     return `
       <div class="trans-card" data-idx="${i}">
@@ -3650,7 +3909,7 @@ function buildTranslateSection(num) {
         <div class="trans-input-row">
           <input type="text" class="trans-input" data-answer="${escapeHtml(r.en)}" placeholder="Wpisz tłumaczenie po angielsku..." onkeydown="if(event.key==='Enter'){event.preventDefault();checkTranslate_${num}(this);}">
           <div class="trans-input-actions">
-            <button class="trans-check" onclick="checkTranslate_${num}(this.closest('.trans-card').querySelector('.trans-input'))" title="Sprawdź" aria-label="Sprawdź">✓</button>
+            <button class="trans-check" onclick="checkTranslate_${num}(this.closest('.trans-card').querySelector('.trans-input'))" title="Sprawdź" aria-label="Sprawdź">✅</button>
             <button class="trans-hint-btn" onclick="hintTranslate_${num}(${i})" title="Podpowiedź - kolejna litera" aria-label="Podpowiedź">💡</button>
             <button class="trans-solve-btn" onclick="solveTranslateOne_${num}(${i})" title="Rozwiąż to zdanie" aria-label="Rozwiąż">✨</button>
             <button class="tts-btn tts-btn-trans" onclick="ttsBtnClick(event, ${JSON.stringify(r.en).replace(/"/g, '&quot;')})" title="Posłuchaj poprawnego tłumaczenia" aria-label="Czytaj">🔊</button>
@@ -3663,14 +3922,14 @@ function buildTranslateSection(num) {
   }).join('');
 
   return `
-    ${sectionImage('translate')}
+    ${sectionImage(taskKey)}
 
     <section class="ws-section" data-section="${num}" id="sec-${num}">
       <div class="ws-sec-head">
-        <div class="ws-sec-num">0${num}</div>
-        <h2 class="ws-sec-title">${sectionTitle('translate', 'Translate')}</h2>
+        <div class="ws-sec-num">${num < 10 ? "0" + num : num}</div>
+        <h2 class="ws-sec-title">${sectionTitle(taskKey, 'Translate')}</h2>
       </div>
-      ${sectionInstr('translate', 'Przetłumacz polskie słowo, frazę lub zdanie na angielski (Enter sprawdza). Sprawdzanie pomija wielkość liter i kropkę na końcu.')}
+      ${sectionInstr(taskKey, 'Przetłumacz polskie słowo, frazę lub zdanie na angielski (Enter sprawdza). Sprawdzanie pomija wielkość liter i kropkę na końcu.')}
       <div class="trans-grid">${items}</div>
       <div class="ws-actions">
         <button class="ws-btn-solve" onclick="solveTranslate_${num}()">Pokaż wszystkie odpowiedzi</button>
@@ -3679,7 +3938,7 @@ function buildTranslateSection(num) {
     </section>`;
 }
 
-function buildTranslateJS(num) {
+function buildTranslateJS(num, options = {}) {
   return `
   // ── TRANSLATE (section ${num}) ──
   let _transDone_${num} = new Set();
@@ -3781,8 +4040,9 @@ function buildTranslateJS(num) {
 // w którymkolwiek z poleceń (i kliknięciu "Zapisz" - dzięki temu user
 // świadomie kończy zadanie, a nie przypadkowo).
 // ============================================================
-function buildWritingSection(num) {
-  const rows = rowsForTask('writing');
+function buildWritingSection(num, options = {}) {
+  const taskKey = options.taskKey || 'writing';
+  const rows = rowsForTask(taskKey);
   const items = rows.map((r, i) => {
     const plBlock = r.pl ? `<div class="write-prompt-pl"><span class="write-prompt-flag">${FLAG_PL_SVG}</span> ${escapeHtml(r.pl)}</div>` : '';
     const enBlock = r.en ? `<div class="write-prompt-en"><span class="write-prompt-flag">${FLAG_UK_SVG}</span> ${escapeHtml(r.en)} <button class="tts-btn tts-btn-write" onclick="ttsBtnClick(event, ${JSON.stringify(r.en).replace(/"/g, '&quot;')})" title="Posłuchaj polecenia" aria-label="Czytaj">🔊</button></div>` : '';
@@ -3795,26 +4055,26 @@ function buildWritingSection(num) {
         <textarea class="write-area" placeholder="Tutaj napisz swoją odpowiedź..." oninput="updateWriteCounter_${num}(this)"></textarea>
         <div class="write-footer">
           <span class="write-counter"><span class="write-counter-num">0</span> słów</span>
-          <button class="write-save" onclick="saveWrite_${num}(this)">✓ Gotowe</button>
+          <button class="write-save" onclick="saveWrite_${num}(this)">✅ Gotowe</button>
         </div>
       </div>`;
   }).join('');
 
   return `
-    ${sectionImage('writing')}
+    ${sectionImage(taskKey)}
 
     <section class="ws-section" data-section="${num}" id="sec-${num}">
       <div class="ws-sec-head">
-        <div class="ws-sec-num">0${num}</div>
-        <h2 class="ws-sec-title">${sectionTitle('writing', 'Writing')}</h2>
+        <div class="ws-sec-num">${num < 10 ? "0" + num : num}</div>
+        <h2 class="ws-sec-title">${sectionTitle(taskKey, 'Writing')}</h2>
       </div>
-      ${sectionInstr('writing', 'Napisz odpowiedź według polecenia. Kliknij "Gotowe", gdy skończysz.')}
+      ${sectionInstr(taskKey, 'Napisz odpowiedź według polecenia. Kliknij "Gotowe", gdy skończysz.')}
       <div class="write-grid">${items}</div>
       <div class="ws-feedback" id="fb-${num}"></div>
     </section>`;
 }
 
-function buildWritingJS(num) {
+function buildWritingJS(num, options = {}) {
   return `
   // ── WRITING (section ${num}) ──
   let _writeSaved_${num} = new Set();
@@ -3836,7 +4096,7 @@ function buildWritingJS(num) {
     const card = btn.closest('.write-card');
     card.classList.add('done');
     btn.disabled = true;
-    btn.textContent = '✓ Zapisane';
+    btn.textContent = '✅ Zapisane';
     _writeSaved_${num}.add(parseInt(card.dataset.idx));
     showSectionFeedback(${num}, true, '✍️ Świetnie, tekst zapisany!');
     markSectionDone(${num});
@@ -3900,11 +4160,14 @@ ${bgEffectHTML}
   <footer class="ws-footer">
     <span class="ws-save-indicator">💾 Postęp zapisywany automatycznie</span>
     <button class="ws-btn-reset-foot" onclick="resetWorksheet()">Reset</button>
+    <button class="ws-btn-download-tsv" onclick="downloadTSV()" title="Pobierz dane jako plik TSV">⤓ TSV</button>
   </footer>
 </div>
 
 <script>
 const WS_DATA = ${rowsJSON};
+const WS_HEADERS = ${JSON.stringify(STATE.headers)};
+const WS_TITLE = ${JSON.stringify(title)};
 const WS_SECTION_COUNT = ${sectionCount};
 // Klucz w localStorage zawiera hash z danych - dzięki temu różne worksheety
 // (nawet z tym samym tytułem) mają osobny progress.
@@ -4399,7 +4662,7 @@ function _wsRestoreWriting(data) {
         const btn = card.querySelector('.write-save');
         if (btn) {
           btn.disabled = true;
-          btn.textContent = '✓ Zapisane';
+          btn.textContent = '✅ Zapisane';
         }
       }
     });
@@ -4445,6 +4708,42 @@ function resetWorksheet() {
   location.reload();
 }
 
+// Konwertuje WS_DATA z powrotem na TSV i pobiera plik. Naglowki sa zapisane w WS_HEADERS.
+// Wewnetrzne pola (_tasks, ktorych nie bylo w oryginalnym TSV) sa pomijane.
+function downloadTSV() {
+  if (!WS_HEADERS || WS_HEADERS.length === 0) {
+    showToast('Brak danych do pobrania', true);
+    return;
+  }
+  const lines = [WS_HEADERS.join('\\t')];
+  WS_DATA.forEach(row => {
+    const cols = WS_HEADERS.map(h => {
+      const v = row[h];
+      if (v == null) return '';
+      // Tabulator w wartosci -> spacja (TSV nie obsluguje escapowania)
+      return String(v).replace(/\\t/g, ' ').replace(/\\r?\\n/g, ' ');
+    });
+    lines.push(cols.join('\\t'));
+  });
+  const tsv = lines.join('\\n');
+  // Nazwa pliku z tytulu karty (sanityzacja)
+  const safeName = (WS_TITLE || 'karta-pracy')
+    .replace(/[^a-zA-Z0-9ąćęłńóśźżĄĆĘŁŃÓŚŹŻ -]/g, '')
+    .replace(/\\s+/g, '-')
+    .toLowerCase()
+    .slice(0, 60) || 'karta-pracy';
+  const blob = new Blob([tsv], { type: 'text/tab-separated-values;charset=utf-8' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = safeName + '.tsv';
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  setTimeout(() => URL.revokeObjectURL(url), 1000);
+  showToast('Pobrano ' + safeName + '.tsv');
+}
+
 function showToast(msg, isError) {
   const t = document.createElement('div');
   t.className = 'ws-toast' + (isError ? ' err' : '');
@@ -4473,6 +4772,7 @@ window.addEventListener('load', loadProgress);
 function getPresetTheme(preset, accent, bg, textColor, isCustomAccent) {
   if (preset === 'vintage') return getVintageTheme(accent, bg, textColor, isCustomAccent);
   if (preset === 'pastel') return getPastelTheme(accent, bg, textColor, isCustomAccent);
+  if (preset === 'atelier') return getAtelierTheme(accent, bg, textColor, isCustomAccent);
   return getVintageTheme(accent, bg, textColor, isCustomAccent);
 }
 
@@ -4581,6 +4881,267 @@ function getPastelTheme(accent, bg, textColor, isCustomAccent) {
     // Tło dla wszystkich boxów zadań - jeden wspólny jasny kolor.
     // Możesz go zmienić tutaj, żeby zmienić tło wszystkich sekcji w motywie Pastel.
     boxBg: '#fdeef8'           // bardzo bladzy pudrowy róż
+  };
+}
+
+// ============================================================
+// ATELIER - elegancki, modernistyczny editorial styl.
+// Glowny ton: gleboki granat na cieplo-bialym papierze (off-white).
+// Czcionki: Spectral (serif, modernistyczny) na tytuly, Inter Tight (sans
+// geometryczny) na tekst, IBM Plex Mono na cyfry. Wszystkie rogi 0px - czyste
+// prostokaty. Cienie zastapione 1px liniami. Cienie subtelne, zadnych gradientow
+// na duzych powierzchniach. Maksymalna ilosc whitespace.
+// ============================================================
+function getAtelierTheme(accent, bg, textColor, isCustomAccent) {
+  const text = textColor || '#1a1a1a';
+  // Drugi/trzeci kolor: dla customowego akcentu generujemy harmonijne wariacje,
+  // dla domyslnego granatu ustalamy paletke editorial: warm taupe (cieplo)
+  // + ciemny burgund (akcent dla bledow/uwag) + bladozloty (highlight).
+  const accent2 = isCustomAccent
+    ? deriveAccentColor(accent, 18, 0.10, -0.15)
+    : '#8b6f47';
+  const accent3 = isCustomAccent
+    ? deriveAccentColor(accent, -22, -0.05, -0.05)
+    : '#5d4037';
+  const accentV = isCustomAccent
+    ? deriveAccentColor(accent, 30, 0.20, -0.20)
+    : '#c9a961';
+  return {
+    name: 'atelier',
+    accent,
+    accentSecondary: accent2,
+    accentTertiary: accent3,
+    accentVibrant: accentV,
+    bg,
+    text,
+    /* TextDim z lekkim granatowym podtonem zamiast czystej szarosci -
+       cieplej i bardziej spojnie z paleta. Wczesniej #5a5a5a bylo zbyt szare. */
+    textDim: '#4a5468',
+    surface: '#ffffff',
+    /* Bordery lekko mocniejsze niz wczesniej - poprzednie 0.18/0.45 bylo zbyt
+       subtelne i caly motyw wygladal pranny. */
+    border: 'rgba(26, 40, 71, 0.25)',
+    borderStrong: 'rgba(26, 40, 71, 0.55)',
+    confettiColors: [accent, accent2, accent3, accentV, '#2c4870', '#1a1a1a'],
+    fontImports: '<link href="https://fonts.googleapis.com/css2?family=Eczar:wght@400;500;600;700;800&family=Signika:wght@300..700&family=IBM+Plex+Mono:wght@300;400;500&display=swap" rel="stylesheet">',
+    displayFont: "'Eczar', 'Philosopher', Georgia, serif",
+    bodyFont: "'Signika', 'Inter Tight', 'Helvetica Neue', Arial, sans-serif",
+    monoFont: "'IBM Plex Mono', 'JetBrains Mono', monospace",
+    bgEffect: `<div class="ws-bg-grid"></div>`,
+    extraBgCSS: `
+.ws-bg-grid {
+  position: fixed; inset: 0; pointer-events: none; z-index: 0;
+  /* Subtelna siatka editorial - widoczna, ale nie krzykliwa.
+     Wczesniej 0.025 bylo niemal niewidoczne; 0.06 daje czytelny papier kreślarski. */
+  background-image:
+    linear-gradient(${rgba(accent, 0.06)} 1px, transparent 1px),
+    linear-gradient(90deg, ${rgba(accent, 0.06)} 1px, transparent 1px);
+  background-size: 64px 64px;
+}
+/* === ATELIER: body Signika 400 (regular variable) === */
+body {
+  font-weight: 400 !important;
+}
+/* Inputy, textarea, buttony i tresci zadan - dziedzicza wage 400 */
+.scramble-input, .trans-input, .write-area, .gap-input, .quiz-option,
+.flashcard-face, .gap-sentence, .trans-prompt, .unsc-word,
+.cornell-q-text, .cornell-a-inner, .write-prompt-pl, .write-prompt-en,
+.match-item, .gap-translation-text {
+  font-weight: 400 !important;
+}
+/* Tytuly w Eczar 500 (medium) - Eczar ma wagi 400-800, 500 daje wyrazny
+   ale nie przesadny kontrast wzgledem body 350. */
+.ws-title, .ws-sec-title, .ws-finale-title {
+  font-weight: 500 !important;
+}
+/* === ATELIER OVERRIDES: ostre rogi, cienkie linie, brak cieni === */
+.ws-section {
+  border: 1px solid var(--ws-border-strong) !important;
+  border-radius: 0 !important;
+  box-shadow: none !important;
+  padding: 2.5rem 2.25rem 2rem !important;
+}
+.ws-section + .ws-section { margin-top: 1.5rem; }
+.ws-section.ws-done {
+  background: var(--ws-card) !important;
+  border-color: var(--ws-accent) !important;
+  box-shadow: none !important;
+}
+/* Nagłówek sekcji: cienka linia pod, granatowy kwadrat z numerem */
+.ws-sec-head {
+  border-bottom: 1px solid var(--ws-border) !important;
+  padding-bottom: 1.25rem;
+  margin-bottom: 1.5rem;
+  align-items: center !important;
+  gap: 1rem !important;
+}
+.ws-sec-num {
+  /* Kwadrat z cienkim granatowym borderem - editorial wersja "kapsuly" */
+  background: transparent !important;
+  color: var(--ws-accent) !important;
+  border: 1px solid var(--ws-accent) !important;
+  width: 44px !important;
+  height: 44px !important;
+  font-family: var(--ws-mono);
+  font-weight: 400 !important;
+  font-size: 0.92rem !important;
+  letter-spacing: 0.02em !important;
+  border-radius: 0 !important;
+  display: grid !important;
+  place-items: center !important;
+  flex-shrink: 0 !important;
+}
+.ws-sec-title {
+  letter-spacing: -0.015em !important;
+}
+.ws-sec-desc {
+  font-style: italic;
+  color: var(--ws-text-dim);
+  font-weight: 300;
+}
+/* Tytul karty pracy: lekko kursywa, ekstra letter-spacing tight */
+.ws-title {
+  letter-spacing: -0.025em !important;
+  line-height: 1 !important;
+}
+.ws-subtitle {
+  font-family: var(--ws-body);
+  font-weight: 300;
+  color: var(--ws-text-dim);
+  letter-spacing: 0.01em;
+}
+/* Karty zadan (scramble, gap, etc.) - ostre, cienkie linie.
+   UWAGA: .flashcard celowo wykluczone - jest tylko kontenerem 3D perspective,
+   widoczny border ma .flashcard-face (oryginalny styl). Inaczej powstaje
+   podwojny border widoczny podczas obrotu fiszki. */
+.scramble-card, .quiz-card, .unsc-card, .cornell-card,
+.gap-card, .trans-card, .write-card {
+  border-radius: 0 !important;
+  box-shadow: none !important;
+  border: 1px solid var(--ws-border) !important;
+}
+/* Matching: jednakowy mocniejszy border na kafelkach (PL/EN) i przyciskach
+   bocznych (TTS, Solve) - dla spójnej, editorial estetyki. */
+.match-item {
+  border-radius: 0 !important;
+  box-shadow: none !important;
+  border: 1.5px solid var(--ws-border-strong) !important;
+}
+.match-item-wrap .tts-btn-side {
+  border-color: var(--ws-border-strong) !important;
+  border-width: 1.5px !important;
+}
+.flashcard {
+  /* Sam kontener bez ramki - widoczny border ma .flashcard-face */
+  box-shadow: none !important;
+}
+.flashcard-face, .flashcard-front, .flashcard-back {
+  border-radius: 0 !important;
+}
+/* Inputy, textarea, buttony - ostre rogi */
+.scramble-input, .trans-input, .write-area, .gap-input,
+.scramble-check, .scramble-hint-btn, .scramble-solve-btn,
+.scramble-show-jumbled, .scramble-jumbled,
+.trans-check, .trans-hint-btn, .trans-solve-btn,
+.unsc-check-btn, .unsc-hint-btn, .unsc-solve-btn, .unsc-clear-btn,
+.write-save, .ws-btn-solve, .ws-btn-celebrate, .ws-btn-reset,
+.ws-btn-save, .ws-btn-reset-foot, .ws-btn-download-tsv,
+.tts-btn, .quiz-option, .unsc-word {
+  border-radius: 0 !important;
+}
+.gap-input {
+  border-radius: 0 !important;
+  border: none !important;
+  border-bottom: 1.5px solid var(--ws-accent) !important;
+  background: transparent !important;
+  padding: 0.1rem 0.3rem !important;
+}
+.gap-input:focus {
+  outline: none !important;
+  background: ${rgba(accent, 0.06)} !important;
+}
+.gap-input.gap-correct {
+  border-bottom-color: var(--ws-ok) !important;
+}
+/* Pasek postępu: ostre rogi, cienki - poprawne klasy */
+.ws-progress-wrap {
+  border-radius: 0 !important;
+  box-shadow: none !important;
+  border: 1px solid var(--ws-border-strong) !important;
+}
+.ws-progress-track {
+  border-radius: 0 !important;
+  height: 3px !important;
+}
+.ws-progress-fill {
+  border-radius: 0 !important;
+  box-shadow: none !important;
+}
+/* Finale: editorial outline zamiast wypelnionego boxa */
+.ws-finale {
+  border-radius: 0 !important;
+  border: 1px solid var(--ws-accent) !important;
+  background: var(--ws-card) !important;
+}
+/* Stopka */
+.ws-footer { border-radius: 0 !important; }
+/* TTS i akcji per-zadanie: ostre, granatowe, monoline */
+.tts-btn {
+  border-radius: 0 !important;
+  border-width: 1px !important;
+}
+/* Numerki par w matching: monospace, granat, ostre rogi */
+.match-item.matched::before {
+  font-family: var(--ws-mono) !important;
+  font-weight: 500 !important;
+  font-style: normal !important;
+  border-radius: 0 !important;
+}
+/* Word scramble: literki tile - ostre rogi */
+.scramble-letters .scramble-letter {
+  border-radius: 0 !important;
+}
+/* Unscramble: pula slow ostra */
+.unsc-pool, .unsc-answer-area, .unsc-pool-reveal {
+  border-radius: 0 !important;
+}
+.unsc-word { border-radius: 0 !important; }
+/* Cornell: ostre rogi na wszystkich elementach (q, a, write, numerek, strzalka) */
+.cornell-q, .cornell-a, .cornell-write,
+.cornell-q-num, .cornell-q-arrow, .cornell-write-toggle,
+.cornell-write-area { border-radius: 0 !important; }
+
+/* Flagi SVG (PL/UK) - kontenery z border-radius. W editorial estetyce ostre. */
+.gap-translation-label, .trans-pl-label, .write-prompt-flag {
+  border-radius: 0 !important;
+}
+/* Eyebrow badge (np. "ZADANIA") i part-badge (np. "Czesc 1/2") - ostre */
+.ws-eyebrow, .ws-part-badge {
+  border-radius: 0 !important;
+}
+/* Quiz options: ostre */
+.quiz-option { border-radius: 0 !important; }
+/* Feedback boxy */
+.ws-feedback { border-radius: 0 !important; }
+
+/* === UNIWERSALNY OVERRIDE: wszystko w karcie pracy ma ostre rogi ===
+   Editorial estetyka konsekwentna. Wykluczamy jedynie:
+   - elementy .ws-keep-radius (escape hatch jesli kiedys cos celowo ma byc okragle)
+   - wewnetrzne SVG <rect r="..."> (te i tak ignoruja CSS border-radius) */
+.ws-app *:not(.ws-keep-radius):not(img) {
+  border-radius: 0 !important;
+}
+`,
+    cardBg: '#ffffff',
+    cardShadow: 'none',
+    // Fiszki - czysta biel z 1px border, brak gradientu (eleganckie minimum)
+    flashGradient: '#ffffff',
+    flashBorder: 'rgba(26, 40, 71, 0.35)',
+    // Tło dla boxów zadań - delikatne off-white, lekko ciemniejsze od tla
+    // i z odrobina granatowego podtonu (zamiast neutralnego szarego).
+    boxBg: '#eef0f3',
+    // Progress: cienki granat bez gradientu
+    progressGradient: accent
   };
 }
 
@@ -5401,7 +5962,7 @@ ${t.extraBgCSS}
   opacity: 0.7;
   letter-spacing: 0.03em;
 }
-.ws-btn-save, .ws-btn-reset-foot {
+.ws-btn-save, .ws-btn-reset-foot, .ws-btn-download-tsv {
   font-family: var(--ws-body); font-size: 0.82rem; font-weight: 500;
   padding: 0.55rem 1rem;
   background: transparent;
@@ -5413,6 +5974,18 @@ ${t.extraBgCSS}
 }
 .ws-btn-save:hover { border-color: var(--ws-accent); color: var(--ws-accent); }
 .ws-btn-reset-foot:hover { color: var(--ws-no); border-color: var(--ws-no); }
+.ws-btn-download-tsv {
+  /* Lekko bardziej stonowane niz Reset - to opcja a nie czesta akcja */
+  opacity: 0.7;
+  font-family: var(--ws-mono);
+  font-size: 0.78rem;
+  letter-spacing: 0.04em;
+}
+.ws-btn-download-tsv:hover {
+  opacity: 1;
+  border-color: var(--ws-accent);
+  color: var(--ws-accent);
+}
 
 /* ========== TTS BUTTONS ========== */
 .tts-btn {
@@ -5884,6 +6457,12 @@ ${t.extraBgCSS}
 }
 .quiz-solve-btn {
   flex-shrink: 0;
+  width: 36px;
+  height: 36px;
+  padding: 0;
+  font-size: 1rem;
+  display: grid;
+  place-items: center;
 }
 .quiz-card.answered .quiz-solve-btn {
   opacity: 0.35;
