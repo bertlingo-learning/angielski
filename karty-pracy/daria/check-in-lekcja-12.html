@@ -1,0 +1,4557 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Check-in, Snacks &amp; Chat: Przydatne zwroty w hotelu i przy stole</title>
+<link href="https://fonts.googleapis.com/css2?family=Eczar:wght@400;500;600;700;800&family=Signika:wght@300..700&family=IBM+Plex+Mono:wght@300;400;500&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.4/dist/confetti.browser.min.js"></script>
+<style>
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --ws-bg: #fafaf7;
+  --ws-text: #1a1a1a;
+  --ws-text-dim: #4a5468;
+  --ws-accent: #00940a;
+  --ws-accent-2: #0fb84d;
+  --ws-accent-3: #267703;
+  --ws-accent-vibrant: #19e18b;
+  --ws-accent-gradient: linear-gradient(135deg, #00940a 0%, #0fb84d 100%);
+  --ws-accent-gradient-3: linear-gradient(135deg, #00940a 0%, #0fb84d 50%, #267703 100%);
+  --ws-progress-gradient: #00940a;
+  --ws-accent-soft: rgba(0, 148, 10, 0.1);
+  --ws-accent-strong: rgba(0, 148, 10, 0.25);
+  --ws-surface: #ffffff;
+  --ws-card: #ffffff;
+  --ws-border: rgba(26, 40, 71, 0.25);
+  --ws-border-strong: rgba(26, 40, 71, 0.55);
+  --ws-display: 'Eczar', 'Philosopher', Georgia, serif;
+  --ws-body: 'Signika', 'Inter Tight', 'Helvetica Neue', Arial, sans-serif;
+  --ws-mono: 'IBM Plex Mono', 'JetBrains Mono', monospace;
+  --ws-shadow: none;
+  --ws-flash-gradient: #ffffff;
+  --ws-flash-gloss: rgba(255,255,255,0.28);
+  /* Wspólne tło dla wszystkich boxów zadań w karcie pracy. */
+  --ws-box-bg: #eef0f3;
+  --ws-ok: #16a34a;
+  --ws-ok-bg: rgba(22, 163, 74, 0.1);
+  --ws-no: #dc2626;
+  --ws-no-bg: rgba(220, 38, 38, 0.1);
+}
+
+html { scroll-behavior: smooth; }
+body {
+  background: var(--ws-bg);
+  color: var(--ws-text);
+  font-family: var(--ws-body);
+  font-size: 18px;
+  line-height: 1.55;
+  min-height: 100vh;
+  position: relative;
+  overflow-x: hidden;
+}
+
+
+.ws-bg-grid {
+  position: fixed; inset: 0; pointer-events: none; z-index: 0;
+  /* Subtelna siatka editorial - widoczna, ale nie krzykliwa.
+     Wczesniej 0.025 bylo niemal niewidoczne; 0.06 daje czytelny papier kreślarski. */
+  background-image:
+    linear-gradient(rgba(0, 148, 10, 0.06) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(0, 148, 10, 0.06) 1px, transparent 1px);
+  background-size: 64px 64px;
+}
+/* === ATELIER: body Signika 400 (regular variable) === */
+body {
+  font-weight: 400 !important;
+}
+/* Inputy, textarea, buttony i tresci zadan - dziedzicza wage 400 */
+.scramble-input, .trans-input, .write-area, .gap-input, .quiz-option,
+.flashcard-face, .gap-sentence, .trans-prompt, .unsc-word,
+.cornell-q-text, .cornell-a-inner, .write-prompt-pl, .write-prompt-en,
+.match-item, .gap-translation-text {
+  font-weight: 400 !important;
+}
+/* Tytuly w Eczar 500 (medium) - Eczar ma wagi 400-800, 500 daje wyrazny
+   ale nie przesadny kontrast wzgledem body 350. */
+.ws-title, .ws-sec-title, .ws-finale-title {
+  font-weight: 500 !important;
+}
+/* === ATELIER OVERRIDES: ostre rogi, cienkie linie, brak cieni === */
+.ws-section {
+  border: 1px solid var(--ws-border-strong) !important;
+  border-radius: 0 !important;
+  box-shadow: none !important;
+  padding: 2.5rem 2.25rem 2rem !important;
+}
+.ws-section + .ws-section { margin-top: 1.5rem; }
+.ws-section.ws-done {
+  background: var(--ws-card) !important;
+  border-color: var(--ws-accent) !important;
+  box-shadow: none !important;
+}
+/* Nagłówek sekcji: cienka linia pod, granatowy kwadrat z numerem */
+.ws-sec-head {
+  border-bottom: 1px solid var(--ws-border) !important;
+  padding-bottom: 1.25rem;
+  margin-bottom: 1.5rem;
+  align-items: center !important;
+  gap: 1rem !important;
+}
+.ws-sec-num {
+  /* Kwadrat z cienkim granatowym borderem - editorial wersja "kapsuly" */
+  background: transparent !important;
+  color: var(--ws-accent) !important;
+  border: 1px solid var(--ws-accent) !important;
+  width: 44px !important;
+  height: 44px !important;
+  font-family: var(--ws-mono);
+  font-weight: 400 !important;
+  font-size: 0.92rem !important;
+  letter-spacing: 0.02em !important;
+  border-radius: 0 !important;
+  display: grid !important;
+  place-items: center !important;
+  flex-shrink: 0 !important;
+}
+.ws-sec-title {
+  letter-spacing: -0.015em !important;
+}
+.ws-sec-desc {
+  font-style: italic;
+  color: var(--ws-text-dim);
+  font-weight: 300;
+}
+/* Tytul karty pracy: lekko kursywa, ekstra letter-spacing tight */
+.ws-title {
+  letter-spacing: -0.025em !important;
+  line-height: 1 !important;
+}
+.ws-subtitle {
+  font-family: var(--ws-body);
+  font-weight: 300;
+  color: var(--ws-text-dim);
+  letter-spacing: 0.01em;
+}
+/* Karty zadan (scramble, gap, etc.) - ostre, cienkie linie.
+   UWAGA: .flashcard celowo wykluczone - jest tylko kontenerem 3D perspective,
+   widoczny border ma .flashcard-face (oryginalny styl). Inaczej powstaje
+   podwojny border widoczny podczas obrotu fiszki. */
+.scramble-card, .quiz-card, .unsc-card, .cornell-card,
+.gap-card, .trans-card, .write-card {
+  border-radius: 0 !important;
+  box-shadow: none !important;
+  border: 1px solid var(--ws-border) !important;
+}
+/* Matching: jednakowy mocniejszy border na kafelkach (PL/EN) i przyciskach
+   bocznych (TTS, Solve) - dla spójnej, editorial estetyki. */
+.match-item {
+  border-radius: 0 !important;
+  box-shadow: none !important;
+  border: 1.5px solid var(--ws-border-strong) !important;
+}
+.match-item-wrap .tts-btn-side {
+  border-color: var(--ws-border-strong) !important;
+  border-width: 1.5px !important;
+}
+.flashcard {
+  /* Sam kontener bez ramki - widoczny border ma .flashcard-face */
+  box-shadow: none !important;
+}
+.flashcard-face, .flashcard-front, .flashcard-back {
+  border-radius: 0 !important;
+}
+/* Inputy, textarea, buttony - ostre rogi */
+.scramble-input, .trans-input, .write-area, .gap-input,
+.scramble-check, .scramble-hint-btn, .scramble-solve-btn,
+.scramble-show-jumbled, .scramble-jumbled,
+.trans-check, .trans-hint-btn, .trans-solve-btn,
+.unsc-check-btn, .unsc-hint-btn, .unsc-solve-btn, .unsc-clear-btn,
+.write-save, .ws-btn-solve, .ws-btn-celebrate, .ws-btn-reset,
+.ws-btn-save, .ws-btn-reset-foot, .ws-btn-download-tsv,
+.tts-btn, .quiz-option, .unsc-word {
+  border-radius: 0 !important;
+}
+.gap-input {
+  border-radius: 0 !important;
+  border: none !important;
+  border-bottom: 1.5px solid var(--ws-accent) !important;
+  background: transparent !important;
+  padding: 0.1rem 0.3rem !important;
+}
+.gap-input:focus {
+  outline: none !important;
+  background: rgba(0, 148, 10, 0.06) !important;
+}
+.gap-input.gap-correct {
+  border-bottom-color: var(--ws-ok) !important;
+}
+/* Pasek postępu: ostre rogi, cienki - poprawne klasy */
+.ws-progress-wrap {
+  border-radius: 0 !important;
+  box-shadow: none !important;
+  border: 1px solid var(--ws-border-strong) !important;
+}
+.ws-progress-track {
+  border-radius: 0 !important;
+  height: 3px !important;
+}
+.ws-progress-fill {
+  border-radius: 0 !important;
+  box-shadow: none !important;
+}
+/* Finale: editorial outline zamiast wypelnionego boxa */
+.ws-finale {
+  border-radius: 0 !important;
+  border: 1px solid var(--ws-accent) !important;
+  background: var(--ws-card) !important;
+}
+/* Stopka */
+.ws-footer { border-radius: 0 !important; }
+/* TTS i akcji per-zadanie: ostre, granatowe, monoline */
+.tts-btn {
+  border-radius: 0 !important;
+  border-width: 1px !important;
+}
+/* Numerki par w matching: monospace, granat, ostre rogi */
+.match-item.matched::before {
+  font-family: var(--ws-mono) !important;
+  font-weight: 500 !important;
+  font-style: normal !important;
+  border-radius: 0 !important;
+}
+/* Word scramble: literki tile - ostre rogi */
+.scramble-letters .scramble-letter {
+  border-radius: 0 !important;
+}
+/* Unscramble: pula slow ostra */
+.unsc-pool, .unsc-answer-area, .unsc-pool-reveal {
+  border-radius: 0 !important;
+}
+.unsc-word { border-radius: 0 !important; }
+/* Cornell: ostre rogi na wszystkich elementach (q, a, write, numerek, strzalka) */
+.cornell-q, .cornell-a, .cornell-write,
+.cornell-q-num, .cornell-q-arrow, .cornell-write-toggle,
+.cornell-write-area { border-radius: 0 !important; }
+
+/* Flagi SVG (PL/UK) - kontenery z border-radius. W editorial estetyce ostre. */
+.gap-translation-label, .trans-pl-label, .write-prompt-flag {
+  border-radius: 0 !important;
+}
+/* Eyebrow badge (np. "ZADANIA") i part-badge (np. "Czesc 1/2") - ostre */
+.ws-eyebrow, .ws-part-badge {
+  border-radius: 0 !important;
+}
+/* Quiz options: ostre */
+.quiz-option { border-radius: 0 !important; }
+/* Feedback boxy */
+.ws-feedback { border-radius: 0 !important; }
+
+/* === UNIWERSALNY OVERRIDE: wszystko w karcie pracy ma ostre rogi ===
+   Editorial estetyka konsekwentna. Wykluczamy jedynie:
+   - elementy .ws-keep-radius (escape hatch jesli kiedys cos celowo ma byc okragle)
+   - wewnetrzne SVG <rect r="..."> (te i tak ignoruja CSS border-radius) */
+.ws-app *:not(.ws-keep-radius):not(img) {
+  border-radius: 0 !important;
+}
+
+
+.ws-app {
+  position: relative; z-index: 1;
+  max-width: 980px; margin: 0 auto;
+  padding: clamp(1.5rem, 4vw, 3rem) clamp(1rem, 3vw, 2rem) 6rem;
+}
+
+/* HEADER */
+.ws-header {
+  text-align: center;
+  margin-bottom: 2rem;
+  padding: 1rem 0 1.5rem;
+  animation: wsSlideDown 0.8s cubic-bezier(0.16,1,0.3,1) both;
+}
+.ws-header-with-logo {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 1.6rem;
+  text-align: left;
+}
+.ws-header-with-logo .ws-line {
+  margin-left: 0;
+  margin-right: 0;
+  width: 100%;
+  height: 2px;
+}
+.ws-header-text {
+  flex: 1;
+  min-width: 0;
+}
+@keyframes wsSlideDown {
+  from { opacity: 0; transform: translateY(-20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.ws-eyebrow {
+  font-family: var(--ws-mono);
+  font-size: 0.78rem; letter-spacing: 0.25em; text-transform: uppercase;
+  color: var(--ws-accent); margin-bottom: 0.8rem;
+  font-weight: 600;
+  display: inline-block;
+  padding: 0.3rem 0.85rem;
+  background: var(--ws-accent-soft);
+  border-radius: 999px;
+}
+.ws-title {
+  font-family: var(--ws-display);
+  font-size: clamp(2.1rem, 5.5vw, 3.2rem);
+  font-weight: 700;
+  line-height: 1.1; letter-spacing: -0.02em;
+  color: var(--ws-accent);
+}
+.ws-subtitle {
+  color: var(--ws-text-dim);
+  margin-top: 0.7rem;
+  font-size: 1.15rem;
+}
+.ws-line {
+  width: 90px; height: 4px;
+  background: var(--ws-accent-gradient);
+  margin: 1.4rem auto 0;
+  border-radius: 4px;
+}
+
+/* PROGRESS */
+.ws-progress-wrap {
+  margin-bottom: 2rem;
+  padding: 0.7rem 1rem;
+  background: var(--ws-surface);
+  border: 1px solid var(--ws-border);
+  border-radius: 11px;
+  position: sticky;
+  top: 1rem;
+  z-index: 10;
+  backdrop-filter: blur(8px);
+  box-shadow: var(--ws-shadow);
+}
+.ws-progress-top {
+  display: flex; justify-content: space-between; align-items: baseline;
+  margin-bottom: 0.4rem;
+}
+.ws-progress-label {
+  font-family: var(--ws-mono); font-size: 0.65rem; letter-spacing: 0.2em;
+  text-transform: uppercase; color: var(--ws-text-dim);
+}
+.ws-progress-track {
+  height: 6px; border-radius: 4px;
+  background: var(--ws-border);
+  overflow: hidden;
+}
+.ws-progress-fill {
+  height: 100%; width: 0%;
+  background: var(--ws-progress-gradient);
+  border-radius: 4px;
+  transition: width 0.6s cubic-bezier(0.16,1,0.3,1);
+  box-shadow: 0 0 8px rgba(0, 148, 10, 0.4);
+}
+.ws-progress-score {
+  font-family: var(--ws-display); font-weight: 700; font-size: 1rem;
+  color: var(--ws-accent);
+}
+
+/* SECTIONS */
+.ws-section {
+  background: var(--ws-card);
+  border: 1px solid var(--ws-border);
+  border-radius: 18px;
+  padding: clamp(1.5rem, 3.5vw, 2.4rem);
+  margin-bottom: 1.5rem;
+  box-shadow: var(--ws-shadow);
+  transition: border-color 0.4s, box-shadow 0.3s;
+  animation: wsFadeUp 0.7s cubic-bezier(0.16,1,0.3,1) both;
+  animation-delay: 0.1s;
+}
+@keyframes wsFadeUp {
+  from { opacity: 0; transform: translateY(15px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.ws-section.ws-done {
+  border-color: var(--ws-accent);
+  box-shadow: 0 4px 16px rgba(0, 148, 10, 0.12), 0 1px 3px rgba(0,0,0,0.05);
+}
+
+/* Obrazek prezentujacy sekcje - odseparowany element NAD sekcja.
+   Czysty kadr, zaokrąglone rogi, pusta przestrzen pod obrazem oddziela go od sekcji. */
+.ws-sec-image {
+  margin: 0 0 clamp(0.9rem, 2vw, 1.4rem) 0;
+  border-radius: 14px;
+  overflow: hidden;
+  background: var(--ws-box-bg);
+  position: relative;
+}
+.ws-sec-image img {
+  display: block;
+  width: 100%;
+  height: 150px;
+  object-fit: cover;
+  /* Punkt wyjsciowy dla parallax: lekko powiekszony, zeby pozniej mial gdzie sie "ruszyc" */
+  transform: scale(1.12) translateY(0);
+  transform-origin: center center;
+  will-change: transform;
+}
+
+/* Parallax: gdy obrazek wchodzi w viewport, transformacja sie zmienia.
+   Uzywamy nowych CSS scroll-driven animations - bez JS. */
+@supports (animation-timeline: view()) {
+  .ws-sec-image img {
+    animation: wsImageParallax linear both;
+    animation-timeline: view();
+    animation-range: cover 0% cover 100%;
+  }
+  @keyframes wsImageParallax {
+    /* Gdy obraz wchodzi w viewport od dolu */
+    from { transform: scale(1.12) translateY(-18px); }
+    /* W srodku viewportu */
+    50%  { transform: scale(1.12) translateY(0); }
+    /* Gdy wychodzi w gore */
+    to   { transform: scale(1.12) translateY(18px); }
+  }
+}
+
+/* Hover na obrazku celowo wylaczony - obraz pozostaje statyczny */
+
+@media (max-width: 640px) {
+  .ws-sec-image img { height: 110px; }
+}
+
+/* Szanuj prefers-reduced-motion - wylacz parallax */
+@media (prefers-reduced-motion: reduce) {
+  .ws-sec-image img {
+    transform: scale(1) translateY(0) !important;
+    animation: none !important;
+    transition: none !important;
+  }
+}
+
+.ws-sec-head {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 0.7rem;
+  flex-wrap: wrap;
+}
+.ws-sec-head .ws-sec-title { flex: 1; min-width: 0; }
+.ws-part-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  font-family: var(--ws-mono);
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  color: var(--ws-accent);
+  background: var(--ws-accent-soft);
+  border: 1.5px solid var(--ws-accent);
+  padding: 0.32rem 0.7rem 0.32rem 0.55rem;
+  border-radius: 999px;
+  text-transform: uppercase;
+  flex-shrink: 0;
+  white-space: nowrap;
+}
+.ws-part-badge::before {
+  content: '◆';
+  font-size: 0.6rem;
+  opacity: 0.75;
+}
+.ws-sec-num {
+  font-family: var(--ws-mono);
+  font-size: 0.95rem; font-weight: 700;
+  width: 48px; height: 48px;
+  border-radius: 12px;
+  background: var(--ws-accent);
+  color: #fff;
+  display: grid; place-items: center;
+  letter-spacing: -0.03em;
+  flex-shrink: 0;
+  -webkit-print-color-adjust: exact;
+  print-color-adjust: exact;
+}
+.ws-sec-title {
+  font-family: var(--ws-display); font-weight: 700;
+  font-size: clamp(1.5rem, 2.8vw, 1.85rem);
+  letter-spacing: -0.02em;
+  color: var(--ws-accent);
+}
+.ws-sec-desc {
+  color: var(--ws-text-dim);
+  font-size: 1.02rem;
+  margin: 0 0 1.5rem 3.7rem;
+}
+
+/* FEEDBACK */
+.ws-feedback {
+  margin-top: 1rem;
+  padding: 0.85rem 1.15rem;
+  border-radius: 10px;
+  font-weight: 500;
+  font-size: 1rem;
+  display: none;
+  animation: wsFadeIn 0.3s ease-out;
+}
+.ws-feedback.show { display: block; }
+.ws-feedback.fb-ok { background: var(--ws-ok-bg); color: var(--ws-ok); border: 1px solid var(--ws-ok); }
+.ws-feedback.fb-no { background: var(--ws-no-bg); color: var(--ws-no); border: 1px solid var(--ws-no); }
+@keyframes wsFadeIn { from { opacity: 0; } to { opacity: 1; } }
+
+/* ACTION BUTTONS */
+.ws-actions { display: flex; gap: 0.6rem; flex-wrap: wrap; margin-top: 1.2rem; }
+.ws-btn-solve {
+  font-family: var(--ws-body);
+  font-size: 0.92rem; font-weight: 500;
+  padding: 0.65rem 1.15rem;
+  background: transparent;
+  border: 1px solid var(--ws-border-strong);
+  color: var(--ws-text-dim);
+  border-radius: 10px;
+  cursor: pointer;
+  transition: all 0.18s;
+}
+.ws-btn-solve:hover {
+  border-color: var(--ws-accent);
+  color: var(--ws-accent);
+  background: var(--ws-accent-soft);
+}
+
+/* ========== FLASHCARDS ========== */
+.flashcards-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(195px, 1fr));
+  gap: 1rem;
+}
+.flashcard {
+  aspect-ratio: 4/3;
+  perspective: 1200px;
+  cursor: pointer;
+  transition: transform 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+.flashcard:hover {
+  transform: scale(1.04);
+}
+.flashcard.fc-size-s, .flashcard.fc-size-xs { aspect-ratio: 4/3.4; }
+.flashcard-inner {
+  position: relative; width: 100%; height: 100%;
+  transition: transform 0.6s cubic-bezier(0.16,1,0.3,1);
+  transform-style: preserve-3d;
+}
+.flashcard.flipped .flashcard-inner {
+  transform: rotateY(180deg);
+}
+.flashcard-face {
+  position: absolute; inset: 0;
+  backface-visibility: hidden; -webkit-backface-visibility: hidden;
+  border-radius: 14px;
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  padding: 1.5rem 1.85rem;
+  text-align: center;
+  background: var(--ws-flash-gradient);
+  border: 1.5px solid rgba(26, 40, 71, 0.35);
+  box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+  transition: box-shadow 0.25s;
+  overflow: hidden;
+}
+/* Shine sweep - jeden wąski, ukośny pasek światła przelatuje przez kartę
+   raz, kiedy najedziesz myszą. Bez powtórek. */
+.flashcard-face::before {
+  content: '';
+  position: absolute;
+  top: -50%;
+  left: 0;
+  width: 35%;
+  height: 200%;
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    rgba(255,255,255,0.6) 50%,
+    transparent 100%
+  );
+  pointer-events: none;
+  z-index: 1;
+  opacity: 0;
+  transform: translateX(-150%) skewX(-22deg);
+}
+/* Treść fiszki musi być nad shine */
+.flashcard-face > * {
+  position: relative;
+  z-index: 2;
+}
+@keyframes flashShineSweep {
+  0%   { transform: translateX(-150%) skewX(-22deg); opacity: 0; }
+  10%  { opacity: 1; }
+  90%  { opacity: 1; }
+  100% { transform: translateX(400%) skewX(-22deg); opacity: 0; }
+}
+.flashcard:hover .flashcard-face::before {
+  animation: flashShineSweep 0.35s ease-out 1 forwards;
+}
+/* Dłuższe teksty - lewo zamiast center, większy padding */
+.flashcard.fc-size-s .flashcard-face,
+.flashcard.fc-size-xs .flashcard-face,
+.flashcard-face.fc-size-s,
+.flashcard-face.fc-size-xs {
+  padding: 1.6rem 1.7rem;
+  align-items: stretch;
+  justify-content: center;
+  text-align: left;
+}
+.flashcard.fc-size-s .flash-word,
+.flashcard.fc-size-s .flash-word-back,
+.flashcard.fc-size-xs .flash-word,
+.flashcard.fc-size-xs .flash-word-back,
+.flashcard.fc-size-s .flash-word-back-pl,
+.flashcard.fc-size-xs .flash-word-back-pl,
+.flashcard-face.fc-size-s .flash-word,
+.flashcard-face.fc-size-s .flash-word-back,
+.flashcard-face.fc-size-xs .flash-word,
+.flashcard-face.fc-size-xs .flash-word-back,
+.flashcard-face.fc-size-s .flash-word-back-pl,
+.flashcard-face.fc-size-xs .flash-word-back-pl {
+  text-align: left;
+  hyphens: auto;
+}
+.flashcard:hover .flashcard-face {
+  box-shadow: 0 10px 28px rgba(0,0,0,0.14);
+}
+.flashcard-back {
+  transform: rotateY(180deg);
+  background: rgba(0, 148, 10, 0.07);
+}
+.flash-lang {
+  font-family: var(--ws-mono);
+  font-size: 0.65rem; letter-spacing: 0.2em; text-transform: uppercase;
+  color: var(--ws-text-dim); margin-bottom: 0.5rem;
+}
+.flashcard-back .flash-lang { color: var(--ws-accent); }
+.flash-word {
+  font-family: var(--ws-display);
+  font-weight: 700;
+  color: var(--ws-text);
+  line-height: 1.2;
+  overflow-wrap: normal;
+  word-break: keep-all;
+}
+.flashcard.fc-size-l .flash-word, .flashcard-face.fc-size-l .flash-word { font-size: 1.5rem; }
+.flashcard.fc-size-m .flash-word, .flashcard-face.fc-size-m .flash-word { font-size: 1.2rem; }
+.flashcard.fc-size-s .flash-word, .flashcard-face.fc-size-s .flash-word { font-size: 0.95rem; line-height: 1.35; }
+.flashcard.fc-size-xs .flash-word, .flashcard-face.fc-size-xs .flash-word { font-size: 0.8rem; line-height: 1.4; }
+.flash-word-back-pl {
+  font-family: var(--ws-body);
+  font-size: 0.78rem;
+  color: var(--ws-text-dim);
+  font-weight: 500;
+  margin-bottom: 0.5rem;
+  opacity: 0.75;
+  word-break: break-word;
+  line-height: 1.3;
+}
+.flashcard.fc-size-s .flash-word-back-pl,
+.flashcard.fc-size-xs .flash-word-back-pl {
+  font-size: 0.68rem;
+  margin-bottom: 0.3rem;
+}
+.flash-word-back {
+  font-family: var(--ws-display);
+  font-weight: 700;
+  color: var(--ws-accent);
+  line-height: 1.2;
+  overflow-wrap: normal;
+  word-break: keep-all;
+}
+.flashcard.fc-size-l .flash-word-back, .flashcard-face.fc-size-l .flash-word-back { font-size: 1.5rem; }
+.flashcard.fc-size-m .flash-word-back, .flashcard-face.fc-size-m .flash-word-back { font-size: 1.2rem; }
+.flashcard.fc-size-s .flash-word-back, .flashcard-face.fc-size-s .flash-word-back { font-size: 0.95rem; line-height: 1.35; }
+.flashcard.fc-size-xs .flash-word-back, .flashcard-face.fc-size-xs .flash-word-back { font-size: 0.8rem; line-height: 1.4; }
+.flash-hint {
+  font-family: var(--ws-mono);
+  font-size: 0.65rem;
+  color: var(--ws-text-dim);
+  margin-top: 0.6rem;
+  letter-spacing: 0.1em; text-transform: uppercase;
+  opacity: 0.7;
+}
+
+/* ========== MATCHING ========== */
+.match-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1.2rem;
+}
+.match-col { display: flex; flex-direction: column; gap: 0.5rem; }
+.match-col-label {
+  font-family: var(--ws-mono);
+  font-size: 0.7rem; letter-spacing: 0.2em; text-transform: uppercase;
+  color: var(--ws-text-dim);
+  margin-bottom: 0.3rem;
+  text-align: center;
+}
+.match-item {
+  position: relative;
+  font-family: var(--ws-body);
+  font-size: 1.08rem; font-weight: 500;
+  padding: 1rem 1.2rem;
+  background: var(--ws-surface);
+  border: 1.5px solid var(--ws-border-strong);
+  color: var(--ws-text);
+  border-radius: 11px;
+  cursor: pointer;
+  transition: border-color 0.18s, background 0.18s;
+  text-align: left;
+  width: 100%;
+}
+.match-item:hover:not(.matched) { border-color: var(--ws-accent); }
+.match-item.selected {
+  border-color: var(--ws-accent);
+  background: var(--ws-accent-soft);
+  color: var(--ws-accent);
+}
+.match-item.matched {
+  cursor: default;
+  font-weight: 700;
+  padding-left: 3.6rem;
+  animation: wsBounce 0.5s cubic-bezier(0.34, 1.56, 0.64, 1), wsCorrectGlow 0.9s ease-out;
+}
+.match-item.matched::before {
+  content: attr(data-pair);
+  position: absolute;
+  top: 0.95rem; left: 0.8rem;
+  font-family: var(--ws-display);
+  font-size: 1.05rem; font-weight: 800;
+  width: 32px; height: 32px;
+  border-radius: 8px;
+  background: var(--pair-color, currentColor);
+  color: #fff;
+  display: grid; place-items: center;
+  letter-spacing: 0;
+}
+/* Jeśli treść jest jednoliniowa (krótka), numerek się centruje */
+.match-item.matched.single-line::before {
+  top: 50%;
+  transform: translateY(-50%);
+}
+.match-item.wrong {
+  border-color: var(--ws-no);
+  background: var(--ws-no-bg);
+  color: var(--ws-no);
+  animation: wsBuzz 0.5s, wsFlashWrong 0.6s ease-out;
+}
+@keyframes wsShake {
+  0%, 100% { transform: translateX(0); }
+  25% { transform: translateX(-4px); }
+  75% { transform: translateX(4px); }
+}
+/* === FEEDBACK ANIMATIONS === */
+/* Pop dla poprawnych odpowiedzi - delikatne powiekszenie z powrotem */
+@keyframes wsPop {
+  0%   { transform: scale(1); }
+  40%  { transform: scale(1.08); }
+  70%  { transform: scale(0.98); }
+  100% { transform: scale(1); }
+}
+/* Subtelniejszy pop dla mniejszych elementow lub gdy nie chcemy duzego skoku */
+@keyframes wsPopSubtle {
+  0%   { transform: scale(1); }
+  50%  { transform: scale(1.025); }
+  100% { transform: scale(1); }
+}
+/* Mocniejszy bounce dla wiekszych elementow (np. quiz-option, match-item) */
+@keyframes wsBounce {
+  0%   { transform: scale(1) translateY(0); }
+  30%  { transform: scale(1.04) translateY(-3px); }
+  60%  { transform: scale(0.99) translateY(0); }
+  100% { transform: scale(1) translateY(0); }
+}
+/* Pulsujaca poswiata sukcesu */
+@keyframes wsCorrectGlow {
+  0%   { box-shadow: 0 0 0 0 rgba(34, 197, 94, 0); }
+  40%  { box-shadow: 0 0 0 6px rgba(34, 197, 94, 0.18); }
+  100% { box-shadow: 0 0 0 0 rgba(34, 197, 94, 0); }
+}
+/* Wzmocnione drganie dla bledu (mocniejsze niz wsShake) */
+@keyframes wsBuzz {
+  0%, 100% { transform: translateX(0) rotate(0); }
+  15% { transform: translateX(-5px) rotate(-0.5deg); }
+  30% { transform: translateX(5px) rotate(0.5deg); }
+  45% { transform: translateX(-4px) rotate(-0.4deg); }
+  60% { transform: translateX(4px) rotate(0.4deg); }
+  75% { transform: translateX(-2px) rotate(0); }
+}
+/* Czerwony blysk tla dla bledu */
+@keyframes wsFlashWrong {
+  0%   { box-shadow: 0 0 0 0 rgba(220, 38, 38, 0); }
+  35%  { box-shadow: 0 0 0 6px rgba(220, 38, 38, 0.22); }
+  100% { box-shadow: 0 0 0 0 rgba(220, 38, 38, 0); }
+}
+/* Tick - delikatny "stempel" dla pojawiajacego sie checkmarka */
+@keyframes wsTickIn {
+  0%   { transform: scale(0.5) rotate(-12deg); opacity: 0; }
+  60%  { transform: scale(1.15) rotate(2deg); opacity: 1; }
+  100% { transform: scale(1) rotate(0); opacity: 1; }
+}
+/* Respekt dla preferencji uzytkownika - wylacz mocne animacje */
+@media (prefers-reduced-motion: reduce) {
+  .match-item.matched,
+  .match-item.wrong,
+  .scramble-input.correct,
+  .scramble-input.wrong,
+  .unsc-word.correct-pos,
+  .unsc-word.wrong-pos,
+  .quiz-option.quiz-correct,
+  .quiz-option.quiz-correct .quiz-opt-letter,
+  .quiz-option.quiz-wrong,
+  .gap-input.gap-correct,
+  .gap-input.gap-wrong,
+  .trans-input.trans-correct,
+  .trans-input.trans-wrong {
+    animation: none !important;
+  }
+}
+@media (max-width: 540px) {
+  .match-grid { grid-template-columns: 1fr; gap: 1.5rem; }
+}
+
+/* ========== SCRAMBLE ========== */
+.scramble-grid {
+  display: grid; gap: 0.85rem;
+}
+.scramble-card {
+  background: var(--ws-box-bg);
+  border: 1px solid var(--ws-border-strong);
+  border-radius: 13px;
+  padding: 1.15rem 1.3rem;
+  transition: all 0.3s;
+}
+.scramble-card.done {
+  border-color: var(--ws-ok);
+  background: var(--ws-ok-bg);
+}
+.scramble-prompt {
+  display: flex; align-items: center; justify-content: space-between;
+  gap: 1rem; flex-wrap: wrap;
+  margin-bottom: 0.85rem;
+}
+.scramble-pl {
+  font-family: var(--ws-display);
+  font-weight: 700;
+  font-size: 1.2rem;
+  color: var(--ws-text);
+}
+.scramble-jumbled,
+.scramble-show-jumbled {
+  font-family: var(--ws-mono);
+  font-weight: 700;
+  font-size: 1.15rem;
+  letter-spacing: 0.25em;
+  color: #fff;
+  background: var(--ws-accent);
+  padding: 0.5rem 0.95rem;
+  border-radius: 8px;
+  text-transform: lowercase;
+  border: none;
+  cursor: pointer;
+  transition: opacity 0.18s;
+}
+.scramble-show-jumbled .scramble-jumbled-shown {
+  display: none;
+  letter-spacing: 0.25em;
+}
+.scramble-show-jumbled.revealed .scramble-jumbled-hidden {
+  display: none;
+}
+.scramble-show-jumbled.revealed .scramble-jumbled-shown {
+  display: inline;
+}
+.scramble-show-jumbled .scramble-jumbled-hidden {
+  font-family: var(--ws-body);
+  letter-spacing: 0.02em;
+  font-size: 0.95rem;
+  text-transform: none;
+  font-weight: 600;
+  opacity: 0.95;
+}
+.scramble-show-jumbled:hover { opacity: 0.85; }
+.scramble-input-row {
+  display: flex; gap: 0.5rem;
+  align-items: stretch;
+}
+.scramble-input {
+  flex: 1;
+  font-family: var(--ws-body);
+  font-size: 1.08rem;
+  padding: 0.8rem 1.05rem;
+  background: var(--ws-bg);
+  border: 1.5px solid var(--ws-border-strong);
+  color: var(--ws-text);
+  border-radius: 10px;
+  transition: all 0.18s;
+}
+.scramble-input:focus { outline: none; border-color: var(--ws-accent); }
+.scramble-input.correct {
+  border-color: var(--ws-ok); color: var(--ws-ok);
+  background: var(--ws-ok-bg);
+  animation: wsPopSubtle 0.35s ease-out, wsCorrectGlow 0.9s ease-out;
+}
+.scramble-input.wrong {
+  border-color: var(--ws-no); color: var(--ws-no);
+  animation: wsBuzz 0.5s, wsFlashWrong 0.6s ease-out;
+}
+.scramble-check, .scramble-hint-btn, .scramble-solve-btn {
+  font-family: var(--ws-body); font-weight: 600;
+  border: 1.5px solid var(--ws-border-strong);
+  background: var(--ws-bg);
+  color: var(--ws-text);
+  border-radius: 10px;
+  cursor: pointer;
+  width: 50px;
+  transition: all 0.18s;
+  font-size: 1.15rem;
+}
+.scramble-check:hover { border-color: var(--ws-accent); color: var(--ws-accent); }
+.scramble-hint-btn:hover { border-color: var(--ws-accent); color: var(--ws-accent); }
+.scramble-solve-btn:hover { border-color: var(--ws-accent); color: var(--ws-accent); }
+.scramble-solve-btn:disabled,
+.scramble-hint-btn:disabled,
+.scramble-check:disabled {
+  opacity: 0.35;
+  cursor: not-allowed;
+}
+.scramble-hint-text {
+  font-family: var(--ws-mono);
+  font-size: 0.85rem;
+  color: var(--ws-accent);
+  margin-top: 0.55rem;
+  display: none;
+  letter-spacing: 0.05em;
+}
+.scramble-hint-text.show { display: block; }
+
+/* ========== FINALE ========== */
+.ws-finale {
+  display: none;
+  text-align: center;
+  margin: 2rem 0;
+  padding: 2.5rem 1.8rem;
+  background: var(--ws-card);
+  border: 2.5px solid transparent;
+  background-image: linear-gradient(var(--ws-card), var(--ws-card)), var(--ws-accent-gradient-3);
+  background-origin: border-box;
+  background-clip: padding-box, border-box;
+  border-radius: 22px;
+  box-shadow: 0 12px 40px rgba(0, 148, 10, 0.18);
+  animation: wsFinaleIn 0.7s cubic-bezier(0.16,1,0.3,1);
+  position: relative;
+  overflow: hidden;
+}
+.ws-finale::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(ellipse 60% 50% at 20% 0%, rgba(0, 148, 10, 0.12), transparent 60%),
+    radial-gradient(ellipse 50% 40% at 80% 100%, rgba(0,0,0,0.04), transparent 60%);
+  pointer-events: none;
+  z-index: 0;
+}
+.ws-finale > * { position: relative; z-index: 1; }
+.ws-finale.show { display: block; }
+@keyframes wsFinaleIn {
+  from { opacity: 0; transform: scale(0.95) translateY(20px); }
+  to { opacity: 1; transform: scale(1) translateY(0); }
+}
+.ws-finale-icon { font-size: 3.8rem; line-height: 1; margin-bottom: 0.85rem; }
+.ws-finale-title {
+  font-family: var(--ws-display);
+  font-weight: 700; font-size: 1.95rem;
+  color: var(--ws-accent);
+  margin-bottom: 0.45rem;
+  letter-spacing: -0.01em;
+}
+.ws-finale-text { color: var(--ws-text-dim); margin-bottom: 1.5rem; }
+.ws-btn-celebrate {
+  font-family: var(--ws-display);
+  font-weight: 700; font-size: 1.05rem;
+  padding: 0.95rem 2.2rem;
+  background: var(--ws-accent-gradient-3);
+  color: #fff;
+  border: none;
+  border-radius: 14px;
+  cursor: pointer;
+  transition: all 0.2s;
+  margin: 0 0.4rem 0.5rem;
+  box-shadow: 0 8px 24px rgba(0, 148, 10, 0.35);
+  letter-spacing: -0.01em;
+}
+.ws-btn-celebrate:hover {
+  transform: scale(1.04);
+  box-shadow: 0 12px 32px rgba(0, 148, 10, 0.5);
+}
+.ws-btn-reset {
+  font-family: var(--ws-body); font-size: 0.85rem;
+  padding: 0.65rem 1.3rem;
+  background: transparent;
+  color: var(--ws-text-dim);
+  border: 1px solid var(--ws-border-strong);
+  border-radius: 9px;
+  cursor: pointer;
+  transition: all 0.18s;
+  margin: 0 0.4rem;
+}
+.ws-btn-reset:hover { color: var(--ws-text); border-color: var(--ws-text-dim); }
+
+/* FOOTER */
+.ws-footer {
+  display: flex; justify-content: center; align-items: center; gap: 1rem;
+  margin-top: 2.5rem; padding-top: 2rem;
+  border-top: 1px solid var(--ws-border);
+  flex-wrap: wrap;
+}
+.ws-save-indicator {
+  font-family: var(--ws-mono);
+  font-size: 0.78rem;
+  color: var(--ws-text-dim);
+  opacity: 0.7;
+  letter-spacing: 0.03em;
+}
+.ws-btn-save, .ws-btn-reset-foot, .ws-btn-download-tsv {
+  font-family: var(--ws-body); font-size: 0.82rem; font-weight: 500;
+  padding: 0.55rem 1rem;
+  background: transparent;
+  border: 1px solid var(--ws-border-strong);
+  color: var(--ws-text-dim);
+  border-radius: 9px;
+  cursor: pointer;
+  transition: all 0.18s;
+}
+.ws-btn-save:hover { border-color: var(--ws-accent); color: var(--ws-accent); }
+.ws-btn-reset-foot:hover { color: var(--ws-no); border-color: var(--ws-no); }
+.ws-btn-download-tsv {
+  /* Lekko bardziej stonowane niz Reset - to opcja a nie czesta akcja */
+  opacity: 0.7;
+  font-family: var(--ws-mono);
+  font-size: 0.78rem;
+  letter-spacing: 0.04em;
+}
+.ws-btn-download-tsv:hover {
+  opacity: 1;
+  border-color: var(--ws-accent);
+  color: var(--ws-accent);
+}
+
+/* ========== TTS BUTTONS ========== */
+.tts-btn {
+  background: var(--ws-bg);
+  border: 1.5px solid var(--ws-border-strong);
+  color: var(--ws-text-dim);
+  border-radius: 7px;
+  cursor: pointer;
+  padding: 0;
+  font-size: 0.95rem;
+  width: 32px; height: 32px;
+  display: grid; place-items: center;
+  transition: all 0.15s;
+  flex-shrink: 0;
+  line-height: 1;
+}
+.tts-btn:hover {
+  border-color: var(--ws-accent);
+  color: var(--ws-accent);
+  background: var(--ws-accent-soft);
+}
+.tts-btn.tts-playing {
+  background: var(--ws-accent);
+  border-color: var(--ws-accent);
+  color: #fff;
+  animation: ttsPulse 1s ease-in-out infinite;
+}
+@keyframes ttsPulse {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.08); }
+}
+
+/* Przycisk w rogu fiszki */
+.tts-btn-corner {
+  position: absolute;
+  top: 0.6rem; right: 0.6rem;
+  width: 30px; height: 30px;
+  font-size: 0.85rem;
+  z-index: 2;
+  opacity: 0.7;
+}
+.flashcard:hover .tts-btn-corner { opacity: 1; }
+
+/* Matching - obok EN tokenu */
+.match-item-wrap {
+  display: flex;
+  gap: 0.4rem;
+  align-items: stretch;
+  width: 100%;
+}
+.match-item-wrap .match-item {
+  flex: 1;
+}
+.tts-btn-side {
+  align-self: stretch;
+  height: auto;
+  min-height: 40px;
+}
+/* Po sparowaniu (matched) ukryj przycisk Rozwiaz - nie ma juz czego rozwiazywac. */
+.match-item-wrap:has(.match-pl.matched) .match-solve-btn {
+  opacity: 0.35;
+  pointer-events: none;
+}
+
+/* Scramble - dodatkowy przycisk w rzędzie */
+.scramble-tts-btn {
+  width: 50px; height: auto;
+  align-self: stretch;
+}
+
+/* Quiz - obok każdej opcji */
+.quiz-opt-wrap {
+  display: flex;
+  gap: 0.4rem;
+  align-items: stretch;
+}
+.quiz-opt-wrap .quiz-option {
+  flex: 1;
+}
+.tts-btn-quiz {
+  align-self: stretch;
+  height: auto;
+  min-height: 44px;
+  width: 36px;
+}
+
+/* W ciemnych preset background tła trzeba dostosować */
+.tts-btn { background: var(--ws-card); }
+
+
+.unsc-grid {
+  display: grid; gap: 1rem;
+}
+.unsc-card {
+  background: var(--ws-box-bg);
+  border: 1px solid var(--ws-border-strong);
+  border-radius: 13px;
+  padding: 1.2rem 1.3rem;
+  transition: border-color 0.3s;
+}
+.unsc-card.done {
+  border-color: var(--ws-ok);
+  background: var(--ws-ok-bg);
+}
+.unsc-prompt {
+  margin-bottom: 0.95rem;
+  display: flex;
+  align-items: flex-start;
+  gap: 0.7rem;
+  justify-content: space-between;
+}
+.unsc-pl {
+  font-family: var(--ws-display);
+  font-weight: 700;
+  font-size: 1.18rem;
+  color: var(--ws-text);
+  line-height: 1.3;
+  flex: 1;
+}
+.tts-btn-unsc {
+  flex-shrink: 0;
+  margin-top: 0.1rem;
+}
+.unsc-answer-area {
+  min-height: 56px;
+  padding: 0.7rem 0.85rem;
+  background: var(--ws-bg);
+  border: 1.5px dashed var(--ws-border-strong);
+  border-radius: 10px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.45rem;
+  align-items: center;
+  margin-bottom: 0.9rem;
+  transition: border-color 0.2s, background 0.2s;
+}
+.unsc-answer-area.drag-over {
+  border-color: var(--ws-accent);
+  background: var(--ws-accent-soft);
+}
+.unsc-answer-empty {
+  color: var(--ws-text-dim);
+  font-size: 0.92rem;
+  font-style: italic;
+  opacity: 0.7;
+  width: 100%;
+  text-align: center;
+}
+.unsc-card.done .unsc-answer-area {
+  border-style: solid;
+  border-color: var(--ws-ok);
+}
+.unsc-pool {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.45rem;
+  padding: 0.7rem 0.85rem;
+  border: 1px dotted var(--ws-border);
+  border-radius: 10px;
+  min-height: 56px;
+  margin-bottom: 0.85rem;
+  transition: border-color 0.2s, background 0.2s, filter 0.3s;
+  align-items: center;
+  justify-content: center;
+}
+/* Wrapper na pulę i przycisk odkrywający (overlay). */
+.unsc-pool-wrap {
+  position: relative;
+}
+/* Pula slow ukryta na starcie - mocno rozmyta zeby nie dalo sie odczytac.
+   pointer-events: none zapobiega drag/click przed kliknieciem zaslony. */
+.unsc-pool.unsc-pool-hidden {
+  filter: blur(10px);
+  user-select: none;
+  pointer-events: none;
+}
+.unsc-pool-reveal {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.55rem;
+  background: var(--ws-card);
+  border: 1.5px dashed var(--ws-accent);
+  color: var(--ws-accent);
+  font-family: var(--ws-body);
+  font-weight: 600;
+  font-size: 0.95rem;
+  border-radius: 10px;
+  cursor: pointer;
+  margin-bottom: 0.85rem; /* dopasuj do unsc-pool */
+  transition: all 0.18s;
+  z-index: 2;
+}
+.unsc-pool-reveal:hover {
+  background: var(--ws-accent-soft);
+  transform: translateY(-1px);
+}
+.unsc-pool-reveal-icon {
+  font-size: 1.2rem;
+  line-height: 1;
+}
+.unsc-pool.drag-over {
+  border-color: var(--ws-accent);
+  background: var(--ws-accent-soft);
+}
+.unsc-pool .unsc-pool-empty {
+  color: var(--ws-text-muted);
+  font-size: 0.85rem;
+  font-style: italic;
+  width: 100%;
+  text-align: center;
+}
+.unsc-word {
+  font-family: var(--ws-body);
+  font-size: 1.05rem;
+  font-weight: 500;
+  padding: 0.55rem 0.95rem;
+  background: var(--ws-card);
+  border: 1.5px solid var(--ws-border-strong);
+  color: var(--ws-text);
+  border-radius: 8px;
+  cursor: grab;
+  transition: transform 0.12s, border-color 0.18s, background 0.18s;
+  user-select: none;
+}
+.unsc-word:hover {
+  border-color: var(--ws-accent);
+  transform: scale(1.03);
+}
+.unsc-word.in-answer {
+  background: var(--ws-accent-soft);
+  border-color: var(--ws-accent);
+  color: var(--ws-accent);
+  font-weight: 600;
+}
+.unsc-word.dragging {
+  opacity: 0.4;
+  cursor: grabbing;
+}
+.unsc-word.correct-pos {
+  background: var(--ws-ok-bg);
+  border-color: var(--ws-ok);
+  color: var(--ws-ok);
+  animation: wsPop 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+.unsc-word.wrong-pos {
+  background: var(--ws-no-bg);
+  border-color: var(--ws-no);
+  color: var(--ws-no);
+  animation: wsBuzz 0.45s, wsFlashWrong 0.55s ease-out;
+}
+.unsc-card.done .unsc-word {
+  cursor: default;
+}
+.unsc-controls {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+.unsc-check-btn,
+.unsc-hint-btn,
+.unsc-solve-btn,
+.unsc-clear-btn {
+  font-family: var(--ws-body);
+  font-size: 0.92rem;
+  font-weight: 500;
+  padding: 0.55rem 1rem;
+  border-radius: 9px;
+  border: 1.5px solid var(--ws-border-strong);
+  background: var(--ws-bg);
+  color: var(--ws-text);
+  cursor: pointer;
+  transition: all 0.15s;
+}
+.unsc-check-btn {
+  background: var(--ws-accent);
+  color: #fff;
+  border-color: var(--ws-accent);
+  font-weight: 600;
+}
+.unsc-check-btn:hover { opacity: 0.85; }
+.unsc-hint-btn:hover, .unsc-solve-btn:hover, .unsc-clear-btn:hover {
+  border-color: var(--ws-accent);
+  color: var(--ws-accent);
+}
+
+/* ========== CORNELL ========== */
+.cornell-grid {
+  display: grid; gap: 0.65rem;
+}
+.cornell-card {
+  background: var(--ws-box-bg);
+  border: 1.5px solid var(--ws-border-strong);
+  border-radius: 12px;
+  overflow: hidden;
+  transition: border-color 0.25s, box-shadow 0.25s;
+}
+.cornell-card.open {
+  border-color: var(--ws-accent);
+  box-shadow: 0 4px 12px rgba(0, 148, 10, 0.12);
+}
+.cornell-q {
+  width: 100%;
+  display: flex;
+  align-items: flex-start;
+  gap: 0.85rem;
+  padding: 1rem 1.1rem;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  text-align: left;
+  font-family: var(--ws-display);
+  color: var(--ws-text);
+  transition: background 0.2s;
+}
+.cornell-q:hover { background: var(--ws-surface-2); }
+.cornell-card.open .cornell-q { background: var(--ws-accent-soft); }
+.cornell-q-num {
+  font-family: var(--ws-mono);
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: var(--ws-accent);
+  background: var(--ws-card);
+  border: 1px solid var(--ws-accent);
+  border-radius: 7px;
+  width: 28px; height: 28px;
+  display: grid; place-items: center;
+  flex-shrink: 0;
+  margin-top: 0.1rem;
+}
+.cornell-q-text {
+  flex: 1;
+  font-weight: 700;
+  font-size: 1.15rem;
+  line-height: 1.35;
+}
+.cornell-q-arrow {
+  flex-shrink: 0;
+  font-size: 1rem;
+  color: var(--ws-accent);
+  transition: transform 0.25s;
+  margin-top: 0.3rem;
+}
+.cornell-card.open .cornell-q-arrow {
+  transform: rotate(180deg);
+}
+.cornell-a {
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height 0.3s ease-out;
+}
+.cornell-card.open .cornell-a {
+  max-height: 1500px;
+  transition: max-height 0.5s ease-in;
+}
+.cornell-a-inner {
+  padding: 0.5rem 1.1rem 1.15rem 4rem;
+  font-family: var(--ws-body);
+  font-size: 1.04rem;
+  line-height: 1.55;
+  color: var(--ws-text);
+  border-top: 1px dashed var(--ws-border);
+  margin-top: 0;
+}
+
+.cornell-write {
+  padding: 0 1.1rem 0 4rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  margin-bottom: 0;
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height 0.35s ease, padding 0.25s ease, margin-bottom 0.25s ease;
+}
+.cornell-card.writing .cornell-write {
+  max-height: 220px;
+  padding-top: 0.85rem;
+  padding-bottom: 0.85rem;
+  margin-bottom: 0;
+}
+.cornell-write-toggle {
+  align-self: flex-start;
+  font-family: var(--ws-body);
+  font-size: 0.86rem;
+  font-weight: 500;
+  background: transparent;
+  border: 1px dashed var(--ws-border-strong);
+  color: var(--ws-text-dim);
+  padding: 0.4rem 0.85rem;
+  border-radius: 7px;
+  cursor: pointer;
+  transition: all 0.15s;
+  display: inline-flex;
+}
+/* Zachowanie textarea ale przyciski toggle zawsze widoczne */
+.cornell-card:not(.writing) .cornell-write {
+  max-height: 50px;
+  padding-top: 0.5rem;
+  padding-bottom: 0.85rem;
+}
+.cornell-card:not(.writing) .cornell-write-area { display: none; }
+/* Przełączanie tekstu przycisku */
+.cornell-write-toggle-close { display: none; }
+.cornell-card.writing .cornell-write-toggle-open { display: none; }
+.cornell-card.writing .cornell-write-toggle-close { display: inline; }
+.cornell-card.writing .cornell-write-toggle {
+  border-color: var(--ws-accent);
+  color: var(--ws-accent);
+  border-style: solid;
+}
+.cornell-write-toggle:hover {
+  border-color: var(--ws-accent);
+  color: var(--ws-accent);
+  border-style: solid;
+}
+.cornell-write-area {
+  font-family: var(--ws-body);
+  font-size: 1rem;
+  padding: 0.7rem 0.9rem;
+  background: var(--ws-bg);
+  border: 1.5px solid var(--ws-border-strong);
+  border-radius: 9px;
+  color: var(--ws-text);
+  resize: vertical;
+  min-height: 80px;
+  width: 100%;
+  font-family: var(--ws-body);
+}
+.cornell-write-area:focus {
+  outline: none;
+  border-color: var(--ws-accent);
+}
+
+/* ========== QUIZ ========== */
+.quiz-grid {
+  display: grid; gap: 1rem;
+}
+.quiz-card {
+  background: var(--ws-box-bg);
+  border: 1px solid var(--ws-border-strong);
+  border-radius: 13px;
+  padding: 1.3rem 1.4rem;
+  transition: border-color 0.3s;
+}
+.quiz-card.answered {
+  border-color: var(--ws-accent);
+}
+.quiz-question {
+  display: flex; gap: 0.8rem; align-items: center;
+  margin-bottom: 1rem;
+}
+.quiz-q-num {
+  font-family: var(--ws-mono);
+  font-size: 0.92rem; font-weight: 700;
+  color: var(--ws-text-dim);
+  flex-shrink: 0;
+}
+.quiz-q-text {
+  font-family: var(--ws-display);
+  font-weight: 700;
+  font-size: 1.25rem;
+  color: var(--ws-text);
+  line-height: 1.3;
+  flex: 1;
+  min-width: 0;
+}
+.quiz-solve-btn {
+  flex-shrink: 0;
+  width: 36px;
+  height: 36px;
+  padding: 0;
+  font-size: 1rem;
+  display: grid;
+  place-items: center;
+}
+.quiz-card.answered .quiz-solve-btn {
+  opacity: 0.35;
+  pointer-events: none;
+}
+.quiz-options {
+  display: grid;
+  gap: 0.55rem;
+  /* Domyślnie auto-fill - fallback gdyby brakowało data-opts */
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+}
+/* 4 opcje -> 2x2 (najczęstszy przypadek, równo wypełnia box) */
+.quiz-options[data-opts="4"] { grid-template-columns: repeat(2, 1fr); }
+/* 6 opcji -> 3x2 */
+.quiz-options[data-opts="6"] { grid-template-columns: repeat(3, 1fr); }
+/* 3 opcje -> 3 kolumny w jednym rzędzie (lub 1 kolumna na wąskich) */
+.quiz-options[data-opts="3"] { grid-template-columns: repeat(3, 1fr); }
+/* 5 opcji -> 3 kolumny (3+2) - mniej "sieroce" niż 2 (2+2+1) */
+.quiz-options[data-opts="5"] { grid-template-columns: repeat(3, 1fr); }
+/* 2 opcje -> obok siebie */
+.quiz-options[data-opts="2"] { grid-template-columns: repeat(2, 1fr); }
+/* Mobile: wszystko w jednej kolumnie */
+@media (max-width: 600px) {
+  .quiz-options,
+  .quiz-options[data-opts] { grid-template-columns: 1fr; }
+}
+.quiz-option {
+  display: flex; align-items: center; gap: 0.7rem;
+  font-family: var(--ws-body);
+  font-size: 1.05rem; font-weight: 500;
+  padding: 0.85rem 1rem;
+  background: var(--ws-bg);
+  border: 1.5px solid var(--ws-border-strong);
+  color: var(--ws-text);
+  border-radius: 10px;
+  cursor: pointer;
+  transition: border-color 0.18s, background 0.18s;
+  text-align: left;
+}
+.quiz-option:hover:not(.quiz-correct):not(.quiz-wrong) {
+  border-color: var(--ws-accent);
+}
+.quiz-card.answered .quiz-option {
+  cursor: default;
+}
+.quiz-card.answered .quiz-option:not(.quiz-correct):not(.quiz-wrong) {
+  opacity: 0.45;
+}
+.quiz-opt-letter {
+  font-family: var(--ws-mono); font-weight: 700;
+  font-size: 0.88rem;
+  width: 26px; height: 26px;
+  border-radius: 6px;
+  background: var(--ws-accent-soft);
+  color: var(--ws-accent);
+  display: grid; place-items: center;
+  flex-shrink: 0;
+}
+.quiz-opt-text {
+  flex: 1;
+  word-break: break-word;
+}
+.quiz-option.quiz-correct {
+  border-color: var(--ws-ok);
+  background: var(--ws-ok-bg);
+  color: var(--ws-ok);
+  animation: wsBounce 0.5s cubic-bezier(0.34, 1.56, 0.64, 1), wsCorrectGlow 0.9s ease-out;
+}
+.quiz-option.quiz-correct .quiz-opt-letter {
+  background: var(--ws-ok); color: #fff;
+  animation: wsTickIn 0.45s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+.quiz-option.quiz-wrong {
+  border-color: var(--ws-no);
+  background: var(--ws-no-bg);
+  color: var(--ws-no);
+  animation: wsBuzz 0.5s, wsFlashWrong 0.6s ease-out;
+}
+.quiz-option.quiz-wrong .quiz-opt-letter {
+  background: var(--ws-no); color: #fff;
+}
+
+/* TOAST */
+.ws-toast {
+  position: fixed; bottom: 1.5rem; left: 50%;
+  transform: translateX(-50%) translateY(20px);
+  background: var(--ws-text);
+  color: var(--ws-bg);
+  padding: 0.7rem 1.3rem;
+  border-radius: 11px;
+  font-size: 0.9rem;
+  font-weight: 500;
+  font-family: var(--ws-body);
+  opacity: 0;
+  transition: all 0.3s cubic-bezier(0.16,1,0.3,1);
+  z-index: 999;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.25);
+}
+.ws-toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+.ws-toast.err { background: var(--ws-no); color: white; }
+
+/* LOGO */
+.ws-logo {
+  display: flex;
+  justify-content: center;
+  margin: 0 auto;
+  opacity: 0.92;
+  transition: opacity 0.3s;
+}
+.ws-logo:hover { opacity: 1; }
+.ws-logo img {
+  display: block;
+  max-width: 100%;
+  height: auto;
+}
+.ws-logo-top {
+  margin: 0;
+  flex-shrink: 0;
+}
+.ws-logo-top img {
+  height: 115px;
+  width: auto;
+}
+.ws-logo-bottom {
+  margin-top: 2rem;
+  opacity: 0.55;
+}
+.ws-logo-bottom img {
+  height: 50px;
+  width: auto;
+}
+
+/* ===== GAP FILL ===== */
+.gap-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+.gap-card {
+  background: var(--ws-box-bg);
+  border: 1.5px solid var(--ws-border);
+  border-radius: 12px;
+  padding: 1.25rem 1.4rem;
+  transition: border-color 0.25s, background 0.25s;
+}
+.gap-card.done {
+  border-color: var(--ws-accent);
+  background: var(--ws-accent-soft);
+}
+.gap-sentence {
+  font-family: var(--ws-body);
+  font-size: 1.18rem;
+  line-height: 2.1;
+  color: var(--ws-text);
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.3rem;
+}
+.gap-sentence .tts-btn-gap {
+  margin-left: 0.4rem;
+}
+/* Wrapper na 3 przyciski akcji po prawej stronie zdania:
+   Podpowiedz, Rozwiaz, Posluchaj - wszystkie w stylu tts-btn,
+   dzieki czemu siedza obok siebie w tej samej linii. */
+.gap-actions {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  margin-left: auto;
+  white-space: nowrap;
+}
+.gap-actions .tts-btn-gap {
+  margin-left: 0;
+}
+.gap-helper-btn:hover,
+.gap-solve-btn:hover,
+.gap-translate-btn:hover {
+  border-color: var(--ws-accent);
+  color: var(--ws-accent);
+  background: var(--ws-accent-soft);
+}
+.gap-translate-btn.active {
+  background: var(--ws-accent);
+  color: #fff;
+  border-color: var(--ws-accent);
+}
+.gap-input {
+  display: inline-block;
+  font-family: var(--ws-mono);
+  font-size: 1rem;
+  font-weight: 600;
+  padding: 0.35rem 0.7rem;
+  margin: 0 0.15rem;
+  background: var(--ws-bg);
+  border: none;
+  border-bottom: 2.5px solid var(--ws-accent);
+  border-radius: 6px 6px 0 0;
+  color: var(--ws-text);
+  text-align: center;
+  min-width: 80px;
+  transition: background 0.18s, border-color 0.18s;
+}
+.gap-input:focus {
+  outline: none;
+  background: var(--ws-accent-soft);
+}
+.gap-input.gap-correct {
+  background: var(--ws-ok-bg);
+  border-bottom-color: var(--ws-ok);
+  color: var(--ws-ok);
+  animation: wsPop 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+.gap-input.gap-wrong {
+  background: var(--ws-no-bg);
+  border-bottom-color: var(--ws-no);
+  color: var(--ws-no);
+  animation: wsBuzz 0.45s, wsFlashWrong 0.55s ease-out;
+}
+.gap-input::placeholder {
+  color: var(--ws-text-dim);
+  opacity: 0.55;
+  font-weight: 400;
+}
+.gap-translation {
+  margin-top: 1rem;
+  padding-top: 0.85rem;
+  border-top: 1px solid var(--ws-border);
+  font-size: 0.98rem;
+  color: var(--ws-text-dim);
+  display: none;
+  animation: wsFadeIn 0.4s ease-out;
+}
+.gap-translation.show { display: block; }
+.gap-translation-label {
+  display: inline-flex;
+  align-items: center;
+  vertical-align: middle;
+  width: 1.5rem;
+  height: 1.05rem;
+  border-radius: 3px;
+  overflow: hidden;
+  border: 1px solid var(--ws-border-strong);
+  margin-right: 0.4rem;
+}
+.gap-translation-label svg {
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+.gap-translation-text {
+  color: var(--ws-text);
+  font-style: italic;
+}
+
+/* ===== TRANSLATE ===== */
+.trans-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 1.1rem;
+}
+.trans-card {
+  background: var(--ws-box-bg);
+  border: 1.5px solid var(--ws-border);
+  border-radius: 12px;
+  padding: 1.25rem 1.4rem;
+  transition: border-color 0.25s, background 0.25s;
+}
+.trans-card.done {
+  border-color: var(--ws-accent);
+  background: var(--ws-accent-soft);
+}
+.trans-pl {
+  display: flex;
+  align-items: baseline;
+  gap: 0.65rem;
+  margin-bottom: 0.85rem;
+}
+.trans-pl-label {
+  display: inline-flex;
+  align-items: center;
+  flex-shrink: 0;
+  width: 1.7rem;
+  height: 1.2rem;
+  border-radius: 3px;
+  overflow: hidden;
+  border: 1px solid var(--ws-border-strong);
+}
+.trans-pl-label svg {
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+.trans-pl-text {
+  font-family: var(--ws-body);
+  font-size: 1.18rem;
+  font-weight: 600;
+  color: var(--ws-text);
+  line-height: 1.4;
+}
+.trans-input-row {
+  display: flex;
+  gap: 0.6rem;
+  align-items: center;
+}
+.trans-input {
+  flex: 1;
+  font-family: var(--ws-body);
+  font-size: 1.05rem;
+  padding: 0.7rem 0.9rem;
+  background: var(--ws-bg);
+  border: 1.5px solid var(--ws-border-strong);
+  border-radius: 9px;
+  color: var(--ws-text);
+  line-height: 1.4;
+  min-width: 0;
+  transition: border-color 0.18s, background 0.18s;
+}
+.trans-input:focus {
+  outline: none;
+  border-color: var(--ws-accent);
+}
+.trans-input.trans-correct {
+  background: var(--ws-ok-bg);
+  border-color: var(--ws-ok);
+  color: var(--ws-ok);
+  font-weight: 600;
+  animation: wsPopSubtle 0.35s ease-out, wsCorrectGlow 0.9s ease-out;
+}
+.trans-input.trans-wrong {
+  border-color: var(--ws-no);
+  background: var(--ws-no-bg);
+  color: var(--ws-no);
+  animation: wsBuzz 0.5s, wsFlashWrong 0.6s ease-out;
+}
+.trans-input-actions {
+  display: flex;
+  flex-direction: row;
+  gap: 0.4rem;
+  flex-shrink: 0;
+}
+.trans-check, .trans-hint-btn, .trans-solve-btn, .tts-btn-trans {
+  width: 2.4rem; height: 2.4rem;
+  border-radius: 8px;
+  border: 1.5px solid var(--ws-border-strong);
+  background: var(--ws-bg);
+  color: var(--ws-text);
+  cursor: pointer;
+  font-size: 1.05rem;
+  font-weight: 700;
+  display: grid; place-items: center;
+  transition: transform 0.15s, border-color 0.15s, background 0.15s;
+}
+.trans-check { color: var(--ws-ok); border-color: var(--ws-ok); }
+.trans-check:hover { background: var(--ws-ok-bg); transform: scale(1.05); }
+.trans-hint-btn { color: var(--ws-accent); border-color: var(--ws-accent); }
+.trans-hint-btn:hover { background: var(--ws-accent-soft); transform: scale(1.05); }
+.trans-solve-btn { color: var(--ws-accent); border-color: var(--ws-accent); }
+.trans-solve-btn:hover { background: var(--ws-accent-soft); transform: scale(1.05); }
+.trans-solve-btn:disabled, .trans-hint-btn:disabled, .trans-check:disabled {
+  opacity: 0.35;
+  cursor: not-allowed;
+  transform: none;
+}
+.trans-correct {
+  margin-top: 1rem;
+  padding-top: 0.85rem;
+  border-top: 1px solid var(--ws-border);
+  font-size: 0.98rem;
+  color: var(--ws-text-dim);
+  display: none;
+  animation: wsFadeIn 0.4s ease-out;
+}
+.trans-correct.show { display: block; }
+.trans-correct-label {
+  font-family: var(--ws-mono);
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: var(--ws-ok);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  margin-right: 0.35rem;
+}
+.trans-correct-text {
+  color: var(--ws-text);
+  font-style: italic;
+}
+
+/* ===== WRITING ===== */
+.write-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+.write-card {
+  background: var(--ws-box-bg);
+  border: 1.5px solid var(--ws-border);
+  border-radius: 14px;
+  padding: 1.6rem 1.7rem;
+  transition: border-color 0.25s;
+}
+.write-card.done {
+  border-color: var(--ws-accent);
+}
+.write-prompt {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  margin-bottom: 1.1rem;
+  padding-bottom: 1.1rem;
+  border-bottom: 1px dashed var(--ws-border);
+}
+.write-prompt-pl, .write-prompt-en {
+  font-family: var(--ws-body);
+  font-size: 1.35rem;
+  font-weight: 600;
+  color: var(--ws-text);
+  line-height: 1.4;
+  display: flex;
+  align-items: baseline;
+  gap: 0.65rem;
+  flex-wrap: wrap;
+}
+.write-prompt-en {
+  font-style: italic;
+  color: var(--ws-text-dim);
+  font-size: 1.18rem;
+}
+.write-prompt-flag {
+  display: inline-flex;
+  align-items: center;
+  flex-shrink: 0;
+  align-self: center;
+  width: 1.7rem;
+  height: 1.2rem;
+  border-radius: 3px;
+  overflow: hidden;
+  border: 1px solid var(--ws-border-strong);
+}
+.write-prompt-flag svg {
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+.write-area {
+  width: 100%;
+  font-family: var(--ws-body);
+  font-size: 1.08rem;
+  padding: 1rem 1.15rem;
+  background: var(--ws-bg);
+  border: 1.5px solid var(--ws-border-strong);
+  border-radius: 10px;
+  color: var(--ws-text);
+  resize: vertical;
+  min-height: 8rem;
+  line-height: 1.55;
+  transition: border-color 0.18s;
+}
+.write-area:focus {
+  outline: none;
+  border-color: var(--ws-accent);
+}
+.write-card.done .write-area {
+  background: var(--ws-accent-soft);
+  border-color: var(--ws-accent);
+}
+.write-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 0.85rem;
+  flex-wrap: wrap;
+  gap: 0.6rem;
+}
+.write-counter {
+  font-family: var(--ws-mono);
+  font-size: 0.85rem;
+  color: var(--ws-text-dim);
+}
+.write-counter-num {
+  color: var(--ws-text);
+  font-weight: 700;
+}
+.write-save {
+  font-family: var(--ws-body);
+  font-size: 0.95rem;
+  font-weight: 600;
+  padding: 0.55rem 1.1rem;
+  border-radius: 8px;
+  border: 1.5px solid var(--ws-accent);
+  background: var(--ws-accent-soft);
+  color: var(--ws-accent);
+  cursor: pointer;
+  transition: transform 0.15s, background 0.15s, color 0.15s;
+}
+.write-save:hover {
+  background: var(--ws-accent);
+  color: var(--ws-bg);
+  transform: scale(1.03);
+}
+.write-save:disabled {
+  opacity: 0.7;
+  cursor: default;
+  background: var(--ws-ok-bg);
+  border-color: var(--ws-ok);
+  color: var(--ws-ok);
+  transform: none;
+}
+
+@media print {
+  .ws-logo-bottom { display: none; }
+  .ws-logo-top img { height: 90px; }
+}
+
+/* DRUK / PDF - tylko niezbędne poprawki, bez ruszania marginesów strony */
+@media print {
+  /* Naprawa pionowych linii/cieni przy nagłówkach w PDF: wyłącz wszystkie
+     box-shadow w sekcjach i wokół nagłówków. Przeglądarki czasem renderują
+     box-shadow jako wąską pionową linię obok elementu (zwłaszcza Chrome
+     przy zapisie do PDF). */
+  .ws-section,
+  .ws-section.ws-done,
+  .ws-sec-head,
+  .ws-sec-num,
+  .ws-part-badge,
+  .ws-progress-fill,
+  .flashcard-back,
+  .gap-card,
+  .quiz-card,
+  .scramble-card,
+  .unsc-card,
+  .trans-card,
+  .write-card,
+  .match-item,
+  .cornell-card {
+    box-shadow: none !important;
+    filter: none !important;
+  }
+  /* Subtelne tło dekoracyjne (Vintage kratka, Pastel blobs) maskujemy w druku.
+     Bywa, że konwersja PDF zostawia po nim widoczne smugi. */
+  .ws-bg-pattern,
+  .ws-bg-blobs {
+    display: none !important;
+  }
+
+  /* Fiszki: tylko tył (zawiera PL i EN) */
+  .flashcard {
+    aspect-ratio: auto;
+    min-height: auto;
+    perspective: none;
+  }
+  .flashcard-inner {
+    transform: none !important;
+    transform-style: flat;
+    position: static;
+    height: auto;
+  }
+  .flashcard-front {
+    display: none !important;
+  }
+  .flashcard-back {
+    position: static;
+    backface-visibility: visible;
+    -webkit-backface-visibility: visible;
+    transform: none !important;
+    page-break-inside: avoid;
+    break-inside: avoid;
+    min-height: 90px;
+    border-radius: 14px;
+  }
+  /* Ukryj przyciski TTS przy druku */
+  .tts-btn { display: none !important; }
+  /* Ukryj wszystkie przyciski podpowiedzi i rozwiązań pojedynczych segmentów */
+  .scramble-hint-btn, .scramble-solve-btn,
+  .unsc-hint-btn, .unsc-solve-btn,
+  .trans-hint-btn, .trans-solve-btn,
+  .quiz-solve-btn,
+  .match-solve-btn,
+  .gap-helper-btn,
+  .gap-solve-btn {
+    display: none !important;
+  }
+  /* Ukryj progress bar i przyciski akcji */
+  .ws-progress-wrap { display: none !important; }
+  .ws-actions { display: none !important; }
+  /* Cornell - rozwiń wszystkie odpowiedzi przy druku */
+  .cornell-card .cornell-a {
+    max-height: none !important;
+    overflow: visible !important;
+  }
+  .cornell-card .cornell-write { display: none !important; }
+  .cornell-q-arrow { display: none !important; }
+  /* Gap-fill: pokaż tłumaczenia, ukryj inputy puste -> jako linia do napisania */
+  .gap-translation { display: block !important; }
+  /* Translate: ukryj wzór (żeby był do uzupełnienia) - chyba że kliknięte solve */
+  .trans-input-actions { display: none !important; }
+  /* Writing: ukryj licznik i przycisk Gotowe (puste pole na pisanie) */
+  .write-footer { display: none !important; }
+  .write-area {
+    min-height: 12rem !important;
+    background: transparent !important;
+  }
+  /* Sekcje płyną normalnie między stronami - mogą się łamać. */
+  /* (wcześniej była tu reguła page-break-inside: avoid, która wypychała każdą sekcję na osobną stronę) */
+}
+
+</style>
+</head>
+<body>
+<div class="ws-bg-grid"></div>
+<div class="ws-app">
+  <header class="ws-header ws-header-with-logo">
+    <div class="ws-logo ws-logo-top"><img src="https://bertlingo-learning.github.io/Angielski/Obrazki/loga/ewr-logo.svg" alt="Logo" loading="lazy" /></div>
+    <div class="ws-header-text">
+      <div class="ws-eyebrow">Worksheet</div>
+      <h1 class="ws-title">Check-in, Snacks &amp; Chat: Przydatne zwroty w hotelu i przy stole</h1>
+      <p class="ws-subtitle">Lekcja 12 - 27.05.2026</p>
+      <div class="ws-line"></div>
+    </div>
+  </header>
+
+  <div class="ws-progress-wrap">
+    <div class="ws-progress-top">
+      <span class="ws-progress-label">Postęp</span>
+      <span class="ws-progress-score" id="wsProgressScore">0 / 7</span>
+    </div>
+    <div class="ws-progress-track"><div class="ws-progress-fill" id="wsProgressFill"></div></div>
+  </div>
+
+  
+    
+
+    <section class="ws-section" data-section="1" id="sec-1">
+      <div class="ws-sec-head">
+        <div class="ws-sec-num">01</div>
+        <h2 class="ws-sec-title">Pytania &amp; odpowiedzi</h2>
+      </div>
+      <p class="ws-sec-desc">Kliknij pytanie, żeby odsłonić odpowiedź. Spróbuj najpierw odpowiedzieć w głowie!</p>
+      <div class="cornell-grid">
+    <div class="cornell-card" data-idx="0">
+      <button class="cornell-q" onclick="toggleCornell_1(0)" aria-expanded="false">
+        <span class="cornell-q-num">1</span>
+        <span class="cornell-q-text">Co to jest &quot;aspekt&quot; w gramatyce?</span>
+        <span class="cornell-q-arrow">▾</span>
+      </button>
+      <div class="cornell-write" id="cornell-w-1-0">
+        <button class="cornell-write-toggle" onclick="toggleCornellWrite_1(0)">
+          <span class="cornell-write-toggle-open">✎ Napisz odpowiedź</span>
+          <span class="cornell-write-toggle-close">✕ Schowaj pole</span>
+        </button>
+        <textarea class="cornell-write-area" placeholder="Napisz tu swoją odpowiedź zanim sprawdzisz wzorcową..." rows="3"></textarea>
+      </div>
+      <div class="cornell-a" id="cornell-a-1-0">
+        <div class="cornell-a-inner">Aspekt (postać, forma) – kategoria gramatyczna wyrażająca sposób przedstawienia czynności lub stanu. JAK? JAKI JEST STATUS?</div>
+      </div>
+    </div>
+    <div class="cornell-card" data-idx="1">
+      <button class="cornell-q" onclick="toggleCornell_1(1)" aria-expanded="false">
+        <span class="cornell-q-num">2</span>
+        <span class="cornell-q-text">Co to jest &quot;czas&quot; w gramatyce (tylko &quot;czas&quot; bez dodanego aspektu)?</span>
+        <span class="cornell-q-arrow">▾</span>
+      </button>
+      <div class="cornell-write" id="cornell-w-1-1">
+        <button class="cornell-write-toggle" onclick="toggleCornellWrite_1(1)">
+          <span class="cornell-write-toggle-open">✎ Napisz odpowiedź</span>
+          <span class="cornell-write-toggle-close">✕ Schowaj pole</span>
+        </button>
+        <textarea class="cornell-write-area" placeholder="Napisz tu swoją odpowiedź zanim sprawdzisz wzorcową..." rows="3"></textarea>
+      </div>
+      <div class="cornell-a" id="cornell-a-1-1">
+        <div class="cornell-a-inner">Czas – kategoria językowa określająca w czasie czynność, zjawisko lub stan, o których mowa w zdaniu. KIEDY?</div>
+      </div>
+    </div>
+    <div class="cornell-card" data-idx="2">
+      <button class="cornell-q" onclick="toggleCornell_1(2)" aria-expanded="false">
+        <span class="cornell-q-num">3</span>
+        <span class="cornell-q-text">Jakie mamy cztery aspekty w języku angielskim?</span>
+        <span class="cornell-q-arrow">▾</span>
+      </button>
+      <div class="cornell-write" id="cornell-w-1-2">
+        <button class="cornell-write-toggle" onclick="toggleCornellWrite_1(2)">
+          <span class="cornell-write-toggle-open">✎ Napisz odpowiedź</span>
+          <span class="cornell-write-toggle-close">✕ Schowaj pole</span>
+        </button>
+        <textarea class="cornell-write-area" placeholder="Napisz tu swoją odpowiedź zanim sprawdzisz wzorcową..." rows="3"></textarea>
+      </div>
+      <div class="cornell-a" id="cornell-a-1-2">
+        <div class="cornell-a-inner">Simple (prosty) – pojedyncza kropka, fakt, zdarzenie. Continuous (ciągły) – wszystko, co było / jest / będzie w trakcie. Perfect – coś, co stało się wcześniej, przed czymś innym, i jest z tym powiązane, ma istotny związek. Perfect Continuous – coś, co działo się wcześniej, przed czymś innym, lub dalej trwa do danego momentu, i jest z tym powiązane, ma istotny związek.</div>
+      </div>
+    </div></div>
+      <div class="ws-actions">
+        <button class="ws-btn-solve" onclick="solveCornell_1()">Rozwiń wszystkie</button>
+      </div>
+      <div class="ws-feedback" id="fb-1"></div>
+    </section>
+
+    
+
+    <section class="ws-section" data-section="2" id="sec-2">
+      <div class="ws-sec-head">
+        <div class="ws-sec-num">02</div>
+        <h2 class="ws-sec-title">Flashcards</h2>
+      </div>
+      <p class="ws-sec-desc">Kliknij kartę, żeby odsłonić tłumaczenie. Spróbuj najpierw zgadnąć w głowie!</p>
+      <div class="flashcards-grid">
+        <div class="flashcard fc-size-m" data-idx="0" onclick="flipCard(this)">
+          <div class="flashcard-inner">
+            <div class="flashcard-face flashcard-front fc-size-m">
+              <div class="flash-word">przyrządzić coś szybko z tego, co jest pod ręką</div>
+            </div>
+            <div class="flashcard-face flashcard-back fc-size-l">
+              <div class="flash-word-back-pl">przyrządzić coś szybko z tego, co jest pod ręką</div>
+              <div class="flash-word-back">whip something up</div>
+              <button class="tts-btn tts-btn-corner" onclick="ttsBtnClick(event, &quot;whip something up&quot;)" title="Czytaj" aria-label="Czytaj">🔊</button>
+            </div>
+          </div>
+        </div>
+        <div class="flashcard fc-size-m" data-idx="1" onclick="flipCard(this)">
+          <div class="flashcard-inner">
+            <div class="flashcard-face flashcard-front fc-size-m">
+              <div class="flash-word">proszę bardzo / częstuj się / nie krępuj się</div>
+            </div>
+            <div class="flashcard-face flashcard-back fc-size-l">
+              <div class="flash-word-back-pl">proszę bardzo / częstuj się / nie krępuj się</div>
+              <div class="flash-word-back">be my guest</div>
+              <button class="tts-btn tts-btn-corner" onclick="ttsBtnClick(event, &quot;be my guest&quot;)" title="Czytaj" aria-label="Czytaj">🔊</button>
+            </div>
+          </div>
+        </div>
+        <div class="flashcard fc-size-l" data-idx="2" onclick="flipCard(this)">
+          <div class="flashcard-inner">
+            <div class="flashcard-face flashcard-front fc-size-l">
+              <div class="flash-word">Śmiało. / Nie krępuj się.</div>
+            </div>
+            <div class="flashcard-face flashcard-back fc-size-l">
+              <div class="flash-word-back-pl">Śmiało. / Nie krępuj się.</div>
+              <div class="flash-word-back">feel free to go ahead</div>
+              <button class="tts-btn tts-btn-corner" onclick="ttsBtnClick(event, &quot;feel free to go ahead&quot;)" title="Czytaj" aria-label="Czytaj">🔊</button>
+            </div>
+          </div>
+        </div>
+        <div class="flashcard fc-size-l" data-idx="3" onclick="flipCard(this)">
+          <div class="flashcard-inner">
+            <div class="flashcard-face flashcard-front fc-size-l">
+              <div class="flash-word">tylko kęs / mały gryz</div>
+            </div>
+            <div class="flashcard-face flashcard-back fc-size-l">
+              <div class="flash-word-back-pl">tylko kęs / mały gryz</div>
+              <div class="flash-word-back">just a bite</div>
+              <button class="tts-btn tts-btn-corner" onclick="ttsBtnClick(event, &quot;just a bite&quot;)" title="Czytaj" aria-label="Czytaj">🔊</button>
+            </div>
+          </div>
+        </div>
+        <div class="flashcard fc-size-l" data-idx="4" onclick="flipCard(this)">
+          <div class="flashcard-inner">
+            <div class="flashcard-face flashcard-front fc-size-l">
+              <div class="flash-word">wolne pokoje (dostępne)</div>
+            </div>
+            <div class="flashcard-face flashcard-back fc-size-l">
+              <div class="flash-word-back-pl">wolne pokoje (dostępne)</div>
+              <div class="flash-word-back">available rooms</div>
+              <button class="tts-btn tts-btn-corner" onclick="ttsBtnClick(event, &quot;available rooms&quot;)" title="Czytaj" aria-label="Czytaj">🔊</button>
+            </div>
+          </div>
+        </div>
+        <div class="flashcard fc-size-l" data-idx="5" onclick="flipCard(this)">
+          <div class="flashcard-inner">
+            <div class="flashcard-face flashcard-front fc-size-l">
+              <div class="flash-word">wymeldowanie (z hotelu)</div>
+            </div>
+            <div class="flashcard-face flashcard-back fc-size-l">
+              <div class="flash-word-back-pl">wymeldowanie (z hotelu)</div>
+              <div class="flash-word-back">check out</div>
+              <button class="tts-btn tts-btn-corner" onclick="ttsBtnClick(event, &quot;check out&quot;)" title="Czytaj" aria-label="Czytaj">🔊</button>
+            </div>
+          </div>
+        </div>
+        <div class="flashcard fc-size-l" data-idx="6" onclick="flipCard(this)">
+          <div class="flashcard-inner">
+            <div class="flashcard-face flashcard-front fc-size-l">
+              <div class="flash-word">późne wymeldowanie</div>
+            </div>
+            <div class="flashcard-face flashcard-back fc-size-l">
+              <div class="flash-word-back-pl">późne wymeldowanie</div>
+              <div class="flash-word-back">late check out</div>
+              <button class="tts-btn tts-btn-corner" onclick="ttsBtnClick(event, &quot;late check out&quot;)" title="Czytaj" aria-label="Czytaj">🔊</button>
+            </div>
+          </div>
+        </div>
+        <div class="flashcard fc-size-m" data-idx="7" onclick="flipCard(this)">
+          <div class="flashcard-inner">
+            <div class="flashcard-face flashcard-front fc-size-m">
+              <div class="flash-word">ekstra / dodatkowo (o opłacie)</div>
+            </div>
+            <div class="flashcard-face flashcard-back fc-size-l">
+              <div class="flash-word-back-pl">ekstra / dodatkowo (o opłacie)</div>
+              <div class="flash-word-back">extra</div>
+              <button class="tts-btn tts-btn-corner" onclick="ttsBtnClick(event, &quot;extra&quot;)" title="Czytaj" aria-label="Czytaj">🔊</button>
+            </div>
+          </div>
+        </div></div>
+      <div class="ws-actions">
+        <button class="ws-btn-solve" onclick="solveFlashcards_2()">Pokaż wszystkie odpowiedzi</button>
+      </div>
+      <div class="ws-feedback" id="fb-2"></div>
+    </section>
+
+    
+
+    <section class="ws-section" data-section="3" id="sec-3">
+      <div class="ws-sec-head">
+        <div class="ws-sec-num">03</div>
+        <h2 class="ws-sec-title">Word Scramble</h2>
+      </div>
+      <p class="ws-sec-desc">Wpisz angielskie słowo (Enter sprawdza). Kliknij rozsypankę, żeby zobaczyć pomieszane litery. Kliknij 💡, żeby wstawić kolejną literę odpowiedzi, lub ✨, żeby rozwiązać od razu.</p>
+      <div class="scramble-grid">
+      <div class="scramble-card" data-idx="0">
+        <div class="scramble-prompt">
+          <span class="scramble-pl">dosłownie wolny (niezajęty / bezpłatny)</span>
+          <button class="scramble-show-jumbled" onclick="toggleJumbled_3(this, 3, 0)">
+            <span class="scramble-jumbled-hidden">Pokaż rozsypankę</span>
+            <span class="scramble-jumbled-shown" data-jumbled="erfe">erfe</span>
+          </button>
+        </div>
+        <div class="scramble-input-row">
+          <input type="text" class="scramble-input" data-answer="free" placeholder="Wpisz słowo..." onkeydown="if(event.key==='Enter') checkScramble_3(this)">
+          <button class="scramble-check" onclick="checkScramble_3(this.previousElementSibling)" title="Sprawdź" aria-label="Sprawdź">✅</button>
+          <button class="scramble-hint-btn" onclick="hintScramble_3(0)" title="Podpowiedź - wstaw kolejną literę" aria-label="Podpowiedź">💡</button>
+          <button class="scramble-solve-btn" onclick="solveScrambleOne_3(0)" title="Rozwiąż to słowo" aria-label="Rozwiąż">✨</button>
+          <button class="scramble-tts-btn tts-btn" onclick="ttsBtnClick(event, &quot;free&quot;)" title="Posłuchaj" aria-label="Czytaj">🔊</button>
+        </div>
+      </div>
+      <div class="scramble-card" data-idx="1">
+        <div class="scramble-prompt">
+          <span class="scramble-pl">posiłek</span>
+          <button class="scramble-show-jumbled" onclick="toggleJumbled_3(this, 3, 1)">
+            <span class="scramble-jumbled-hidden">Pokaż rozsypankę</span>
+            <span class="scramble-jumbled-shown" data-jumbled="alem">alem</span>
+          </button>
+        </div>
+        <div class="scramble-input-row">
+          <input type="text" class="scramble-input" data-answer="meal" placeholder="Wpisz słowo..." onkeydown="if(event.key==='Enter') checkScramble_3(this)">
+          <button class="scramble-check" onclick="checkScramble_3(this.previousElementSibling)" title="Sprawdź" aria-label="Sprawdź">✅</button>
+          <button class="scramble-hint-btn" onclick="hintScramble_3(1)" title="Podpowiedź - wstaw kolejną literę" aria-label="Podpowiedź">💡</button>
+          <button class="scramble-solve-btn" onclick="solveScrambleOne_3(1)" title="Rozwiąż to słowo" aria-label="Rozwiąż">✨</button>
+          <button class="scramble-tts-btn tts-btn" onclick="ttsBtnClick(event, &quot;meal&quot;)" title="Posłuchaj" aria-label="Czytaj">🔊</button>
+        </div>
+      </div>
+      <div class="scramble-card" data-idx="2">
+        <div class="scramble-prompt">
+          <span class="scramble-pl">paszport</span>
+          <button class="scramble-show-jumbled" onclick="toggleJumbled_3(this, 3, 2)">
+            <span class="scramble-jumbled-hidden">Pokaż rozsypankę</span>
+            <span class="scramble-jumbled-shown" data-jumbled="spasotrp">spasotrp</span>
+          </button>
+        </div>
+        <div class="scramble-input-row">
+          <input type="text" class="scramble-input" data-answer="passport" placeholder="Wpisz słowo..." onkeydown="if(event.key==='Enter') checkScramble_3(this)">
+          <button class="scramble-check" onclick="checkScramble_3(this.previousElementSibling)" title="Sprawdź" aria-label="Sprawdź">✅</button>
+          <button class="scramble-hint-btn" onclick="hintScramble_3(2)" title="Podpowiedź - wstaw kolejną literę" aria-label="Podpowiedź">💡</button>
+          <button class="scramble-solve-btn" onclick="solveScrambleOne_3(2)" title="Rozwiąż to słowo" aria-label="Rozwiąż">✨</button>
+          <button class="scramble-tts-btn tts-btn" onclick="ttsBtnClick(event, &quot;passport&quot;)" title="Posłuchaj" aria-label="Czytaj">🔊</button>
+        </div>
+      </div>
+      <div class="scramble-card" data-idx="3">
+        <div class="scramble-prompt">
+          <span class="scramble-pl">przepis</span>
+          <button class="scramble-show-jumbled" onclick="toggleJumbled_3(this, 3, 3)">
+            <span class="scramble-jumbled-hidden">Pokaż rozsypankę</span>
+            <span class="scramble-jumbled-shown" data-jumbled="pceire">pceire</span>
+          </button>
+        </div>
+        <div class="scramble-input-row">
+          <input type="text" class="scramble-input" data-answer="recipe" placeholder="Wpisz słowo..." onkeydown="if(event.key==='Enter') checkScramble_3(this)">
+          <button class="scramble-check" onclick="checkScramble_3(this.previousElementSibling)" title="Sprawdź" aria-label="Sprawdź">✅</button>
+          <button class="scramble-hint-btn" onclick="hintScramble_3(3)" title="Podpowiedź - wstaw kolejną literę" aria-label="Podpowiedź">💡</button>
+          <button class="scramble-solve-btn" onclick="solveScrambleOne_3(3)" title="Rozwiąż to słowo" aria-label="Rozwiąż">✨</button>
+          <button class="scramble-tts-btn tts-btn" onclick="ttsBtnClick(event, &quot;recipe&quot;)" title="Posłuchaj" aria-label="Czytaj">🔊</button>
+        </div>
+      </div>
+      <div class="scramble-card" data-idx="4">
+        <div class="scramble-prompt">
+          <span class="scramble-pl">rachunek</span>
+          <button class="scramble-show-jumbled" onclick="toggleJumbled_3(this, 3, 4)">
+            <span class="scramble-jumbled-hidden">Pokaż rozsypankę</span>
+            <span class="scramble-jumbled-shown" data-jumbled="rictpee">rictpee</span>
+          </button>
+        </div>
+        <div class="scramble-input-row">
+          <input type="text" class="scramble-input" data-answer="receipt" placeholder="Wpisz słowo..." onkeydown="if(event.key==='Enter') checkScramble_3(this)">
+          <button class="scramble-check" onclick="checkScramble_3(this.previousElementSibling)" title="Sprawdź" aria-label="Sprawdź">✅</button>
+          <button class="scramble-hint-btn" onclick="hintScramble_3(4)" title="Podpowiedź - wstaw kolejną literę" aria-label="Podpowiedź">💡</button>
+          <button class="scramble-solve-btn" onclick="solveScrambleOne_3(4)" title="Rozwiąż to słowo" aria-label="Rozwiąż">✨</button>
+          <button class="scramble-tts-btn tts-btn" onclick="ttsBtnClick(event, &quot;receipt&quot;)" title="Posłuchaj" aria-label="Czytaj">🔊</button>
+        </div>
+      </div>
+      <div class="scramble-card" data-idx="5">
+        <div class="scramble-prompt">
+          <span class="scramble-pl">recepta</span>
+          <button class="scramble-show-jumbled" onclick="toggleJumbled_3(this, 3, 5)">
+            <span class="scramble-jumbled-hidden">Pokaż rozsypankę</span>
+            <span class="scramble-jumbled-shown" data-jumbled="toerrncpiips">toerrncpiips</span>
+          </button>
+        </div>
+        <div class="scramble-input-row">
+          <input type="text" class="scramble-input" data-answer="prescription" placeholder="Wpisz słowo..." onkeydown="if(event.key==='Enter') checkScramble_3(this)">
+          <button class="scramble-check" onclick="checkScramble_3(this.previousElementSibling)" title="Sprawdź" aria-label="Sprawdź">✅</button>
+          <button class="scramble-hint-btn" onclick="hintScramble_3(5)" title="Podpowiedź - wstaw kolejną literę" aria-label="Podpowiedź">💡</button>
+          <button class="scramble-solve-btn" onclick="solveScrambleOne_3(5)" title="Rozwiąż to słowo" aria-label="Rozwiąż">✨</button>
+          <button class="scramble-tts-btn tts-btn" onclick="ttsBtnClick(event, &quot;prescription&quot;)" title="Posłuchaj" aria-label="Czytaj">🔊</button>
+        </div>
+      </div>
+      <div class="scramble-card" data-idx="6">
+        <div class="scramble-prompt">
+          <span class="scramble-pl">rzadko</span>
+          <button class="scramble-show-jumbled" onclick="toggleJumbled_3(this, 3, 6)">
+            <span class="scramble-jumbled-hidden">Pokaż rozsypankę</span>
+            <span class="scramble-jumbled-shown" data-jumbled="reyalr">reyalr</span>
+          </button>
+        </div>
+        <div class="scramble-input-row">
+          <input type="text" class="scramble-input" data-answer="rarely" placeholder="Wpisz słowo..." onkeydown="if(event.key==='Enter') checkScramble_3(this)">
+          <button class="scramble-check" onclick="checkScramble_3(this.previousElementSibling)" title="Sprawdź" aria-label="Sprawdź">✅</button>
+          <button class="scramble-hint-btn" onclick="hintScramble_3(6)" title="Podpowiedź - wstaw kolejną literę" aria-label="Podpowiedź">💡</button>
+          <button class="scramble-solve-btn" onclick="solveScrambleOne_3(6)" title="Rozwiąż to słowo" aria-label="Rozwiąż">✨</button>
+          <button class="scramble-tts-btn tts-btn" onclick="ttsBtnClick(event, &quot;rarely&quot;)" title="Posłuchaj" aria-label="Czytaj">🔊</button>
+        </div>
+      </div>
+      <div class="scramble-card" data-idx="7">
+        <div class="scramble-prompt">
+          <span class="scramble-pl">ostatnio - r...</span>
+          <button class="scramble-show-jumbled" onclick="toggleJumbled_3(this, 3, 7)">
+            <span class="scramble-jumbled-hidden">Pokaż rozsypankę</span>
+            <span class="scramble-jumbled-shown" data-jumbled="ctnleeyr">ctnleeyr</span>
+          </button>
+        </div>
+        <div class="scramble-input-row">
+          <input type="text" class="scramble-input" data-answer="recently" placeholder="Wpisz słowo..." onkeydown="if(event.key==='Enter') checkScramble_3(this)">
+          <button class="scramble-check" onclick="checkScramble_3(this.previousElementSibling)" title="Sprawdź" aria-label="Sprawdź">✅</button>
+          <button class="scramble-hint-btn" onclick="hintScramble_3(7)" title="Podpowiedź - wstaw kolejną literę" aria-label="Podpowiedź">💡</button>
+          <button class="scramble-solve-btn" onclick="solveScrambleOne_3(7)" title="Rozwiąż to słowo" aria-label="Rozwiąż">✨</button>
+          <button class="scramble-tts-btn tts-btn" onclick="ttsBtnClick(event, &quot;recently&quot;)" title="Posłuchaj" aria-label="Czytaj">🔊</button>
+        </div>
+      </div>
+      <div class="scramble-card" data-idx="8">
+        <div class="scramble-prompt">
+          <span class="scramble-pl">ostatnio - l...</span>
+          <button class="scramble-show-jumbled" onclick="toggleJumbled_3(this, 3, 8)">
+            <span class="scramble-jumbled-hidden">Pokaż rozsypankę</span>
+            <span class="scramble-jumbled-shown" data-jumbled="ytllae">ytllae</span>
+          </button>
+        </div>
+        <div class="scramble-input-row">
+          <input type="text" class="scramble-input" data-answer="lately" placeholder="Wpisz słowo..." onkeydown="if(event.key==='Enter') checkScramble_3(this)">
+          <button class="scramble-check" onclick="checkScramble_3(this.previousElementSibling)" title="Sprawdź" aria-label="Sprawdź">✅</button>
+          <button class="scramble-hint-btn" onclick="hintScramble_3(8)" title="Podpowiedź - wstaw kolejną literę" aria-label="Podpowiedź">💡</button>
+          <button class="scramble-solve-btn" onclick="solveScrambleOne_3(8)" title="Rozwiąż to słowo" aria-label="Rozwiąż">✨</button>
+          <button class="scramble-tts-btn tts-btn" onclick="ttsBtnClick(event, &quot;lately&quot;)" title="Posłuchaj" aria-label="Czytaj">🔊</button>
+        </div>
+      </div>
+      <div class="scramble-card" data-idx="9">
+        <div class="scramble-prompt">
+          <span class="scramble-pl">serce (wym. bardziej przez “a’)</span>
+          <button class="scramble-show-jumbled" onclick="toggleJumbled_3(this, 3, 9)">
+            <span class="scramble-jumbled-hidden">Pokaż rozsypankę</span>
+            <span class="scramble-jumbled-shown" data-jumbled="raeht">raeht</span>
+          </button>
+        </div>
+        <div class="scramble-input-row">
+          <input type="text" class="scramble-input" data-answer="heart" placeholder="Wpisz słowo..." onkeydown="if(event.key==='Enter') checkScramble_3(this)">
+          <button class="scramble-check" onclick="checkScramble_3(this.previousElementSibling)" title="Sprawdź" aria-label="Sprawdź">✅</button>
+          <button class="scramble-hint-btn" onclick="hintScramble_3(9)" title="Podpowiedź - wstaw kolejną literę" aria-label="Podpowiedź">💡</button>
+          <button class="scramble-solve-btn" onclick="solveScrambleOne_3(9)" title="Rozwiąż to słowo" aria-label="Rozwiąż">✨</button>
+          <button class="scramble-tts-btn tts-btn" onclick="ttsBtnClick(event, &quot;heart&quot;)" title="Posłuchaj" aria-label="Czytaj">🔊</button>
+        </div>
+      </div>
+      <div class="scramble-card" data-idx="10">
+        <div class="scramble-prompt">
+          <span class="scramble-pl">boleć, ranić (wym. bardziej przez “e”)</span>
+          <button class="scramble-show-jumbled" onclick="toggleJumbled_3(this, 3, 10)">
+            <span class="scramble-jumbled-hidden">Pokaż rozsypankę</span>
+            <span class="scramble-jumbled-shown" data-jumbled="uthr">uthr</span>
+          </button>
+        </div>
+        <div class="scramble-input-row">
+          <input type="text" class="scramble-input" data-answer="hurt" placeholder="Wpisz słowo..." onkeydown="if(event.key==='Enter') checkScramble_3(this)">
+          <button class="scramble-check" onclick="checkScramble_3(this.previousElementSibling)" title="Sprawdź" aria-label="Sprawdź">✅</button>
+          <button class="scramble-hint-btn" onclick="hintScramble_3(10)" title="Podpowiedź - wstaw kolejną literę" aria-label="Podpowiedź">💡</button>
+          <button class="scramble-solve-btn" onclick="solveScrambleOne_3(10)" title="Rozwiąż to słowo" aria-label="Rozwiąż">✨</button>
+          <button class="scramble-tts-btn tts-btn" onclick="ttsBtnClick(event, &quot;hurt&quot;)" title="Posłuchaj" aria-label="Czytaj">🔊</button>
+        </div>
+      </div></div>
+      <div class="ws-actions">
+        <button class="ws-btn-solve" onclick="solveScramble_3()">Pokaż wszystkie odpowiedzi</button>
+      </div>
+      <div class="ws-feedback" id="fb-3"></div>
+    </section>
+
+    
+
+    <section class="ws-section" data-section="4" id="sec-4">
+      <div class="ws-sec-head">
+        <div class="ws-sec-num">04</div>
+        <h2 class="ws-sec-title">Quiz</h2>
+      </div>
+      <p class="ws-sec-desc">Wybierz prawidłowe tłumaczenie polskiego słowa. Tylko jedna odpowiedź jest poprawna.</p>
+      <div class="quiz-grid">
+      <div class="quiz-card" data-idx="0">
+        <div class="quiz-question">
+          <span class="quiz-q-num">1.</span>
+          <span class="quiz-q-text">przyrządzić coś szybko z tego, co jest pod ręką</span>
+          <button class="tts-btn quiz-solve-btn" onclick="solveQuizOne_4(0)" title="Rozwiąż to pytanie" aria-label="Rozwiąż">✨</button>
+        </div>
+        <div class="quiz-options" data-opts="4">
+      <div class="quiz-opt-wrap">
+        <button class="quiz-option" data-correct="0" onclick="pickQuiz_4(this, 0)">
+          <span class="quiz-opt-letter">A</span>
+          <span class="quiz-opt-text">be my guest</span>
+        </button>
+        <button class="tts-btn tts-btn-quiz" onclick="ttsBtnClick(event, &quot;be my guest&quot;)" title="Czytaj" aria-label="Czytaj">🔊</button>
+      </div>
+      <div class="quiz-opt-wrap">
+        <button class="quiz-option" data-correct="0" onclick="pickQuiz_4(this, 0)">
+          <span class="quiz-opt-letter">B</span>
+          <span class="quiz-opt-text">feel free to go ahead</span>
+        </button>
+        <button class="tts-btn tts-btn-quiz" onclick="ttsBtnClick(event, &quot;feel free to go ahead&quot;)" title="Czytaj" aria-label="Czytaj">🔊</button>
+      </div>
+      <div class="quiz-opt-wrap">
+        <button class="quiz-option" data-correct="1" onclick="pickQuiz_4(this, 0)">
+          <span class="quiz-opt-letter">C</span>
+          <span class="quiz-opt-text">whip something up</span>
+        </button>
+        <button class="tts-btn tts-btn-quiz" onclick="ttsBtnClick(event, &quot;whip something up&quot;)" title="Czytaj" aria-label="Czytaj">🔊</button>
+      </div>
+      <div class="quiz-opt-wrap">
+        <button class="quiz-option" data-correct="0" onclick="pickQuiz_4(this, 0)">
+          <span class="quiz-opt-letter">D</span>
+          <span class="quiz-opt-text">extra</span>
+        </button>
+        <button class="tts-btn tts-btn-quiz" onclick="ttsBtnClick(event, &quot;extra&quot;)" title="Czytaj" aria-label="Czytaj">🔊</button>
+      </div></div>
+      </div>
+      <div class="quiz-card" data-idx="1">
+        <div class="quiz-question">
+          <span class="quiz-q-num">2.</span>
+          <span class="quiz-q-text">proszę bardzo / częstuj się / nie krępuj się</span>
+          <button class="tts-btn quiz-solve-btn" onclick="solveQuizOne_4(1)" title="Rozwiąż to pytanie" aria-label="Rozwiąż">✨</button>
+        </div>
+        <div class="quiz-options" data-opts="4">
+      <div class="quiz-opt-wrap">
+        <button class="quiz-option" data-correct="0" onclick="pickQuiz_4(this, 1)">
+          <span class="quiz-opt-letter">A</span>
+          <span class="quiz-opt-text">check out</span>
+        </button>
+        <button class="tts-btn tts-btn-quiz" onclick="ttsBtnClick(event, &quot;check out&quot;)" title="Czytaj" aria-label="Czytaj">🔊</button>
+      </div>
+      <div class="quiz-opt-wrap">
+        <button class="quiz-option" data-correct="1" onclick="pickQuiz_4(this, 1)">
+          <span class="quiz-opt-letter">B</span>
+          <span class="quiz-opt-text">be my guest</span>
+        </button>
+        <button class="tts-btn tts-btn-quiz" onclick="ttsBtnClick(event, &quot;be my guest&quot;)" title="Czytaj" aria-label="Czytaj">🔊</button>
+      </div>
+      <div class="quiz-opt-wrap">
+        <button class="quiz-option" data-correct="0" onclick="pickQuiz_4(this, 1)">
+          <span class="quiz-opt-letter">C</span>
+          <span class="quiz-opt-text">late check out</span>
+        </button>
+        <button class="tts-btn tts-btn-quiz" onclick="ttsBtnClick(event, &quot;late check out&quot;)" title="Czytaj" aria-label="Czytaj">🔊</button>
+      </div>
+      <div class="quiz-opt-wrap">
+        <button class="quiz-option" data-correct="0" onclick="pickQuiz_4(this, 1)">
+          <span class="quiz-opt-letter">D</span>
+          <span class="quiz-opt-text">whip something up</span>
+        </button>
+        <button class="tts-btn tts-btn-quiz" onclick="ttsBtnClick(event, &quot;whip something up&quot;)" title="Czytaj" aria-label="Czytaj">🔊</button>
+      </div></div>
+      </div>
+      <div class="quiz-card" data-idx="2">
+        <div class="quiz-question">
+          <span class="quiz-q-num">3.</span>
+          <span class="quiz-q-text">Śmiało. / Nie krępuj się.</span>
+          <button class="tts-btn quiz-solve-btn" onclick="solveQuizOne_4(2)" title="Rozwiąż to pytanie" aria-label="Rozwiąż">✨</button>
+        </div>
+        <div class="quiz-options" data-opts="4">
+      <div class="quiz-opt-wrap">
+        <button class="quiz-option" data-correct="1" onclick="pickQuiz_4(this, 2)">
+          <span class="quiz-opt-letter">A</span>
+          <span class="quiz-opt-text">feel free to go ahead</span>
+        </button>
+        <button class="tts-btn tts-btn-quiz" onclick="ttsBtnClick(event, &quot;feel free to go ahead&quot;)" title="Czytaj" aria-label="Czytaj">🔊</button>
+      </div>
+      <div class="quiz-opt-wrap">
+        <button class="quiz-option" data-correct="0" onclick="pickQuiz_4(this, 2)">
+          <span class="quiz-opt-letter">B</span>
+          <span class="quiz-opt-text">check out</span>
+        </button>
+        <button class="tts-btn tts-btn-quiz" onclick="ttsBtnClick(event, &quot;check out&quot;)" title="Czytaj" aria-label="Czytaj">🔊</button>
+      </div>
+      <div class="quiz-opt-wrap">
+        <button class="quiz-option" data-correct="0" onclick="pickQuiz_4(this, 2)">
+          <span class="quiz-opt-letter">C</span>
+          <span class="quiz-opt-text">be my guest</span>
+        </button>
+        <button class="tts-btn tts-btn-quiz" onclick="ttsBtnClick(event, &quot;be my guest&quot;)" title="Czytaj" aria-label="Czytaj">🔊</button>
+      </div>
+      <div class="quiz-opt-wrap">
+        <button class="quiz-option" data-correct="0" onclick="pickQuiz_4(this, 2)">
+          <span class="quiz-opt-letter">D</span>
+          <span class="quiz-opt-text">late check out</span>
+        </button>
+        <button class="tts-btn tts-btn-quiz" onclick="ttsBtnClick(event, &quot;late check out&quot;)" title="Czytaj" aria-label="Czytaj">🔊</button>
+      </div></div>
+      </div>
+      <div class="quiz-card" data-idx="3">
+        <div class="quiz-question">
+          <span class="quiz-q-num">4.</span>
+          <span class="quiz-q-text">tylko kęs / mały gryz</span>
+          <button class="tts-btn quiz-solve-btn" onclick="solveQuizOne_4(3)" title="Rozwiąż to pytanie" aria-label="Rozwiąż">✨</button>
+        </div>
+        <div class="quiz-options" data-opts="4">
+      <div class="quiz-opt-wrap">
+        <button class="quiz-option" data-correct="0" onclick="pickQuiz_4(this, 3)">
+          <span class="quiz-opt-letter">A</span>
+          <span class="quiz-opt-text">whip something up</span>
+        </button>
+        <button class="tts-btn tts-btn-quiz" onclick="ttsBtnClick(event, &quot;whip something up&quot;)" title="Czytaj" aria-label="Czytaj">🔊</button>
+      </div>
+      <div class="quiz-opt-wrap">
+        <button class="quiz-option" data-correct="0" onclick="pickQuiz_4(this, 3)">
+          <span class="quiz-opt-letter">B</span>
+          <span class="quiz-opt-text">available rooms</span>
+        </button>
+        <button class="tts-btn tts-btn-quiz" onclick="ttsBtnClick(event, &quot;available rooms&quot;)" title="Czytaj" aria-label="Czytaj">🔊</button>
+      </div>
+      <div class="quiz-opt-wrap">
+        <button class="quiz-option" data-correct="1" onclick="pickQuiz_4(this, 3)">
+          <span class="quiz-opt-letter">C</span>
+          <span class="quiz-opt-text">just a bite</span>
+        </button>
+        <button class="tts-btn tts-btn-quiz" onclick="ttsBtnClick(event, &quot;just a bite&quot;)" title="Czytaj" aria-label="Czytaj">🔊</button>
+      </div>
+      <div class="quiz-opt-wrap">
+        <button class="quiz-option" data-correct="0" onclick="pickQuiz_4(this, 3)">
+          <span class="quiz-opt-letter">D</span>
+          <span class="quiz-opt-text">extra</span>
+        </button>
+        <button class="tts-btn tts-btn-quiz" onclick="ttsBtnClick(event, &quot;extra&quot;)" title="Czytaj" aria-label="Czytaj">🔊</button>
+      </div></div>
+      </div>
+      <div class="quiz-card" data-idx="4">
+        <div class="quiz-question">
+          <span class="quiz-q-num">5.</span>
+          <span class="quiz-q-text">wolne pokoje (dostępne)</span>
+          <button class="tts-btn quiz-solve-btn" onclick="solveQuizOne_4(4)" title="Rozwiąż to pytanie" aria-label="Rozwiąż">✨</button>
+        </div>
+        <div class="quiz-options" data-opts="4">
+      <div class="quiz-opt-wrap">
+        <button class="quiz-option" data-correct="0" onclick="pickQuiz_4(this, 4)">
+          <span class="quiz-opt-letter">A</span>
+          <span class="quiz-opt-text">extra</span>
+        </button>
+        <button class="tts-btn tts-btn-quiz" onclick="ttsBtnClick(event, &quot;extra&quot;)" title="Czytaj" aria-label="Czytaj">🔊</button>
+      </div>
+      <div class="quiz-opt-wrap">
+        <button class="quiz-option" data-correct="0" onclick="pickQuiz_4(this, 4)">
+          <span class="quiz-opt-letter">B</span>
+          <span class="quiz-opt-text">be my guest</span>
+        </button>
+        <button class="tts-btn tts-btn-quiz" onclick="ttsBtnClick(event, &quot;be my guest&quot;)" title="Czytaj" aria-label="Czytaj">🔊</button>
+      </div>
+      <div class="quiz-opt-wrap">
+        <button class="quiz-option" data-correct="0" onclick="pickQuiz_4(this, 4)">
+          <span class="quiz-opt-letter">C</span>
+          <span class="quiz-opt-text">just a bite</span>
+        </button>
+        <button class="tts-btn tts-btn-quiz" onclick="ttsBtnClick(event, &quot;just a bite&quot;)" title="Czytaj" aria-label="Czytaj">🔊</button>
+      </div>
+      <div class="quiz-opt-wrap">
+        <button class="quiz-option" data-correct="1" onclick="pickQuiz_4(this, 4)">
+          <span class="quiz-opt-letter">D</span>
+          <span class="quiz-opt-text">available rooms</span>
+        </button>
+        <button class="tts-btn tts-btn-quiz" onclick="ttsBtnClick(event, &quot;available rooms&quot;)" title="Czytaj" aria-label="Czytaj">🔊</button>
+      </div></div>
+      </div>
+      <div class="quiz-card" data-idx="5">
+        <div class="quiz-question">
+          <span class="quiz-q-num">6.</span>
+          <span class="quiz-q-text">wymeldowanie (z hotelu)</span>
+          <button class="tts-btn quiz-solve-btn" onclick="solveQuizOne_4(5)" title="Rozwiąż to pytanie" aria-label="Rozwiąż">✨</button>
+        </div>
+        <div class="quiz-options" data-opts="4">
+      <div class="quiz-opt-wrap">
+        <button class="quiz-option" data-correct="0" onclick="pickQuiz_4(this, 5)">
+          <span class="quiz-opt-letter">A</span>
+          <span class="quiz-opt-text">be my guest</span>
+        </button>
+        <button class="tts-btn tts-btn-quiz" onclick="ttsBtnClick(event, &quot;be my guest&quot;)" title="Czytaj" aria-label="Czytaj">🔊</button>
+      </div>
+      <div class="quiz-opt-wrap">
+        <button class="quiz-option" data-correct="0" onclick="pickQuiz_4(this, 5)">
+          <span class="quiz-opt-letter">B</span>
+          <span class="quiz-opt-text">just a bite</span>
+        </button>
+        <button class="tts-btn tts-btn-quiz" onclick="ttsBtnClick(event, &quot;just a bite&quot;)" title="Czytaj" aria-label="Czytaj">🔊</button>
+      </div>
+      <div class="quiz-opt-wrap">
+        <button class="quiz-option" data-correct="0" onclick="pickQuiz_4(this, 5)">
+          <span class="quiz-opt-letter">C</span>
+          <span class="quiz-opt-text">whip something up</span>
+        </button>
+        <button class="tts-btn tts-btn-quiz" onclick="ttsBtnClick(event, &quot;whip something up&quot;)" title="Czytaj" aria-label="Czytaj">🔊</button>
+      </div>
+      <div class="quiz-opt-wrap">
+        <button class="quiz-option" data-correct="1" onclick="pickQuiz_4(this, 5)">
+          <span class="quiz-opt-letter">D</span>
+          <span class="quiz-opt-text">check out</span>
+        </button>
+        <button class="tts-btn tts-btn-quiz" onclick="ttsBtnClick(event, &quot;check out&quot;)" title="Czytaj" aria-label="Czytaj">🔊</button>
+      </div></div>
+      </div>
+      <div class="quiz-card" data-idx="6">
+        <div class="quiz-question">
+          <span class="quiz-q-num">7.</span>
+          <span class="quiz-q-text">późne wymeldowanie</span>
+          <button class="tts-btn quiz-solve-btn" onclick="solveQuizOne_4(6)" title="Rozwiąż to pytanie" aria-label="Rozwiąż">✨</button>
+        </div>
+        <div class="quiz-options" data-opts="4">
+      <div class="quiz-opt-wrap">
+        <button class="quiz-option" data-correct="0" onclick="pickQuiz_4(this, 6)">
+          <span class="quiz-opt-letter">A</span>
+          <span class="quiz-opt-text">extra</span>
+        </button>
+        <button class="tts-btn tts-btn-quiz" onclick="ttsBtnClick(event, &quot;extra&quot;)" title="Czytaj" aria-label="Czytaj">🔊</button>
+      </div>
+      <div class="quiz-opt-wrap">
+        <button class="quiz-option" data-correct="0" onclick="pickQuiz_4(this, 6)">
+          <span class="quiz-opt-letter">B</span>
+          <span class="quiz-opt-text">whip something up</span>
+        </button>
+        <button class="tts-btn tts-btn-quiz" onclick="ttsBtnClick(event, &quot;whip something up&quot;)" title="Czytaj" aria-label="Czytaj">🔊</button>
+      </div>
+      <div class="quiz-opt-wrap">
+        <button class="quiz-option" data-correct="1" onclick="pickQuiz_4(this, 6)">
+          <span class="quiz-opt-letter">C</span>
+          <span class="quiz-opt-text">late check out</span>
+        </button>
+        <button class="tts-btn tts-btn-quiz" onclick="ttsBtnClick(event, &quot;late check out&quot;)" title="Czytaj" aria-label="Czytaj">🔊</button>
+      </div>
+      <div class="quiz-opt-wrap">
+        <button class="quiz-option" data-correct="0" onclick="pickQuiz_4(this, 6)">
+          <span class="quiz-opt-letter">D</span>
+          <span class="quiz-opt-text">available rooms</span>
+        </button>
+        <button class="tts-btn tts-btn-quiz" onclick="ttsBtnClick(event, &quot;available rooms&quot;)" title="Czytaj" aria-label="Czytaj">🔊</button>
+      </div></div>
+      </div>
+      <div class="quiz-card" data-idx="7">
+        <div class="quiz-question">
+          <span class="quiz-q-num">8.</span>
+          <span class="quiz-q-text">ekstra / dodatkowo (o opłacie)</span>
+          <button class="tts-btn quiz-solve-btn" onclick="solveQuizOne_4(7)" title="Rozwiąż to pytanie" aria-label="Rozwiąż">✨</button>
+        </div>
+        <div class="quiz-options" data-opts="4">
+      <div class="quiz-opt-wrap">
+        <button class="quiz-option" data-correct="0" onclick="pickQuiz_4(this, 7)">
+          <span class="quiz-opt-letter">A</span>
+          <span class="quiz-opt-text">check out</span>
+        </button>
+        <button class="tts-btn tts-btn-quiz" onclick="ttsBtnClick(event, &quot;check out&quot;)" title="Czytaj" aria-label="Czytaj">🔊</button>
+      </div>
+      <div class="quiz-opt-wrap">
+        <button class="quiz-option" data-correct="0" onclick="pickQuiz_4(this, 7)">
+          <span class="quiz-opt-letter">B</span>
+          <span class="quiz-opt-text">whip something up</span>
+        </button>
+        <button class="tts-btn tts-btn-quiz" onclick="ttsBtnClick(event, &quot;whip something up&quot;)" title="Czytaj" aria-label="Czytaj">🔊</button>
+      </div>
+      <div class="quiz-opt-wrap">
+        <button class="quiz-option" data-correct="0" onclick="pickQuiz_4(this, 7)">
+          <span class="quiz-opt-letter">C</span>
+          <span class="quiz-opt-text">available rooms</span>
+        </button>
+        <button class="tts-btn tts-btn-quiz" onclick="ttsBtnClick(event, &quot;available rooms&quot;)" title="Czytaj" aria-label="Czytaj">🔊</button>
+      </div>
+      <div class="quiz-opt-wrap">
+        <button class="quiz-option" data-correct="1" onclick="pickQuiz_4(this, 7)">
+          <span class="quiz-opt-letter">D</span>
+          <span class="quiz-opt-text">extra</span>
+        </button>
+        <button class="tts-btn tts-btn-quiz" onclick="ttsBtnClick(event, &quot;extra&quot;)" title="Czytaj" aria-label="Czytaj">🔊</button>
+      </div></div>
+      </div></div>
+      <div class="ws-actions">
+        <button class="ws-btn-solve" onclick="solveQuiz_4()">Pokaż odpowiedzi</button>
+      </div>
+      <div class="ws-feedback" id="fb-4"></div>
+    </section>
+
+    
+
+    <section class="ws-section" data-section="5" id="sec-5">
+      <div class="ws-sec-head">
+        <div class="ws-sec-num">05</div>
+        <h2 class="ws-sec-title">Sentence Unscramble</h2>
+      </div>
+      <p class="ws-sec-desc">Kliknij pole &quot;Pokaż słowa&quot;, a następnie ułóż je w odpowiedniej kolejności. Możesz też przeciągać słowa. Kliknij 💡, aby wstawić kolejne poprawne słowo, lub ✨, aby rozwiązać od razu.</p>
+      <div class="unsc-grid">
+      <div class="unsc-card" data-idx="0" data-correct='[&quot;Can&quot;,&quot;I&quot;,&quot;try&quot;,&quot;it?&quot;]'>
+        <div class="unsc-prompt">
+          <span class="unsc-pl">Czy mogę spróbować?</span>
+          <button class="tts-btn tts-btn-unsc" onclick="ttsBtnClick(event, &quot;Can I try it?&quot;)" title="Posłuchaj poprawnego zdania" aria-label="Czytaj">🔊</button>
+        </div>
+        <div class="unsc-answer-area" data-section="5" data-card-idx="0">
+          <div class="unsc-answer-empty">Kliknij słowa poniżej lub przeciągnij je tutaj</div>
+        </div>
+        <div class="unsc-pool-wrap">
+          <div class="unsc-pool unsc-pool-hidden" data-section="5" data-card-idx="0">
+            <button class="unsc-word" data-word="try" data-orig-idx="0" draggable="true">try</button><button class="unsc-word" data-word="I" data-orig-idx="1" draggable="true">I</button><button class="unsc-word" data-word="Can" data-orig-idx="2" draggable="true">Can</button><button class="unsc-word" data-word="it?" data-orig-idx="3" draggable="true">it?</button>
+          </div>
+          <button type="button" class="unsc-pool-reveal" onclick="revealUnscPool_5(0)">
+            <span class="unsc-pool-reveal-icon">👁</span>
+            <span>Kliknij, aby pokazać słowa do ułożenia</span>
+          </button>
+        </div>
+        <div class="unsc-controls">
+          <button class="unsc-check-btn" onclick="checkUnscramble_5(0)">Sprawdź</button>
+          <button class="unsc-hint-btn" onclick="hintUnscramble_5(0)">💡 Podpowiedź</button>
+          <button class="unsc-solve-btn" onclick="solveUnscrambleOne_5(0)">✨ Rozwiąż</button>
+          <button class="unsc-clear-btn" onclick="clearUnscramble_5(0)">Wyczyść</button>
+        </div>
+      </div>
+      <div class="unsc-card" data-idx="1" data-correct='[&quot;Be&quot;,&quot;my&quot;,&quot;guest.&quot;]'>
+        <div class="unsc-prompt">
+          <span class="unsc-pl">Proszę bardzo.</span>
+          <button class="tts-btn tts-btn-unsc" onclick="ttsBtnClick(event, &quot;Be my guest.&quot;)" title="Posłuchaj poprawnego zdania" aria-label="Czytaj">🔊</button>
+        </div>
+        <div class="unsc-answer-area" data-section="5" data-card-idx="1">
+          <div class="unsc-answer-empty">Kliknij słowa poniżej lub przeciągnij je tutaj</div>
+        </div>
+        <div class="unsc-pool-wrap">
+          <div class="unsc-pool unsc-pool-hidden" data-section="5" data-card-idx="1">
+            <button class="unsc-word" data-word="guest." data-orig-idx="0" draggable="true">guest.</button><button class="unsc-word" data-word="Be" data-orig-idx="1" draggable="true">Be</button><button class="unsc-word" data-word="my" data-orig-idx="2" draggable="true">my</button>
+          </div>
+          <button type="button" class="unsc-pool-reveal" onclick="revealUnscPool_5(1)">
+            <span class="unsc-pool-reveal-icon">👁</span>
+            <span>Kliknij, aby pokazać słowa do ułożenia</span>
+          </button>
+        </div>
+        <div class="unsc-controls">
+          <button class="unsc-check-btn" onclick="checkUnscramble_5(1)">Sprawdź</button>
+          <button class="unsc-hint-btn" onclick="hintUnscramble_5(1)">💡 Podpowiedź</button>
+          <button class="unsc-solve-btn" onclick="solveUnscrambleOne_5(1)">✨ Rozwiąż</button>
+          <button class="unsc-clear-btn" onclick="clearUnscramble_5(1)">Wyczyść</button>
+        </div>
+      </div>
+      <div class="unsc-card" data-idx="2" data-correct='[&quot;Feel&quot;,&quot;free&quot;,&quot;to&quot;,&quot;go&quot;,&quot;ahead.&quot;]'>
+        <div class="unsc-prompt">
+          <span class="unsc-pl">Śmiało, nie krępuj się.</span>
+          <button class="tts-btn tts-btn-unsc" onclick="ttsBtnClick(event, &quot;Feel free to go ahead.&quot;)" title="Posłuchaj poprawnego zdania" aria-label="Czytaj">🔊</button>
+        </div>
+        <div class="unsc-answer-area" data-section="5" data-card-idx="2">
+          <div class="unsc-answer-empty">Kliknij słowa poniżej lub przeciągnij je tutaj</div>
+        </div>
+        <div class="unsc-pool-wrap">
+          <div class="unsc-pool unsc-pool-hidden" data-section="5" data-card-idx="2">
+            <button class="unsc-word" data-word="free" data-orig-idx="0" draggable="true">free</button><button class="unsc-word" data-word="to" data-orig-idx="1" draggable="true">to</button><button class="unsc-word" data-word="go" data-orig-idx="2" draggable="true">go</button><button class="unsc-word" data-word="ahead." data-orig-idx="3" draggable="true">ahead.</button><button class="unsc-word" data-word="Feel" data-orig-idx="4" draggable="true">Feel</button>
+          </div>
+          <button type="button" class="unsc-pool-reveal" onclick="revealUnscPool_5(2)">
+            <span class="unsc-pool-reveal-icon">👁</span>
+            <span>Kliknij, aby pokazać słowa do ułożenia</span>
+          </button>
+        </div>
+        <div class="unsc-controls">
+          <button class="unsc-check-btn" onclick="checkUnscramble_5(2)">Sprawdź</button>
+          <button class="unsc-hint-btn" onclick="hintUnscramble_5(2)">💡 Podpowiedź</button>
+          <button class="unsc-solve-btn" onclick="solveUnscrambleOne_5(2)">✨ Rozwiąż</button>
+          <button class="unsc-clear-btn" onclick="clearUnscramble_5(2)">Wyczyść</button>
+        </div>
+      </div>
+      <div class="unsc-card" data-idx="3" data-correct='[&quot;He&#39;s&quot;,&quot;just&quot;,&quot;taken&quot;,&quot;her&quot;,&quot;meal!&quot;]'>
+        <div class="unsc-prompt">
+          <span class="unsc-pl">On właśnie zabrał jej posiłek!</span>
+          <button class="tts-btn tts-btn-unsc" onclick="ttsBtnClick(event, &quot;He's just taken her meal!&quot;)" title="Posłuchaj poprawnego zdania" aria-label="Czytaj">🔊</button>
+        </div>
+        <div class="unsc-answer-area" data-section="5" data-card-idx="3">
+          <div class="unsc-answer-empty">Kliknij słowa poniżej lub przeciągnij je tutaj</div>
+        </div>
+        <div class="unsc-pool-wrap">
+          <div class="unsc-pool unsc-pool-hidden" data-section="5" data-card-idx="3">
+            <button class="unsc-word" data-word="her" data-orig-idx="0" draggable="true">her</button><button class="unsc-word" data-word="He&#39;s" data-orig-idx="1" draggable="true">He&#39;s</button><button class="unsc-word" data-word="taken" data-orig-idx="2" draggable="true">taken</button><button class="unsc-word" data-word="meal!" data-orig-idx="3" draggable="true">meal!</button><button class="unsc-word" data-word="just" data-orig-idx="4" draggable="true">just</button>
+          </div>
+          <button type="button" class="unsc-pool-reveal" onclick="revealUnscPool_5(3)">
+            <span class="unsc-pool-reveal-icon">👁</span>
+            <span>Kliknij, aby pokazać słowa do ułożenia</span>
+          </button>
+        </div>
+        <div class="unsc-controls">
+          <button class="unsc-check-btn" onclick="checkUnscramble_5(3)">Sprawdź</button>
+          <button class="unsc-hint-btn" onclick="hintUnscramble_5(3)">💡 Podpowiedź</button>
+          <button class="unsc-solve-btn" onclick="solveUnscrambleOne_5(3)">✨ Rozwiąż</button>
+          <button class="unsc-clear-btn" onclick="clearUnscramble_5(3)">Wyczyść</button>
+        </div>
+      </div>
+      <div class="unsc-card" data-idx="4" data-correct='[&quot;Do&quot;,&quot;you&quot;,&quot;have&quot;,&quot;free&quot;,&quot;rooms?&quot;]'>
+        <div class="unsc-prompt">
+          <span class="unsc-pl">Czy macie wolne pokoje?</span>
+          <button class="tts-btn tts-btn-unsc" onclick="ttsBtnClick(event, &quot;Do you have free rooms?&quot;)" title="Posłuchaj poprawnego zdania" aria-label="Czytaj">🔊</button>
+        </div>
+        <div class="unsc-answer-area" data-section="5" data-card-idx="4">
+          <div class="unsc-answer-empty">Kliknij słowa poniżej lub przeciągnij je tutaj</div>
+        </div>
+        <div class="unsc-pool-wrap">
+          <div class="unsc-pool unsc-pool-hidden" data-section="5" data-card-idx="4">
+            <button class="unsc-word" data-word="rooms?" data-orig-idx="0" draggable="true">rooms?</button><button class="unsc-word" data-word="Do" data-orig-idx="1" draggable="true">Do</button><button class="unsc-word" data-word="you" data-orig-idx="2" draggable="true">you</button><button class="unsc-word" data-word="free" data-orig-idx="3" draggable="true">free</button><button class="unsc-word" data-word="have" data-orig-idx="4" draggable="true">have</button>
+          </div>
+          <button type="button" class="unsc-pool-reveal" onclick="revealUnscPool_5(4)">
+            <span class="unsc-pool-reveal-icon">👁</span>
+            <span>Kliknij, aby pokazać słowa do ułożenia</span>
+          </button>
+        </div>
+        <div class="unsc-controls">
+          <button class="unsc-check-btn" onclick="checkUnscramble_5(4)">Sprawdź</button>
+          <button class="unsc-hint-btn" onclick="hintUnscramble_5(4)">💡 Podpowiedź</button>
+          <button class="unsc-solve-btn" onclick="solveUnscrambleOne_5(4)">✨ Rozwiąż</button>
+          <button class="unsc-clear-btn" onclick="clearUnscramble_5(4)">Wyczyść</button>
+        </div>
+      </div>
+      <div class="unsc-card" data-idx="5" data-correct='[&quot;What&quot;,&quot;time&quot;,&quot;is&quot;,&quot;check&quot;,&quot;out?&quot;]'>
+        <div class="unsc-prompt">
+          <span class="unsc-pl">O której jest wymeldowanie?</span>
+          <button class="tts-btn tts-btn-unsc" onclick="ttsBtnClick(event, &quot;What time is check out?&quot;)" title="Posłuchaj poprawnego zdania" aria-label="Czytaj">🔊</button>
+        </div>
+        <div class="unsc-answer-area" data-section="5" data-card-idx="5">
+          <div class="unsc-answer-empty">Kliknij słowa poniżej lub przeciągnij je tutaj</div>
+        </div>
+        <div class="unsc-pool-wrap">
+          <div class="unsc-pool unsc-pool-hidden" data-section="5" data-card-idx="5">
+            <button class="unsc-word" data-word="is" data-orig-idx="0" draggable="true">is</button><button class="unsc-word" data-word="What" data-orig-idx="1" draggable="true">What</button><button class="unsc-word" data-word="check" data-orig-idx="2" draggable="true">check</button><button class="unsc-word" data-word="out?" data-orig-idx="3" draggable="true">out?</button><button class="unsc-word" data-word="time" data-orig-idx="4" draggable="true">time</button>
+          </div>
+          <button type="button" class="unsc-pool-reveal" onclick="revealUnscPool_5(5)">
+            <span class="unsc-pool-reveal-icon">👁</span>
+            <span>Kliknij, aby pokazać słowa do ułożenia</span>
+          </button>
+        </div>
+        <div class="unsc-controls">
+          <button class="unsc-check-btn" onclick="checkUnscramble_5(5)">Sprawdź</button>
+          <button class="unsc-hint-btn" onclick="hintUnscramble_5(5)">💡 Podpowiedź</button>
+          <button class="unsc-solve-btn" onclick="solveUnscrambleOne_5(5)">✨ Rozwiąż</button>
+          <button class="unsc-clear-btn" onclick="clearUnscramble_5(5)">Wyczyść</button>
+        </div>
+      </div>
+      <div class="unsc-card" data-idx="6" data-correct='[&quot;Check&quot;,&quot;out&quot;,&quot;is&quot;,&quot;at&quot;,&quot;12:00.&quot;]'>
+        <div class="unsc-prompt">
+          <span class="unsc-pl">Wymeldowanie jest o 12:00.</span>
+          <button class="tts-btn tts-btn-unsc" onclick="ttsBtnClick(event, &quot;Check out is at 12:00.&quot;)" title="Posłuchaj poprawnego zdania" aria-label="Czytaj">🔊</button>
+        </div>
+        <div class="unsc-answer-area" data-section="5" data-card-idx="6">
+          <div class="unsc-answer-empty">Kliknij słowa poniżej lub przeciągnij je tutaj</div>
+        </div>
+        <div class="unsc-pool-wrap">
+          <div class="unsc-pool unsc-pool-hidden" data-section="5" data-card-idx="6">
+            <button class="unsc-word" data-word="at" data-orig-idx="0" draggable="true">at</button><button class="unsc-word" data-word="out" data-orig-idx="1" draggable="true">out</button><button class="unsc-word" data-word="is" data-orig-idx="2" draggable="true">is</button><button class="unsc-word" data-word="12:00." data-orig-idx="3" draggable="true">12:00.</button><button class="unsc-word" data-word="Check" data-orig-idx="4" draggable="true">Check</button>
+          </div>
+          <button type="button" class="unsc-pool-reveal" onclick="revealUnscPool_5(6)">
+            <span class="unsc-pool-reveal-icon">👁</span>
+            <span>Kliknij, aby pokazać słowa do ułożenia</span>
+          </button>
+        </div>
+        <div class="unsc-controls">
+          <button class="unsc-check-btn" onclick="checkUnscramble_5(6)">Sprawdź</button>
+          <button class="unsc-hint-btn" onclick="hintUnscramble_5(6)">💡 Podpowiedź</button>
+          <button class="unsc-solve-btn" onclick="solveUnscrambleOne_5(6)">✨ Rozwiąż</button>
+          <button class="unsc-clear-btn" onclick="clearUnscramble_5(6)">Wyczyść</button>
+        </div>
+      </div>
+      <div class="unsc-card" data-idx="7" data-correct='[&quot;Can&quot;,&quot;I&quot;,&quot;check&quot;,&quot;out&quot;,&quot;at&quot;,&quot;3:00?&quot;]'>
+        <div class="unsc-prompt">
+          <span class="unsc-pl">Czy mogę się wymeldować o 3:00?</span>
+          <button class="tts-btn tts-btn-unsc" onclick="ttsBtnClick(event, &quot;Can I check out at 3:00?&quot;)" title="Posłuchaj poprawnego zdania" aria-label="Czytaj">🔊</button>
+        </div>
+        <div class="unsc-answer-area" data-section="5" data-card-idx="7">
+          <div class="unsc-answer-empty">Kliknij słowa poniżej lub przeciągnij je tutaj</div>
+        </div>
+        <div class="unsc-pool-wrap">
+          <div class="unsc-pool unsc-pool-hidden" data-section="5" data-card-idx="7">
+            <button class="unsc-word" data-word="3:00?" data-orig-idx="0" draggable="true">3:00?</button><button class="unsc-word" data-word="at" data-orig-idx="1" draggable="true">at</button><button class="unsc-word" data-word="out" data-orig-idx="2" draggable="true">out</button><button class="unsc-word" data-word="I" data-orig-idx="3" draggable="true">I</button><button class="unsc-word" data-word="Can" data-orig-idx="4" draggable="true">Can</button><button class="unsc-word" data-word="check" data-orig-idx="5" draggable="true">check</button>
+          </div>
+          <button type="button" class="unsc-pool-reveal" onclick="revealUnscPool_5(7)">
+            <span class="unsc-pool-reveal-icon">👁</span>
+            <span>Kliknij, aby pokazać słowa do ułożenia</span>
+          </button>
+        </div>
+        <div class="unsc-controls">
+          <button class="unsc-check-btn" onclick="checkUnscramble_5(7)">Sprawdź</button>
+          <button class="unsc-hint-btn" onclick="hintUnscramble_5(7)">💡 Podpowiedź</button>
+          <button class="unsc-solve-btn" onclick="solveUnscrambleOne_5(7)">✨ Rozwiąż</button>
+          <button class="unsc-clear-btn" onclick="clearUnscramble_5(7)">Wyczyść</button>
+        </div>
+      </div>
+      <div class="unsc-card" data-idx="8" data-correct='[&quot;Late&quot;,&quot;check&quot;,&quot;out&quot;,&quot;is&quot;,&quot;$80&quot;,&quot;extra.&quot;]'>
+        <div class="unsc-prompt">
+          <span class="unsc-pl">Późne wymeldowanie kosztuje dodatkowe 80 dolarów.</span>
+          <button class="tts-btn tts-btn-unsc" onclick="ttsBtnClick(event, &quot;Late check out is $80 extra.&quot;)" title="Posłuchaj poprawnego zdania" aria-label="Czytaj">🔊</button>
+        </div>
+        <div class="unsc-answer-area" data-section="5" data-card-idx="8">
+          <div class="unsc-answer-empty">Kliknij słowa poniżej lub przeciągnij je tutaj</div>
+        </div>
+        <div class="unsc-pool-wrap">
+          <div class="unsc-pool unsc-pool-hidden" data-section="5" data-card-idx="8">
+            <button class="unsc-word" data-word="out" data-orig-idx="0" draggable="true">out</button><button class="unsc-word" data-word="extra." data-orig-idx="1" draggable="true">extra.</button><button class="unsc-word" data-word="is" data-orig-idx="2" draggable="true">is</button><button class="unsc-word" data-word="check" data-orig-idx="3" draggable="true">check</button><button class="unsc-word" data-word="Late" data-orig-idx="4" draggable="true">Late</button><button class="unsc-word" data-word="$80" data-orig-idx="5" draggable="true">$80</button>
+          </div>
+          <button type="button" class="unsc-pool-reveal" onclick="revealUnscPool_5(8)">
+            <span class="unsc-pool-reveal-icon">👁</span>
+            <span>Kliknij, aby pokazać słowa do ułożenia</span>
+          </button>
+        </div>
+        <div class="unsc-controls">
+          <button class="unsc-check-btn" onclick="checkUnscramble_5(8)">Sprawdź</button>
+          <button class="unsc-hint-btn" onclick="hintUnscramble_5(8)">💡 Podpowiedź</button>
+          <button class="unsc-solve-btn" onclick="solveUnscrambleOne_5(8)">✨ Rozwiąż</button>
+          <button class="unsc-clear-btn" onclick="clearUnscramble_5(8)">Wyczyść</button>
+        </div>
+      </div></div>
+      <div class="ws-actions">
+        <button class="ws-btn-solve" onclick="solveUnscramble_5()">Pokaż wszystkie odpowiedzi</button>
+      </div>
+      <div class="ws-feedback" id="fb-5"></div>
+    </section>
+
+    
+
+    <section class="ws-section" data-section="6" id="sec-6">
+      <div class="ws-sec-head">
+        <div class="ws-sec-num">06</div>
+        <h2 class="ws-sec-title">Gap Fill</h2>
+      </div>
+      <p class="ws-sec-desc">Wpisz brakujące słowa w lukach (Enter sprawdza). Kliknij 👁, żeby zobaczyć polskie tłumaczenie zdania jako wskazówkę, 💡 - kolejna litera, ✨ - rozwiąż całe zdanie.</p>
+      <div class="gap-grid">
+      <div class="gap-card" data-idx="0" data-total-gaps="1">
+        <div class="gap-sentence">He&#39;s just <input type="text" class="gap-input" data-answer="taken" data-gap-idx="0" size="7" placeholder="✎" onkeydown="if(event.key==='Enter') checkGap_6(this)"> her meal!
+          <span class="gap-actions">
+            <button class="tts-btn tts-btn-gap gap-helper-btn" onclick="hintGap_6(0)" title="Podpowiedź - kolejna litera w pierwszej pustej luce" aria-label="Podpowiedź">💡</button>
+            <button class="tts-btn tts-btn-gap gap-translate-btn" onclick="revealGapTranslation_6(0)" title="Pokaż polskie tłumaczenie" aria-label="Pokaż tłumaczenie">👁</button>
+            <button class="tts-btn tts-btn-gap gap-solve-btn" onclick="solveGapOne_6(0)" title="Rozwiąż całe zdanie" aria-label="Rozwiąż">✨</button>
+            <button class="tts-btn tts-btn-gap" onclick="ttsBtnClick(event, &quot;He's just taken her meal!&quot;)" title="Posłuchaj całego zdania" aria-label="Czytaj">🔊</button>
+          </span>
+        </div>
+        <div class="gap-translation" id="gap-tr-6-0">
+          <span class="gap-translation-label"><svg viewBox="5 17 62 38" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg" aria-label="PL"><rect x="5" y="17" width="62" height="19" fill="#fff"/><rect x="5" y="36" width="62" height="19" fill="#d22f27"/></svg></span> <span class="gap-translation-text">On właśnie zabrał jej posiłek!</span>
+        </div>
+      </div>
+      <div class="gap-card" data-idx="1" data-total-gaps="1">
+        <div class="gap-sentence"><input type="text" class="gap-input" data-answer="did" data-gap-idx="0" size="5" placeholder="✎" onkeydown="if(event.key==='Enter') checkGap_6(this)"> you cook?
+          <span class="gap-actions">
+            <button class="tts-btn tts-btn-gap gap-helper-btn" onclick="hintGap_6(1)" title="Podpowiedź - kolejna litera w pierwszej pustej luce" aria-label="Podpowiedź">💡</button>
+            <button class="tts-btn tts-btn-gap gap-translate-btn" onclick="revealGapTranslation_6(1)" title="Pokaż polskie tłumaczenie" aria-label="Pokaż tłumaczenie">👁</button>
+            <button class="tts-btn tts-btn-gap gap-solve-btn" onclick="solveGapOne_6(1)" title="Rozwiąż całe zdanie" aria-label="Rozwiąż">✨</button>
+            <button class="tts-btn tts-btn-gap" onclick="ttsBtnClick(event, &quot;Did you cook?&quot;)" title="Posłuchaj całego zdania" aria-label="Czytaj">🔊</button>
+          </span>
+        </div>
+        <div class="gap-translation" id="gap-tr-6-1">
+          <span class="gap-translation-label"><svg viewBox="5 17 62 38" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg" aria-label="PL"><rect x="5" y="17" width="62" height="19" fill="#fff"/><rect x="5" y="36" width="62" height="19" fill="#d22f27"/></svg></span> <span class="gap-translation-text">Czy gotowałeś?</span>
+        </div>
+      </div>
+      <div class="gap-card" data-idx="2" data-total-gaps="1">
+        <div class="gap-sentence">I <input type="text" class="gap-input" data-answer="whipped" data-gap-idx="0" size="9" placeholder="✎" onkeydown="if(event.key==='Enter') checkGap_6(this)"> something up.
+          <span class="gap-actions">
+            <button class="tts-btn tts-btn-gap gap-helper-btn" onclick="hintGap_6(2)" title="Podpowiedź - kolejna litera w pierwszej pustej luce" aria-label="Podpowiedź">💡</button>
+            <button class="tts-btn tts-btn-gap gap-translate-btn" onclick="revealGapTranslation_6(2)" title="Pokaż polskie tłumaczenie" aria-label="Pokaż tłumaczenie">👁</button>
+            <button class="tts-btn tts-btn-gap gap-solve-btn" onclick="solveGapOne_6(2)" title="Rozwiąż całe zdanie" aria-label="Rozwiąż">✨</button>
+            <button class="tts-btn tts-btn-gap" onclick="ttsBtnClick(event, &quot;I whipped something up.&quot;)" title="Posłuchaj całego zdania" aria-label="Czytaj">🔊</button>
+          </span>
+        </div>
+        <div class="gap-translation" id="gap-tr-6-2">
+          <span class="gap-translation-label"><svg viewBox="5 17 62 38" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg" aria-label="PL"><rect x="5" y="17" width="62" height="19" fill="#fff"/><rect x="5" y="36" width="62" height="19" fill="#d22f27"/></svg></span> <span class="gap-translation-text">Przyrządziłem coś na szybko.</span>
+        </div>
+      </div>
+      <div class="gap-card" data-idx="3" data-total-gaps="1">
+        <div class="gap-sentence">It means to <input type="text" class="gap-input" data-answer="prepare" data-gap-idx="0" size="9" placeholder="✎" onkeydown="if(event.key==='Enter') checkGap_6(this)"> something quickly with what you have.
+          <span class="gap-actions">
+            <button class="tts-btn tts-btn-gap gap-helper-btn" onclick="hintGap_6(3)" title="Podpowiedź - kolejna litera w pierwszej pustej luce" aria-label="Podpowiedź">💡</button>
+            <button class="tts-btn tts-btn-gap gap-translate-btn" onclick="revealGapTranslation_6(3)" title="Pokaż polskie tłumaczenie" aria-label="Pokaż tłumaczenie">👁</button>
+            <button class="tts-btn tts-btn-gap gap-solve-btn" onclick="solveGapOne_6(3)" title="Rozwiąż całe zdanie" aria-label="Rozwiąż">✨</button>
+            <button class="tts-btn tts-btn-gap" onclick="ttsBtnClick(event, &quot;It means to prepare something quickly with what you have.&quot;)" title="Posłuchaj całego zdania" aria-label="Czytaj">🔊</button>
+          </span>
+        </div>
+        <div class="gap-translation" id="gap-tr-6-3">
+          <span class="gap-translation-label"><svg viewBox="5 17 62 38" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg" aria-label="PL"><rect x="5" y="17" width="62" height="19" fill="#fff"/><rect x="5" y="36" width="62" height="19" fill="#d22f27"/></svg></span> <span class="gap-translation-text">To znaczy przyrządzić coś szybko z tego, co masz.</span>
+        </div>
+      </div>
+      <div class="gap-card" data-idx="4" data-total-gaps="1">
+        <div class="gap-sentence">We have <input type="text" class="gap-input" data-answer="available" data-gap-idx="0" size="11" placeholder="✎" onkeydown="if(event.key==='Enter') checkGap_6(this)"> rooms.
+          <span class="gap-actions">
+            <button class="tts-btn tts-btn-gap gap-helper-btn" onclick="hintGap_6(4)" title="Podpowiedź - kolejna litera w pierwszej pustej luce" aria-label="Podpowiedź">💡</button>
+            <button class="tts-btn tts-btn-gap gap-translate-btn" onclick="revealGapTranslation_6(4)" title="Pokaż polskie tłumaczenie" aria-label="Pokaż tłumaczenie">👁</button>
+            <button class="tts-btn tts-btn-gap gap-solve-btn" onclick="solveGapOne_6(4)" title="Rozwiąż całe zdanie" aria-label="Rozwiąż">✨</button>
+            <button class="tts-btn tts-btn-gap" onclick="ttsBtnClick(event, &quot;We have available rooms.&quot;)" title="Posłuchaj całego zdania" aria-label="Czytaj">🔊</button>
+          </span>
+        </div>
+        <div class="gap-translation" id="gap-tr-6-4">
+          <span class="gap-translation-label"><svg viewBox="5 17 62 38" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg" aria-label="PL"><rect x="5" y="17" width="62" height="19" fill="#fff"/><rect x="5" y="36" width="62" height="19" fill="#d22f27"/></svg></span> <span class="gap-translation-text">Mamy dostępne pokoje.</span>
+        </div>
+      </div></div>
+      <div class="ws-actions">
+        <button class="ws-btn-solve" onclick="solveGap_6()">Pokaż wszystkie odpowiedzi</button>
+      </div>
+      <div class="ws-feedback" id="fb-6"></div>
+    </section>
+
+    
+
+    <section class="ws-section" data-section="7" id="sec-7">
+      <div class="ws-sec-head">
+        <div class="ws-sec-num">07</div>
+        <h2 class="ws-sec-title">Translate</h2>
+      </div>
+      <p class="ws-sec-desc">Przetłumacz polskie słowo, frazę lub zdanie na angielski (Enter sprawdza). Sprawdzanie pomija wielkość liter i kropkę na końcu.</p>
+      <div class="trans-grid">
+      <div class="trans-card" data-idx="0">
+        <div class="trans-pl">
+          <span class="trans-pl-label"><svg viewBox="5 17 62 38" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg" aria-label="PL"><rect x="5" y="17" width="62" height="19" fill="#fff"/><rect x="5" y="36" width="62" height="19" fill="#d22f27"/></svg></span>
+          <span class="trans-pl-text">Witamy.</span>
+        </div>
+        <div class="trans-input-row">
+          <input type="text" class="trans-input" data-answer="Welcome." placeholder="Wpisz tłumaczenie po angielsku..." onkeydown="if(event.key==='Enter'){event.preventDefault();checkTranslate_7(this);}">
+          <div class="trans-input-actions">
+            <button class="trans-check" onclick="checkTranslate_7(this.closest('.trans-card').querySelector('.trans-input'))" title="Sprawdź" aria-label="Sprawdź">✅</button>
+            <button class="trans-hint-btn" onclick="hintTranslate_7(0)" title="Podpowiedź - kolejna litera" aria-label="Podpowiedź">💡</button>
+            <button class="trans-solve-btn" onclick="solveTranslateOne_7(0)" title="Rozwiąż to zdanie" aria-label="Rozwiąż">✨</button>
+            <button class="tts-btn tts-btn-trans" onclick="ttsBtnClick(event, &quot;Welcome.&quot;)" title="Posłuchaj poprawnego tłumaczenia" aria-label="Czytaj">🔊</button>
+          </div>
+        </div>
+        <div class="trans-correct" id="trans-c-7-0">
+          <span class="trans-correct-label">Wzór:</span> <span class="trans-correct-text">Welcome.</span>
+        </div>
+      </div>
+      <div class="trans-card" data-idx="1">
+        <div class="trans-pl">
+          <span class="trans-pl-label"><svg viewBox="5 17 62 38" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg" aria-label="PL"><rect x="5" y="17" width="62" height="19" fill="#fff"/><rect x="5" y="36" width="62" height="19" fill="#d22f27"/></svg></span>
+          <span class="trans-pl-text">Tylko mały kęs.</span>
+        </div>
+        <div class="trans-input-row">
+          <input type="text" class="trans-input" data-answer="Just a bite." placeholder="Wpisz tłumaczenie po angielsku..." onkeydown="if(event.key==='Enter'){event.preventDefault();checkTranslate_7(this);}">
+          <div class="trans-input-actions">
+            <button class="trans-check" onclick="checkTranslate_7(this.closest('.trans-card').querySelector('.trans-input'))" title="Sprawdź" aria-label="Sprawdź">✅</button>
+            <button class="trans-hint-btn" onclick="hintTranslate_7(1)" title="Podpowiedź - kolejna litera" aria-label="Podpowiedź">💡</button>
+            <button class="trans-solve-btn" onclick="solveTranslateOne_7(1)" title="Rozwiąż to zdanie" aria-label="Rozwiąż">✨</button>
+            <button class="tts-btn tts-btn-trans" onclick="ttsBtnClick(event, &quot;Just a bite.&quot;)" title="Posłuchaj poprawnego tłumaczenia" aria-label="Czytaj">🔊</button>
+          </div>
+        </div>
+        <div class="trans-correct" id="trans-c-7-1">
+          <span class="trans-correct-label">Wzór:</span> <span class="trans-correct-text">Just a bite.</span>
+        </div>
+      </div>
+      <div class="trans-card" data-idx="2">
+        <div class="trans-pl">
+          <span class="trans-pl-label"><svg viewBox="5 17 62 38" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg" aria-label="PL"><rect x="5" y="17" width="62" height="19" fill="#fff"/><rect x="5" y="36" width="62" height="19" fill="#d22f27"/></svg></span>
+          <span class="trans-pl-text">Na ile nocy?</span>
+        </div>
+        <div class="trans-input-row">
+          <input type="text" class="trans-input" data-answer="For how many nights?" placeholder="Wpisz tłumaczenie po angielsku..." onkeydown="if(event.key==='Enter'){event.preventDefault();checkTranslate_7(this);}">
+          <div class="trans-input-actions">
+            <button class="trans-check" onclick="checkTranslate_7(this.closest('.trans-card').querySelector('.trans-input'))" title="Sprawdź" aria-label="Sprawdź">✅</button>
+            <button class="trans-hint-btn" onclick="hintTranslate_7(2)" title="Podpowiedź - kolejna litera" aria-label="Podpowiedź">💡</button>
+            <button class="trans-solve-btn" onclick="solveTranslateOne_7(2)" title="Rozwiąż to zdanie" aria-label="Rozwiąż">✨</button>
+            <button class="tts-btn tts-btn-trans" onclick="ttsBtnClick(event, &quot;For how many nights?&quot;)" title="Posłuchaj poprawnego tłumaczenia" aria-label="Czytaj">🔊</button>
+          </div>
+        </div>
+        <div class="trans-correct" id="trans-c-7-2">
+          <span class="trans-correct-label">Wzór:</span> <span class="trans-correct-text">For how many nights?</span>
+        </div>
+      </div>
+      <div class="trans-card" data-idx="3">
+        <div class="trans-pl">
+          <span class="trans-pl-label"><svg viewBox="5 17 62 38" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg" aria-label="PL"><rect x="5" y="17" width="62" height="19" fill="#fff"/><rect x="5" y="36" width="62" height="19" fill="#d22f27"/></svg></span>
+          <span class="trans-pl-text">Na trzy noce.</span>
+        </div>
+        <div class="trans-input-row">
+          <input type="text" class="trans-input" data-answer="For three nights." placeholder="Wpisz tłumaczenie po angielsku..." onkeydown="if(event.key==='Enter'){event.preventDefault();checkTranslate_7(this);}">
+          <div class="trans-input-actions">
+            <button class="trans-check" onclick="checkTranslate_7(this.closest('.trans-card').querySelector('.trans-input'))" title="Sprawdź" aria-label="Sprawdź">✅</button>
+            <button class="trans-hint-btn" onclick="hintTranslate_7(3)" title="Podpowiedź - kolejna litera" aria-label="Podpowiedź">💡</button>
+            <button class="trans-solve-btn" onclick="solveTranslateOne_7(3)" title="Rozwiąż to zdanie" aria-label="Rozwiąż">✨</button>
+            <button class="tts-btn tts-btn-trans" onclick="ttsBtnClick(event, &quot;For three nights.&quot;)" title="Posłuchaj poprawnego tłumaczenia" aria-label="Czytaj">🔊</button>
+          </div>
+        </div>
+        <div class="trans-correct" id="trans-c-7-3">
+          <span class="trans-correct-label">Wzór:</span> <span class="trans-correct-text">For three nights.</span>
+        </div>
+      </div></div>
+      <div class="ws-actions">
+        <button class="ws-btn-solve" onclick="solveTranslate_7()">Pokaż wszystkie odpowiedzi</button>
+      </div>
+      <div class="ws-feedback" id="fb-7"></div>
+    </section>
+
+  <div class="ws-finale" id="wsFinale">
+    <div class="ws-finale-icon">🏆</div>
+    <h2 class="ws-finale-title">Wszystko ukończone!</h2>
+    <p class="ws-finale-text">Świetna robota.</p>
+    <button class="ws-btn-celebrate" onclick="bigCelebrate()">🎉 Celebrate!</button>
+    <button class="ws-btn-reset" onclick="resetWorksheet()">🔄 Zacznij od nowa</button>
+  </div>
+
+  <footer class="ws-footer">
+    <span class="ws-save-indicator">💾 Postęp zapisywany automatycznie</span>
+    <button class="ws-btn-reset-foot" onclick="resetWorksheet()">Reset</button>
+    <button class="ws-btn-download-tsv" onclick="downloadTSV()" title="Pobierz dane jako plik TSV">⤓ TSV</button>
+  </footer>
+</div>
+
+<script>
+const WS_DATA = [{"pl":"przyrządzić coś szybko z tego, co jest pod ręką","en":"whip something up","tasks":"f,q","_tasks":["flashcards","quiz"]},{"pl":"proszę bardzo / częstuj się / nie krępuj się","en":"be my guest","tasks":"f,q","_tasks":["flashcards","quiz"]},{"pl":"Śmiało. / Nie krępuj się.","en":"feel free to go ahead","tasks":"f,q","_tasks":["flashcards","quiz"]},{"pl":"tylko kęs / mały gryz","en":"just a bite","tasks":"f,q","_tasks":["flashcards","quiz"]},{"pl":"wolne pokoje (dostępne)","en":"available rooms","tasks":"f,q","_tasks":["flashcards","quiz"]},{"pl":"wymeldowanie (z hotelu)","en":"check out","tasks":"f,q","_tasks":["flashcards","quiz"]},{"pl":"późne wymeldowanie","en":"late check out","tasks":"f,q","_tasks":["flashcards","quiz"]},{"pl":"ekstra / dodatkowo (o opłacie)","en":"extra","tasks":"f,q","_tasks":["flashcards","quiz"]},{"pl":"On właśnie zabrał jej posiłek!","en":"He's just {taken} her meal!","tasks":"g","_tasks":["gapfill"]},{"pl":"Czy gotowałeś?","en":"{Did} you cook?","tasks":"g","_tasks":["gapfill"]},{"pl":"Przyrządziłem coś na szybko.","en":"I {whipped} something up.","tasks":"g","_tasks":["gapfill"]},{"pl":"To znaczy przyrządzić coś szybko z tego, co masz.","en":"It means to {prepare} something quickly with what you have.","tasks":"g","_tasks":["gapfill"]},{"pl":"Mamy dostępne pokoje.","en":"We have {available} rooms.","tasks":"g","_tasks":["gapfill"]},{"pl":"dosłownie wolny (niezajęty / bezpłatny)","en":"free","tasks":"s","_tasks":["scramble"]},{"pl":"posiłek","en":"meal","tasks":"s","_tasks":["scramble"]},{"pl":"paszport","en":"passport","tasks":"s","_tasks":["scramble"]},{"pl":"przepis","en":"recipe","tasks":"s","_tasks":["scramble"]},{"pl":"rachunek","en":"receipt","tasks":"s","_tasks":["scramble"]},{"pl":"recepta","en":"prescription","tasks":"s","_tasks":["scramble"]},{"pl":"rzadko","en":"rarely","tasks":"s","_tasks":["scramble"]},{"pl":"ostatnio - r...","en":"recently","tasks":"s","_tasks":["scramble"]},{"pl":"ostatnio - l...","en":"lately","tasks":"s","_tasks":["scramble"]},{"pl":"serce (wym. bardziej przez “a’)","en":"heart","tasks":"s","_tasks":["scramble"]},{"pl":"boleć, ranić (wym. bardziej przez “e”)","en":"hurt","tasks":"s","_tasks":["scramble"]},{"pl":"Witamy.","en":"Welcome.","tasks":"t","_tasks":["translate"]},{"pl":"Tylko mały kęs.","en":"Just a bite.","tasks":"t","_tasks":["translate"]},{"pl":"Na ile nocy?","en":"For how many nights?","tasks":"t","_tasks":["translate"]},{"pl":"Na trzy noce.","en":"For three nights.","tasks":"t","_tasks":["translate"]},{"pl":"Czy mogę spróbować?","en":"Can I try it?","tasks":"u","_tasks":["unscramble"]},{"pl":"Proszę bardzo.","en":"Be my guest.","tasks":"u","_tasks":["unscramble"]},{"pl":"Śmiało, nie krępuj się.","en":"Feel free to go ahead.","tasks":"u","_tasks":["unscramble"]},{"pl":"On właśnie zjadł jej posiłek!","en":"He's just taken her meal!","tasks":"u","_tasks":["unscramble"]},{"pl":"Czy macie wolne pokoje?","en":"Do you have free rooms?","tasks":"u","_tasks":["unscramble"]},{"pl":"O której jest wymeldowanie?","en":"What time is check out?","tasks":"u","_tasks":["unscramble"]},{"pl":"Wymeldowanie jest o 12:00.","en":"Check out is at 12:00.","tasks":"u","_tasks":["unscramble"]},{"pl":"Czy mogę się wymeldować o 3:00?","en":"Can I check out at 3:00?","tasks":"u","_tasks":["unscramble"]},{"pl":"Późne wymeldowanie kosztuje dodatkowe 80 dolarów.","en":"Late check out is $80 extra.","tasks":"u","_tasks":["unscramble"]},{"pl":"Co to jest \"aspekt\" w gramatyce?","en":"Aspekt (postać, forma) – kategoria gramatyczna wyrażająca sposób przedstawienia czynności lub stanu. JAK? JAKI JEST STATUS?","tasks":"c","_tasks":["cornell"]},{"pl":"Co to jest \"czas\" w gramatyce (tylko \"czas\" bez dodanego aspektu)?","en":"Czas – kategoria językowa określająca w czasie czynność, zjawisko lub stan, o których mowa w zdaniu. KIEDY?","tasks":"c","_tasks":["cornell"]},{"pl":"Jakie mamy cztery aspekty w języku angielskim?","en":"Simple (prosty) – pojedyncza kropka, fakt, zdarzenie. Continuous (ciągły) – wszystko, co było / jest / będzie w trakcie. Perfect – coś, co stało się wcześniej, przed czymś innym, i jest z tym powiązane, ma istotny związek. Perfect Continuous – coś, co działo się wcześniej, przed czymś innym, lub dalej trwa do danego momentu, i jest z tym powiązane, ma istotny związek.","tasks":"c","_tasks":["cornell"]}];
+const WS_HEADERS = ["pl","en","tasks"];
+const WS_TITLE = "Check-in, Snacks & Chat: Przydatne zwroty w hotelu i przy stole";
+const WS_SECTION_COUNT = 7;
+// Klucz w localStorage zawiera hash z danych - dzięki temu różne worksheety
+// (nawet z tym samym tytułem) mają osobny progress.
+function _wsHash(s) {
+  let h = 0;
+  for (let i = 0; i < s.length; i++) {
+    h = ((h << 5) - h + s.charCodeAt(i)) | 0;
+  }
+  return Math.abs(h).toString(36);
+}
+const WS_STORAGE_KEY = 'ws-progress-' + _wsHash("Check-in, Snacks & Chat: Przydatne zwroty w hotelu i przy stole" + '|' + 7 + '|' + JSON.stringify(WS_DATA));
+const WS_TTS = {"enabled":true,"lang":"en-GB","voiceName":"Google UK English Male","rate":0.75};
+let _wsDone = new Set();
+let _wsVoices = [];
+
+// ── TTS ────────────────────────────────────────────────
+function _wsLoadVoices() {
+  if (!window.speechSynthesis) return;
+  _wsVoices = window.speechSynthesis.getVoices();
+}
+if (window.speechSynthesis) {
+  _wsLoadVoices();
+  if (window.speechSynthesis.onvoiceschanged !== undefined) {
+    window.speechSynthesis.onvoiceschanged = _wsLoadVoices;
+  }
+}
+
+function _wsGetVoice() {
+  if (!_wsVoices.length) _wsLoadVoices();
+  // Preferuj wybrany głos
+  if (WS_TTS.voiceName) {
+    const v = _wsVoices.find(v => v.name === WS_TTS.voiceName);
+    if (v) return v;
+  }
+  // Auto: Google głos pasujący do języka
+  const langPrefix = (WS_TTS.lang || 'en-US').split('-')[0];
+  const matching = _wsVoices.filter(v => v.lang.toLowerCase().startsWith(langPrefix));
+  return matching.find(v => v.name.toLowerCase().includes('google')) || matching[0];
+}
+
+function speakText(text, btn) {
+  if (!WS_TTS.enabled || !window.speechSynthesis) return;
+  if (!text) return;
+  window.speechSynthesis.cancel();
+  const u = new SpeechSynthesisUtterance(text);
+  u.lang = WS_TTS.lang || 'en-US';
+  u.rate = typeof WS_TTS.rate === 'number' ? WS_TTS.rate : 1.0;
+  const voice = _wsGetVoice();
+  if (voice) u.voice = voice;
+  if (btn) {
+    btn.classList.add('tts-playing');
+    u.onend = u.onerror = () => btn.classList.remove('tts-playing');
+  }
+  window.speechSynthesis.speak(u);
+}
+
+// Stop event propagation - przyciski TTS nie powinny aktywować rodziców (np. flip card)
+function ttsBtnClick(event, text) {
+  event.stopPropagation();
+  speakText(text, event.currentTarget);
+}
+
+function markSectionDone(num) {
+  if (_wsDone.has(num)) return;
+  _wsDone.add(num);
+  const sec = document.querySelector('[data-section="' + num + '"]');
+  if (sec) sec.classList.add('ws-done');
+  updateProgress();
+  // Zapamiętaj, że sekcja została zaliczona (na wypadek, gdyby event nie został złapany)
+  if (typeof wsScheduleSave === 'function') wsScheduleSave();
+}
+
+function updateProgress() {
+  const n = _wsDone.size;
+  document.getElementById('wsProgressScore').textContent = n + ' / ' + WS_SECTION_COUNT;
+  document.getElementById('wsProgressFill').style.width = (n / WS_SECTION_COUNT * 100) + '%';
+  if (n === WS_SECTION_COUNT) {
+    document.getElementById('wsFinale').classList.add('show');
+    setTimeout(() => {
+      document.getElementById('wsFinale').scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }, 300);
+  }
+}
+
+function showSectionFeedback(num, ok, msg) {
+  const fb = document.getElementById('fb-' + num);
+  if (!fb) return;
+  fb.className = 'ws-feedback show ' + (ok ? 'fb-ok' : 'fb-no');
+  fb.textContent = msg;
+}
+
+const WS_CONFETTI_COLORS = ["#00940a","#0fb84d","#267703","#19e18b","#2c4870","#1a1a1a"];
+function confettiFire() {
+  if (typeof confetti !== 'function') return;
+  confetti({
+    particleCount: 60,
+    spread: 65,
+    origin: { y: 0.7 },
+    colors: WS_CONFETTI_COLORS
+  });
+}
+
+function bigCelebrate() {
+  if (typeof confetti !== 'function') return;
+  const end = Date.now() + 3000;
+  (function frame() {
+    confetti({ particleCount: 5, angle: 60, spread: 55, origin: { x: 0 }, colors: WS_CONFETTI_COLORS });
+    confetti({ particleCount: 5, angle: 120, spread: 55, origin: { x: 1 }, colors: WS_CONFETTI_COLORS });
+    confetti({ particleCount: 8, spread: 100, origin: { y: Math.random() * 0.4 + 0.4 }, colors: WS_CONFETTI_COLORS });
+    if (Date.now() < end) requestAnimationFrame(frame);
+  })();
+}
+
+// ── PROGRES: ZAPIS I ODCZYT ──────────────────────────
+// Strategia: stan jest zawsze w DOM (klasy, wartości pól, otwarte sekcje).
+// saveProgress() zbiera ten stan i zapisuje. loadProgress() odtwarza klasy
+// i wartości w DOM - bez duplikowania logiki budowania kart.
+// Zapis jest automatyczny (debounced 300ms) po wywołaniu wsScheduleSave().
+
+let _wsSaveTimer = null;
+function wsScheduleSave() {
+  if (_wsSaveTimer) clearTimeout(_wsSaveTimer);
+  _wsSaveTimer = setTimeout(saveProgress, 300);
+}
+
+function _wsCollectMatching() {
+  // dla każdej sekcji matching zapisujemy listę par PL idx -> EN idx oraz kolor
+  const data = {};
+  document.querySelectorAll('.ws-section').forEach(sec => {
+    const num = sec.dataset.section;
+    const pairs = [];
+    sec.querySelectorAll('.match-pl.matched').forEach(plEl => {
+      const enEl = sec.querySelector('.match-en.matched[data-pair="' + plEl.getAttribute('data-pair') + '"]');
+      if (enEl) {
+        pairs.push({
+          pl: plEl.dataset.idx,
+          en: enEl.dataset.idx,
+          pair: plEl.getAttribute('data-pair'),
+          color: plEl.style.borderColor || ''
+        });
+      }
+    });
+    if (pairs.length) data[num] = pairs;
+  });
+  return data;
+}
+
+function _wsCollectScramble() {
+  const data = {};
+  document.querySelectorAll('.ws-section').forEach(sec => {
+    const num = sec.dataset.section;
+    const items = [];
+    sec.querySelectorAll('.scramble-input').forEach(inp => {
+      if (inp.value || inp.classList.contains('correct')) {
+        items.push({
+          answer: inp.dataset.answer,
+          value: inp.value,
+          correct: inp.classList.contains('correct')
+        });
+      }
+    });
+    if (items.length) data[num] = items;
+  });
+  return data;
+}
+
+function _wsCollectQuiz() {
+  const data = {};
+  document.querySelectorAll('.ws-section').forEach(sec => {
+    const num = sec.dataset.section;
+    const answered = [];
+    sec.querySelectorAll('.quiz-card.answered').forEach(card => {
+      const picked = card.querySelector('.quiz-correct, .quiz-wrong');
+      if (picked) {
+        const opts = Array.from(card.querySelectorAll('.quiz-option'));
+        answered.push({
+          idx: card.dataset.idx,
+          pickedIdx: opts.indexOf(picked),
+          correct: picked.classList.contains('quiz-correct')
+        });
+      }
+    });
+    if (answered.length) data[num] = answered;
+  });
+  return data;
+}
+
+function _wsCollectUnscramble() {
+  const data = {};
+  document.querySelectorAll('.ws-section').forEach(sec => {
+    const num = sec.dataset.section;
+    const cards = [];
+    sec.querySelectorAll('.unsc-card').forEach(card => {
+      const answer = Array.from(card.querySelectorAll('.unsc-answer-area .unsc-word')).map(w => w.dataset.word);
+      const done = card.classList.contains('done');
+      if (answer.length > 0 || done) {
+        cards.push({ idx: card.dataset.idx, answer, done });
+      }
+    });
+    if (cards.length) data[num] = cards;
+  });
+  return data;
+}
+
+function _wsCollectCornell() {
+  const data = {};
+  document.querySelectorAll('.ws-section').forEach(sec => {
+    const num = sec.dataset.section;
+    const cards = [];
+    sec.querySelectorAll('.cornell-card').forEach(card => {
+      const open = card.classList.contains('open');
+      const writeArea = card.querySelector('.cornell-write-area');
+      const text = writeArea ? writeArea.value : '';
+      if (open || text) cards.push({ idx: card.dataset.idx, open, text });
+    });
+    if (cards.length) data[num] = cards;
+  });
+  return data;
+}
+
+function _wsCollectGapfill() {
+  const data = {};
+  document.querySelectorAll('.ws-section').forEach(sec => {
+    const num = sec.dataset.section;
+    const cards = [];
+    sec.querySelectorAll('.gap-card').forEach(card => {
+      const inputs = Array.from(card.querySelectorAll('.gap-input')).map(inp => ({
+        value: inp.value,
+        correct: inp.classList.contains('gap-correct')
+      }));
+      const done = card.classList.contains('done');
+      if (inputs.some(i => i.value) || done) {
+        cards.push({ idx: card.dataset.idx, inputs, done });
+      }
+    });
+    if (cards.length) data[num] = cards;
+  });
+  return data;
+}
+
+function _wsCollectTranslate() {
+  const data = {};
+  document.querySelectorAll('.ws-section').forEach(sec => {
+    const num = sec.dataset.section;
+    const cards = [];
+    sec.querySelectorAll('.trans-card').forEach(card => {
+      const inp = card.querySelector('.trans-input');
+      const done = card.classList.contains('done');
+      if (inp && (inp.value || done)) {
+        cards.push({
+          idx: card.dataset.idx,
+          value: inp.value,
+          correct: inp.classList.contains('trans-correct'),
+          done
+        });
+      }
+    });
+    if (cards.length) data[num] = cards;
+  });
+  return data;
+}
+
+function _wsCollectWriting() {
+  const data = {};
+  document.querySelectorAll('.ws-section').forEach(sec => {
+    const num = sec.dataset.section;
+    const cards = [];
+    sec.querySelectorAll('.write-card').forEach(card => {
+      const ta = card.querySelector('.write-area');
+      const done = card.classList.contains('done');
+      if (ta && (ta.value || done)) {
+        cards.push({ idx: card.dataset.idx, text: ta.value, done });
+      }
+    });
+    if (cards.length) data[num] = cards;
+  });
+  return data;
+}
+
+function saveProgress() {
+  try {
+    const state = {
+      v: 2,                                    // wersja schematu (1 = stara, 2 = nowa)
+      done: Array.from(_wsDone),
+      flashFlipped: Array.from(document.querySelectorAll('.flashcard.flipped')).map(c => c.dataset.idx),
+      matching: _wsCollectMatching(),
+      scramble: _wsCollectScramble(),
+      quiz: _wsCollectQuiz(),
+      unscramble: _wsCollectUnscramble(),
+      cornell: _wsCollectCornell(),
+      gapfill: _wsCollectGapfill(),
+      translate: _wsCollectTranslate(),
+      writing: _wsCollectWriting()
+    };
+    localStorage.setItem(WS_STORAGE_KEY, JSON.stringify(state));
+  } catch (e) { /* localStorage może być pełny lub niedostępny */ }
+}
+
+function _wsRestoreMatching(data) {
+  if (!data) return;
+  Object.entries(data).forEach(([num, pairs]) => {
+    const sec = document.querySelector('.ws-section[data-section="' + num + '"]');
+    if (!sec) return;
+    pairs.forEach(p => {
+      const plEl = sec.querySelector('.match-pl[data-idx="' + p.pl + '"]');
+      const enEl = sec.querySelector('.match-en[data-idx="' + p.en + '"]');
+      if (plEl && enEl) {
+        [plEl, enEl].forEach(el => {
+          el.classList.add('matched');
+          el.disabled = true;
+          if (p.color) el.style.borderColor = p.color;
+          el.style.setProperty('--pair-color', p.color || '');
+          if (p.pair) el.setAttribute('data-pair', p.pair);
+          // wstaw numerek pary do ::before przez data atrybut nie zadziała,
+          // ale stylizacja matched używa data-pair przez color, więc OK
+          // dodaj klasę single-line dla krótkich treści (jak w live)
+          requestAnimationFrame(() => {
+            const lineHeight = parseFloat(getComputedStyle(el).lineHeight) || 22;
+            const cs = getComputedStyle(el);
+            const padTop = parseFloat(cs.paddingTop);
+            const padBottom = parseFloat(cs.paddingBottom);
+            const contentHeight = el.offsetHeight - padTop - padBottom;
+            if (contentHeight <= lineHeight * 1.5) el.classList.add('single-line');
+          });
+        });
+      }
+    });
+  });
+}
+
+function _wsRestoreScramble(data) {
+  if (!data) return;
+  Object.entries(data).forEach(([num, items]) => {
+    const sec = document.querySelector('.ws-section[data-section="' + num + '"]');
+    if (!sec) return;
+    sec.querySelectorAll('.scramble-input').forEach(inp => {
+      const saved = items.find(i => i.answer === inp.dataset.answer);
+      if (saved) {
+        inp.value = saved.value;
+        if (saved.correct) {
+          inp.classList.add('correct');
+          inp.disabled = true;
+        }
+      }
+    });
+  });
+}
+
+function _wsRestoreQuiz(data) {
+  if (!data) return;
+  Object.entries(data).forEach(([num, answered]) => {
+    const sec = document.querySelector('.ws-section[data-section="' + num + '"]');
+    if (!sec) return;
+    answered.forEach(a => {
+      const card = sec.querySelector('.quiz-card[data-idx="' + a.idx + '"]');
+      if (!card) return;
+      const opts = card.querySelectorAll('.quiz-option');
+      const picked = opts[a.pickedIdx];
+      if (!picked) return;
+      card.classList.add('answered');
+      picked.classList.add(a.correct ? 'quiz-correct' : 'quiz-wrong');
+      // jeśli odpowiedź była zła, pokażmy też prawidłową
+      if (!a.correct) {
+        const correctBtn = card.querySelector('.quiz-option[data-correct="1"]');
+        if (correctBtn) correctBtn.classList.add('quiz-correct');
+      }
+    });
+  });
+}
+
+function _wsRestoreUnscramble(data) {
+  if (!data) return;
+  Object.entries(data).forEach(([num, cards]) => {
+    const sec = document.querySelector('.ws-section[data-section="' + num + '"]');
+    if (!sec) return;
+    cards.forEach(cardData => {
+      const card = sec.querySelector('.unsc-card[data-idx="' + cardData.idx + '"]');
+      if (!card) return;
+      const pool = card.querySelector('.unsc-pool');
+      const answerArea = card.querySelector('.unsc-answer-area');
+      // przenieś każde słowo z zapisanej kolejności z poola do answer-area
+      cardData.answer.forEach(word => {
+        // znajdź wolny token z tym data-word w karcie
+        const tokens = Array.from(card.querySelectorAll('.unsc-word:not(.in-answer)'));
+        const token = tokens.find(t => t.dataset.word === word);
+        if (token) {
+          token.classList.add('in-answer');
+          if (cardData.done) token.classList.add('correct-pos', 'used');
+          answerArea.appendChild(token);
+        }
+      });
+      if (cardData.done) {
+        card.classList.add('done');
+        card.querySelectorAll('.unsc-word').forEach(w => w.setAttribute('draggable', 'false'));
+      }
+    });
+  });
+}
+
+function _wsRestoreCornell(data) {
+  if (!data) return;
+  Object.entries(data).forEach(([num, cards]) => {
+    const sec = document.querySelector('.ws-section[data-section="' + num + '"]');
+    if (!sec) return;
+    cards.forEach(cardData => {
+      const card = sec.querySelector('.cornell-card[data-idx="' + cardData.idx + '"]');
+      if (!card) return;
+      if (cardData.open) {
+        card.classList.add('open');
+        const btn = card.querySelector('.cornell-q');
+        if (btn) btn.setAttribute('aria-expanded', 'true');
+      }
+      if (cardData.text) {
+        const ta = card.querySelector('.cornell-write-area');
+        if (ta) ta.value = cardData.text;
+      }
+    });
+  });
+}
+
+function _wsRestoreGapfill(data) {
+  if (!data) return;
+  Object.entries(data).forEach(([num, cards]) => {
+    const sec = document.querySelector('.ws-section[data-section="' + num + '"]');
+    if (!sec) return;
+    cards.forEach(cardData => {
+      const card = sec.querySelector('.gap-card[data-idx="' + cardData.idx + '"]');
+      if (!card) return;
+      const inputs = card.querySelectorAll('.gap-input');
+      cardData.inputs.forEach((inpData, i) => {
+        if (!inputs[i]) return;
+        inputs[i].value = inpData.value || '';
+        if (inpData.correct) {
+          inputs[i].classList.add('gap-correct');
+          inputs[i].disabled = true;
+        }
+      });
+      if (cardData.done) {
+        card.classList.add('done');
+        const tr = card.querySelector('.gap-translation');
+        if (tr) tr.classList.add('show');
+      }
+    });
+  });
+}
+
+function _wsRestoreTranslate(data) {
+  if (!data) return;
+  Object.entries(data).forEach(([num, cards]) => {
+    const sec = document.querySelector('.ws-section[data-section="' + num + '"]');
+    if (!sec) return;
+    cards.forEach(cardData => {
+      const card = sec.querySelector('.trans-card[data-idx="' + cardData.idx + '"]');
+      if (!card) return;
+      const inp = card.querySelector('.trans-input');
+      if (inp) {
+        inp.value = cardData.value || '';
+        if (cardData.correct) {
+          inp.classList.add('trans-correct');
+          inp.disabled = true;
+        }
+      }
+      if (cardData.done) {
+        card.classList.add('done');
+        const correct = card.querySelector('.trans-correct');
+        if (correct) correct.classList.add('show');
+      }
+    });
+  });
+}
+
+function _wsRestoreWriting(data) {
+  if (!data) return;
+  Object.entries(data).forEach(([num, cards]) => {
+    const sec = document.querySelector('.ws-section[data-section="' + num + '"]');
+    if (!sec) return;
+    cards.forEach(cardData => {
+      const card = sec.querySelector('.write-card[data-idx="' + cardData.idx + '"]');
+      if (!card) return;
+      const ta = card.querySelector('.write-area');
+      if (ta) {
+        ta.value = cardData.text || '';
+        // odśwież licznik
+        const counter = card.querySelector('.write-counter-num');
+        if (counter) {
+          const n = ta.value.trim() ? ta.value.trim().split(/\s+/).length : 0;
+          counter.textContent = n;
+        }
+      }
+      if (cardData.done) {
+        card.classList.add('done');
+        const btn = card.querySelector('.write-save');
+        if (btn) {
+          btn.disabled = true;
+          btn.textContent = '✅ Zapisane';
+        }
+      }
+    });
+  });
+}
+
+function loadProgress() {
+  try {
+    const raw = localStorage.getItem(WS_STORAGE_KEY);
+    if (!raw) return;
+    const state = JSON.parse(raw);
+
+    // Flashcards - odwróć karty
+    if (state.flashFlipped) {
+      state.flashFlipped.forEach(idx => {
+        const c = document.querySelector('.flashcard[data-idx="' + idx + '"]');
+        if (c) c.classList.add('flipped');
+      });
+    }
+    _wsRestoreMatching(state.matching);
+    _wsRestoreScramble(state.scramble);
+    _wsRestoreQuiz(state.quiz);
+    _wsRestoreUnscramble(state.unscramble);
+    _wsRestoreCornell(state.cornell);
+    _wsRestoreGapfill(state.gapfill);
+    _wsRestoreTranslate(state.translate);
+    _wsRestoreWriting(state.writing);
+
+    // Sekcje oznaczone jako "done" - na końcu, bo niektóre restore funkcje
+    // mogą same dodawać sekcje do done w trakcie (np. unscramble).
+    if (state.done) state.done.forEach(num => markSectionDone(parseInt(num)));
+  } catch (e) { /* zignoruj uszkodzony stan */ }
+}
+
+// Globalny zapis po każdym kliku / inputcie - debounced, więc tani.
+document.addEventListener('click', () => wsScheduleSave(), true);
+document.addEventListener('input', () => wsScheduleSave(), true);
+document.addEventListener('change', () => wsScheduleSave(), true);
+
+function resetWorksheet() {
+  if (!confirm('Wyczyścić wszystkie odpowiedzi?')) return;
+  localStorage.removeItem(WS_STORAGE_KEY);
+  location.reload();
+}
+
+// Konwertuje WS_DATA z powrotem na TSV i pobiera plik. Naglowki sa zapisane w WS_HEADERS.
+// Wewnetrzne pola (_tasks, ktorych nie bylo w oryginalnym TSV) sa pomijane.
+function downloadTSV() {
+  if (!WS_HEADERS || WS_HEADERS.length === 0) {
+    showToast('Brak danych do pobrania', true);
+    return;
+  }
+  const lines = [WS_HEADERS.join('\t')];
+  WS_DATA.forEach(row => {
+    const cols = WS_HEADERS.map(h => {
+      const v = row[h];
+      if (v == null) return '';
+      // Tabulator w wartosci -> spacja (TSV nie obsluguje escapowania)
+      return String(v).replace(/\t/g, ' ').replace(/\r?\n/g, ' ');
+    });
+    lines.push(cols.join('\t'));
+  });
+  const tsv = lines.join('\n');
+  // Nazwa pliku z tytulu karty (sanityzacja)
+  const safeName = (WS_TITLE || 'karta-pracy')
+    .replace(/[^a-zA-Z0-9ąćęłńóśźżĄĆĘŁŃÓŚŹŻ -]/g, '')
+    .replace(/\s+/g, '-')
+    .toLowerCase()
+    .slice(0, 60) || 'karta-pracy';
+  const blob = new Blob([tsv], { type: 'text/tab-separated-values;charset=utf-8' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = safeName + '.tsv';
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  setTimeout(() => URL.revokeObjectURL(url), 1000);
+  showToast('Pobrano ' + safeName + '.tsv');
+}
+
+function showToast(msg, isError) {
+  const t = document.createElement('div');
+  t.className = 'ws-toast' + (isError ? ' err' : '');
+  t.textContent = msg;
+  document.body.appendChild(t);
+  setTimeout(() => t.classList.add('show'), 10);
+  setTimeout(() => {
+    t.classList.remove('show');
+    setTimeout(() => t.remove(), 300);
+  }, 2000);
+}
+
+// Section-specific scripts
+
+  // ── CORNELL (section 1) ──
+  let _cornellOpened_1 = new Set();
+  const _cornellTotal_1 = 3;
+
+  // Per-section nazwy (zob. komentarz przy solveFlashcards_).
+  window.toggleCornell_1 = function(idx) {
+    const card = document.querySelector('#sec-1 .cornell-card[data-idx="' + idx + '"]');
+    if (!card) return;
+    const btn = card.querySelector('.cornell-q');
+    const expanded = card.classList.toggle('open');
+    btn.setAttribute('aria-expanded', expanded ? 'true' : 'false');
+    if (expanded) {
+      _cornellOpened_1.add(idx);
+      if (_cornellOpened_1.size === _cornellTotal_1) {
+        showSectionFeedback(1, true, '📖 Wszystkie odpowiedzi przejrzane!');
+        markSectionDone(1);
+      }
+    }
+  };
+
+  window.toggleCornellWrite_1 = function(idx) {
+    const card = document.querySelector('#sec-1 .cornell-card[data-idx="' + idx + '"]');
+    if (!card) return;
+    card.classList.toggle('writing');
+    const ta = card.querySelector('.cornell-write-area');
+    if (card.classList.contains('writing') && ta) {
+      setTimeout(() => ta.focus(), 250);
+    }
+  };
+
+  window.solveCornell_1 = function() {
+    document.querySelectorAll('#sec-1 .cornell-card').forEach(card => {
+      card.classList.add('open');
+      const btn = card.querySelector('.cornell-q');
+      if (btn) btn.setAttribute('aria-expanded', 'true');
+      _cornellOpened_1.add(parseInt(card.dataset.idx));
+    });
+    showSectionFeedback(1, true, '✓ Wszystkie odsłonięte');
+    markSectionDone(1);
+  };
+
+
+  // ── FLASHCARDS (section 2) ──
+  const _flashTotal_2 = 8;
+  let _flashFlipped_2 = new Set();
+
+  // Per-section state update (zob. komentarz przy solveFlashcards_).
+  // flipCard musi byc globalna (jest na onclick wielu kart), wiec robimy
+  // jedna globalna ktora po DOM dispatchuje do per-num implementacji.
+  window._flipCardImpl_2 = function(el) {
+    el.classList.toggle('flipped');
+    const idx = parseInt(el.dataset.idx);
+    if (!_flashFlipped_2.has(idx)) {
+      _flashFlipped_2.add(idx);
+      if (_flashFlipped_2.size === _flashTotal_2) {
+        showSectionFeedback(2, true, '🃏 Wszystkie fiszki przejrzane!');
+        markSectionDone(2);
+      }
+    }
+  };
+  if (typeof window.flipCard !== 'function' || window.flipCard.__isDispatcher !== true) {
+    window.flipCard = function(el) {
+      const sec = el.closest('.ws-section');
+      if (!sec) return;
+      const n = sec.dataset.section;
+      const impl = window['_flipCardImpl_' + n];
+      if (impl) impl(el);
+    };
+    window.flipCard.__isDispatcher = true;
+  }
+
+  // Per-section function name dzieki 2 - inaczej druga instancja
+  // nadpisalaby globalny window.solveFlashcards. Buttony "Pokaz odpowiedzi"
+  // wywoluja solveFlashcards_2 dzieki interpolacji w HTML sekcji.
+  window.solveFlashcards_2 = function() {
+    document.querySelectorAll('#sec-2 .flashcard').forEach((c, i) => {
+      c.classList.add('flipped');
+      _flashFlipped_2.add(i);
+    });
+    showSectionFeedback(2, true, '✓ Wszystkie odsłonięte');
+    markSectionDone(2);
+  };
+
+
+  // ── SCRAMBLE (section 3) ──
+  const _scrambleWords_3 = [{"pl":"dosłownie wolny (niezajęty / bezpłatny)","en":"free"},{"pl":"posiłek","en":"meal"},{"pl":"paszport","en":"passport"},{"pl":"przepis","en":"recipe"},{"pl":"rachunek","en":"receipt"},{"pl":"recepta","en":"prescription"},{"pl":"rzadko","en":"rarely"},{"pl":"ostatnio - r...","en":"recently"},{"pl":"ostatnio - l...","en":"lately"},{"pl":"serce (wym. bardziej przez “a’)","en":"heart"},{"pl":"boleć, ranić (wym. bardziej przez “e”)","en":"hurt"}];
+  let _scrambleDone_3 = new Set();
+  const _scrambleTotal_3 = _scrambleWords_3.length;
+
+  window.toggleJumbled_3 = function(btn, secNum, idx) {
+    btn.classList.toggle('revealed');
+  };
+
+  window.checkScramble_3 = function(input) {
+    const ans = input.dataset.answer;
+    const val = input.value.trim().toLowerCase();
+    if (val === ans) {
+      input.classList.remove('wrong');
+      input.classList.add('correct');
+      input.disabled = true;
+      const card = input.closest('.scramble-card');
+      card.classList.add('done');
+      const idx = parseInt(card.dataset.idx);
+      _scrambleDone_3.add(idx);
+      if (_scrambleDone_3.size === _scrambleTotal_3) {
+        showSectionFeedback(3, true, '🔤 Wszystkie słowa ułożone!');
+        markSectionDone(3);
+        confettiFire();
+      }
+    } else {
+      input.classList.remove('correct');
+      input.classList.add('wrong');
+      setTimeout(() => input.classList.remove('wrong'), 500);
+    }
+  };
+
+  window.hintScramble_3 = function(idx) {
+    const card = document.querySelector('#sec-3 .scramble-card[data-idx="' + idx + '"]');
+    if (!card) return;
+    const input = card.querySelector('.scramble-input');
+    if (input.disabled) return;
+    const ans = input.dataset.answer;
+    const cur = input.value.toLowerCase();
+    let matchLen = 0;
+    for (let i = 0; i < Math.min(cur.length, ans.length); i++) {
+      if (cur[i] === ans[i]) matchLen++;
+      else break;
+    }
+    const newLen = Math.min(matchLen + 1, ans.length);
+    input.value = ans.slice(0, newLen);
+    input.classList.remove('wrong');
+    input.focus();
+    if (newLen === ans.length) {
+      window.checkScramble_3(input);
+    }
+  };
+
+  window.solveScramble_3 = function() {
+    document.querySelectorAll('#sec-3 .scramble-input').forEach(inp => {
+      if (inp.classList.contains('correct')) return;
+      inp.value = inp.dataset.answer;
+      inp.classList.add('correct');
+      inp.disabled = true;
+      const card = inp.closest('.scramble-card');
+      card.classList.add('done');
+      _scrambleDone_3.add(parseInt(card.dataset.idx));
+    });
+    showSectionFeedback(3, true, '✓ Wszystkie odpowiedzi pokazane');
+    markSectionDone(3);
+  };
+
+  // Rozwiaz pojedyncze slowo - wpisuje odpowiedz w jedna konkretna luke.
+  window.solveScrambleOne_3 = function(idx) {
+    const card = document.querySelector('#sec-3 .scramble-card[data-idx="' + idx + '"]');
+    if (!card) return;
+    const inp = card.querySelector('.scramble-input');
+    if (inp.classList.contains('correct')) return;
+    inp.value = inp.dataset.answer;
+    window.checkScramble_3(inp);
+  };
+
+
+  // ── QUIZ (section 4) ──
+  let _quizDone_4 = new Set();
+  const _quizTotal_4 = 8;
+
+  // Per-section nazwy (zob. komentarz przy solveFlashcards_).
+  window.pickQuiz_4 = function(btn, qIdx) {
+    const card = btn.closest('.quiz-card');
+    if (card.classList.contains('answered')) return;
+    const correct = btn.dataset.correct === '1';
+    btn.classList.add(correct ? 'quiz-correct' : 'quiz-wrong');
+    if (!correct) {
+      // also highlight correct one
+      card.querySelectorAll('.quiz-option').forEach(b => {
+        if (b.dataset.correct === '1') b.classList.add('quiz-correct');
+      });
+    }
+    card.classList.add('answered');
+    _quizDone_4.add(qIdx);
+    if (_quizDone_4.size === _quizTotal_4) {
+      showSectionFeedback(4, true, '✅ Quiz ukończony!');
+      markSectionDone(4);
+      confettiFire();
+    }
+  };
+
+  // Per-section function name (zob. komentarz przy solveFlashcards_).
+  window.solveQuiz_4 = function() {
+    document.querySelectorAll('#sec-4 .quiz-card').forEach((card, qIdx) => {
+      if (card.classList.contains('answered')) return;
+      card.querySelectorAll('.quiz-option').forEach(b => {
+        if (b.dataset.correct === '1') b.classList.add('quiz-correct');
+      });
+      card.classList.add('answered');
+      _quizDone_4.add(qIdx);
+    });
+    showSectionFeedback(4, true, '✓ Wszystkie odpowiedzi pokazane');
+    markSectionDone(4);
+  };
+
+  // Rozwiaz jedna konkretna karte quizu (tylko ta).
+  window.solveQuizOne_4 = function(qIdx) {
+    const card = document.querySelector('#sec-4 .quiz-card[data-idx="' + qIdx + '"]');
+    if (!card || card.classList.contains('answered')) return;
+    card.querySelectorAll('.quiz-option').forEach(b => {
+      if (b.dataset.correct === '1') b.classList.add('quiz-correct');
+    });
+    card.classList.add('answered');
+    _quizDone_4.add(qIdx);
+    if (_quizDone_4.size === _quizTotal_4) {
+      markSectionDone(4);
+    }
+  };
+
+
+  // ── SENTENCE UNSCRAMBLE (section 5) ──
+  let _unscDone_5 = new Set();
+  const _unscTotal_5 = 9;
+
+  // Helper: po kliknięciu słowa w pool przenieś do answer-area
+  function _unscMoveToAnswer(wordEl) {
+    const card = wordEl.closest('.unsc-card');
+    if (card.classList.contains('done')) return;
+    const answerArea = card.querySelector('.unsc-answer-area');
+    const pool = card.querySelector('.unsc-pool');
+    const empty = answerArea.querySelector('.unsc-answer-empty');
+    if (empty) empty.remove();
+    answerArea.appendChild(wordEl);
+    wordEl.classList.add('in-answer');
+    wordEl.classList.remove('correct-pos', 'wrong-pos');
+    _unscUpdatePoolEmpty(pool);
+  }
+  function _unscMoveToPool(wordEl) {
+    const card = wordEl.closest('.unsc-card');
+    if (card.classList.contains('done')) return;
+    const pool = card.querySelector('.unsc-pool');
+    const poolEmpty = pool.querySelector('.unsc-pool-empty');
+    if (poolEmpty) poolEmpty.remove();
+    pool.appendChild(wordEl);
+    wordEl.classList.remove('in-answer', 'correct-pos', 'wrong-pos');
+    const answerArea = card.querySelector('.unsc-answer-area');
+    if (answerArea.querySelectorAll('.unsc-word').length === 0) {
+      const empty = document.createElement('div');
+      empty.className = 'unsc-answer-empty';
+      empty.textContent = 'Kliknij słowa poniżej lub przeciągnij je tutaj';
+      answerArea.appendChild(empty);
+    }
+  }
+  function _unscUpdatePoolEmpty(pool) {
+    if (pool.querySelectorAll('.unsc-word').length === 0 && !pool.querySelector('.unsc-pool-empty')) {
+      const ph = document.createElement('div');
+      ph.className = 'unsc-pool-empty';
+      ph.textContent = '(wszystkie słowa użyte)';
+      pool.appendChild(ph);
+    }
+  }
+
+  function _unscGetUserAnswer(secNum, cardIdx) {
+    const card = document.querySelector('#sec-5 .unsc-card[data-idx="' + cardIdx + '"]');
+    const answerArea = card.querySelector('.unsc-answer-area');
+    return Array.from(answerArea.querySelectorAll('.unsc-word')).map(w => w.dataset.word);
+  }
+
+  // Per-section nazwy (zob. komentarz przy solveFlashcards_).
+  window.checkUnscramble_5 = function(cardIdx) {
+    const card = document.querySelector('#sec-5 .unsc-card[data-idx="' + cardIdx + '"]');
+    const correct = JSON.parse(card.getAttribute('data-correct'));
+    const user = _unscGetUserAnswer(5, cardIdx);
+    if (user.length === 0) return;
+    const words = card.querySelectorAll('.unsc-answer-area .unsc-word');
+    let allOk = user.length === correct.length;
+    words.forEach((w, idx) => {
+      if (idx < correct.length && w.dataset.word === correct[idx]) {
+        w.classList.add('correct-pos');
+        w.classList.remove('wrong-pos');
+      } else {
+        w.classList.add('wrong-pos');
+        w.classList.remove('correct-pos');
+        allOk = false;
+      }
+    });
+    if (allOk) {
+      card.classList.add('done');
+      // wszystkie słowa staja sie disabled
+      card.querySelectorAll('.unsc-word').forEach(w => w.setAttribute('draggable', 'false'));
+      _unscDone_5.add(cardIdx);
+      if (_unscDone_5.size === _unscTotal_5) {
+        showSectionFeedback(5, true, '📝 Wszystkie zdania ułożone!');
+        markSectionDone(5);
+        confettiFire();
+      }
+    }
+  };
+
+  // Hint: znajdź najdłuższy poprawny prefix tego co użytkownik ułożył,
+  // i wstaw kolejne poprawne słowo w odpowiedniej pozycji.
+  window.hintUnscramble_5 = function(cardIdx) {
+    const card = document.querySelector('#sec-5 .unsc-card[data-idx="' + cardIdx + '"]');
+    if (card.classList.contains('done')) return;
+    const correct = JSON.parse(card.getAttribute('data-correct'));
+    const user = _unscGetUserAnswer(5, cardIdx);
+    let matchLen = 0;
+    for (let i = 0; i < Math.min(user.length, correct.length); i++) {
+      if (user[i] === correct[i]) matchLen++;
+      else break;
+    }
+    if (matchLen >= correct.length) return; // już wszystko poprawne
+    // następne poprawne słowo to correct[matchLen]
+    const nextWord = correct[matchLen];
+    // znajdź to słowo w pool (z preferencją na jeszcze nie-przeniesione)
+    const pool = card.querySelector('.unsc-pool');
+    const answerArea = card.querySelector('.unsc-answer-area');
+    let candidate = pool.querySelector('.unsc-word[data-word="' + cssEscape(nextWord) + '"]');
+    if (!candidate) {
+      // może jest w answer-area na złej pozycji - wez pierwsze pasujące spoza prefixu
+      const answerWords = Array.from(answerArea.querySelectorAll('.unsc-word'));
+      candidate = answerWords.slice(matchLen).find(w => w.dataset.word === nextWord);
+    }
+    if (!candidate) return;
+    // usuń wszystkie błędne słowa po prefiksie (zwróć je do poola)
+    const answerWords = Array.from(answerArea.querySelectorAll('.unsc-word'));
+    for (let i = answerWords.length - 1; i >= matchLen; i--) {
+      if (answerWords[i] !== candidate) {
+        _unscMoveToPool(answerWords[i]);
+      }
+    }
+    // przenieś candidate na pozycję matchLen w answer-area
+    _unscMoveToAnswer(candidate);
+    // sprawdź czy ułożone całe zdanie
+    const newUser = _unscGetUserAnswer(5, cardIdx);
+    if (newUser.join(' ') === correct.join(' ')) {
+      window.checkUnscramble_5(cardIdx);
+    }
+  };
+
+  // CSS.escape fallback
+  function cssEscape(s) {
+    if (window.CSS && CSS.escape) return CSS.escape(s);
+    return s.replace(/([!"#$%&'()*+,./:;<=>?@\\\[\\\]^`{|}~])/g, '\\\\$1');
+  }
+
+  window.clearUnscramble_5 = function(cardIdx) {
+    const card = document.querySelector('#sec-5 .unsc-card[data-idx="' + cardIdx + '"]');
+    if (card.classList.contains('done')) return;
+    const answerWords = Array.from(card.querySelectorAll('.unsc-answer-area .unsc-word'));
+    answerWords.forEach(w => _unscMoveToPool(w));
+  };
+
+  window.solveUnscramble_5 = function() {
+    document.querySelectorAll('#sec-5 .unsc-card').forEach(card => {
+      if (card.classList.contains('done')) return;
+      const cardIdx = parseInt(card.dataset.idx);
+      const correct = JSON.parse(card.getAttribute('data-correct'));
+      const answerArea = card.querySelector('.unsc-answer-area');
+      const pool = card.querySelector('.unsc-pool');
+      // wszystkie słowa do poola
+      Array.from(card.querySelectorAll('.unsc-word')).forEach(w => pool.appendChild(w));
+      // wyczyść answer-area placeholder
+      answerArea.innerHTML = '';
+      // dla każdego słowa correct znajdź token w pool i przenieś
+      correct.forEach(targetWord => {
+        const token = pool.querySelector('.unsc-word[data-word="' + cssEscape(targetWord) + '"]:not(.used)');
+        if (token) {
+          token.classList.add('used', 'correct-pos');
+          answerArea.appendChild(token);
+        }
+      });
+      card.classList.add('done');
+      _unscDone_5.add(cardIdx);
+    });
+    showSectionFeedback(5, true, '✓ Wszystkie odpowiedzi pokazane');
+    markSectionDone(5);
+  };
+
+  // Rozwiaz jedna karte unscramble (tylko ta).
+  window.solveUnscrambleOne_5 = function(cardIdx) {
+    const card = document.querySelector('#sec-5 .unsc-card[data-idx="' + cardIdx + '"]');
+    if (!card || card.classList.contains('done')) return;
+    const correct = JSON.parse(card.getAttribute('data-correct'));
+    const answerArea = card.querySelector('.unsc-answer-area');
+    const pool = card.querySelector('.unsc-pool');
+    // pokaz pule slow (jesli ukryta)
+    pool.classList.remove('unsc-pool-hidden');
+    const reveal = card.querySelector('.unsc-pool-reveal');
+    if (reveal) reveal.style.display = 'none';
+    // wszystkie slowa do poola
+    Array.from(card.querySelectorAll('.unsc-word')).forEach(w => pool.appendChild(w));
+    answerArea.innerHTML = '';
+    correct.forEach(targetWord => {
+      const token = pool.querySelector('.unsc-word[data-word="' + cssEscape(targetWord) + '"]:not(.used)');
+      if (token) {
+        token.classList.add('used', 'correct-pos');
+        answerArea.appendChild(token);
+      }
+    });
+    card.classList.add('done');
+    _unscDone_5.add(cardIdx);
+    if (_unscDone_5.size === _unscTotal_5) {
+      markSectionDone(5);
+    }
+  };
+
+  // Odsloniecie puli slow - klikniecie zaslony pokazuje slowa do ulozenia.
+  window.revealUnscPool_5 = function(cardIdx) {
+    const card = document.querySelector('#sec-5 .unsc-card[data-idx="' + cardIdx + '"]');
+    if (!card) return;
+    const pool = card.querySelector('.unsc-pool');
+    const reveal = card.querySelector('.unsc-pool-reveal');
+    if (pool) pool.classList.remove('unsc-pool-hidden');
+    if (reveal) reveal.style.display = 'none';
+  };
+
+  // Kliknięcie słowa w pool przenosi do answer-area; w answer-area zwraca do pool
+  document.addEventListener('click', e => {
+    const word = e.target.closest('#sec-5 .unsc-word');
+    if (!word) return;
+    const card = word.closest('.unsc-card');
+    if (card.classList.contains('done')) return;
+    if (word.classList.contains('in-answer')) {
+      _unscMoveToPool(word);
+    } else {
+      _unscMoveToAnswer(word);
+    }
+  });
+
+  // Drag and drop
+  let _unscDragged_5 = null;
+  document.addEventListener('dragstart', e => {
+    const word = e.target.closest('#sec-5 .unsc-word');
+    if (!word) return;
+    const card = word.closest('.unsc-card');
+    if (card.classList.contains('done')) { e.preventDefault(); return; }
+    _unscDragged_5 = word;
+    e.dataTransfer.effectAllowed = 'move';
+    word.classList.add('dragging');
+  });
+  document.addEventListener('dragend', e => {
+    const word = e.target.closest('#sec-5 .unsc-word');
+    if (word) word.classList.remove('dragging');
+    _unscDragged_5 = null;
+    document.querySelectorAll('#sec-5 .drag-over').forEach(el => el.classList.remove('drag-over'));
+  });
+  document.addEventListener('dragover', e => {
+    if (!_unscDragged_5) return;
+    const target = e.target.closest('#sec-5 .unsc-answer-area, #sec-5 .unsc-pool, #sec-5 .unsc-word');
+    if (target) { e.preventDefault(); }
+  });
+  document.addEventListener('dragenter', e => {
+    if (!_unscDragged_5) return;
+    const dropZone = e.target.closest('#sec-5 .unsc-answer-area, #sec-5 .unsc-pool');
+    if (dropZone) dropZone.classList.add('drag-over');
+  });
+  document.addEventListener('dragleave', e => {
+    const dropZone = e.target.closest('#sec-5 .unsc-answer-area, #sec-5 .unsc-pool');
+    if (dropZone && !dropZone.contains(e.relatedTarget)) {
+      dropZone.classList.remove('drag-over');
+    }
+  });
+  document.addEventListener('drop', e => {
+    if (!_unscDragged_5) return;
+    e.preventDefault();
+    const dragged = _unscDragged_5;
+    const card = dragged.closest('.unsc-card');
+    if (card.classList.contains('done')) return;
+    const targetWord = e.target.closest('#sec-5 .unsc-word');
+    const targetZone = e.target.closest('#sec-5 .unsc-answer-area, #sec-5 .unsc-pool');
+    if (!targetZone || targetZone.closest('.unsc-card') !== card) return;
+    if (targetWord && targetWord !== dragged) {
+      // wstaw przed targetWord
+      targetWord.parentElement.insertBefore(dragged, targetWord);
+    } else {
+      targetZone.appendChild(dragged);
+    }
+    // zaktualizuj klasy
+    if (dragged.parentElement.classList.contains('unsc-answer-area')) {
+      dragged.classList.add('in-answer');
+      dragged.classList.remove('correct-pos', 'wrong-pos');
+      const empty = dragged.parentElement.querySelector('.unsc-answer-empty');
+      if (empty) empty.remove();
+    } else {
+      dragged.classList.remove('in-answer', 'correct-pos', 'wrong-pos');
+      // Sprawdź czy answer-area jest pusta
+      const aa = card.querySelector('.unsc-answer-area');
+      if (aa.querySelectorAll('.unsc-word').length === 0 && !aa.querySelector('.unsc-answer-empty')) {
+        const empty = document.createElement('div');
+        empty.className = 'unsc-answer-empty';
+        empty.textContent = 'Kliknij słowa poniżej lub przeciągnij je tutaj';
+        aa.appendChild(empty);
+      }
+    }
+    targetZone.classList.remove('drag-over');
+  });
+
+
+  // ── GAP FILL (section 6) ──
+  let _gapDone_6 = new Set();
+  const _gapTotal_6 = document.querySelectorAll('#sec-6 .gap-card').length;
+
+  window.checkGap_6 = function(input) {
+    const ans = input.dataset.answer;
+    const val = input.value.trim().toLowerCase();
+    if (val === ans) {
+      input.classList.remove('gap-wrong');
+      input.classList.add('gap-correct');
+      input.disabled = true;
+      _gapCheckCardComplete_6(input.closest('.gap-card'));
+      // przeskocz do następnej luki w tej samej karcie albo do pierwszej w następnej
+      const card = input.closest('.gap-card');
+      const remaining = card.querySelectorAll('.gap-input:not([disabled])');
+      if (remaining.length > 0) {
+        remaining[0].focus();
+      } else {
+        const nextCard = card.nextElementSibling;
+        if (nextCard) {
+          const firstInput = nextCard.querySelector('.gap-input:not([disabled])');
+          if (firstInput) firstInput.focus();
+        }
+      }
+    } else {
+      input.classList.remove('gap-correct');
+      input.classList.add('gap-wrong');
+      setTimeout(() => input.classList.remove('gap-wrong'), 500);
+    }
+  };
+
+  // Podpowiedz: doklada kolejna litere odpowiedzi do pierwszej pustej
+  // (niewypelnionej i nieaktywnej jako correct) luki w karcie.
+  window.hintGap_6 = function(cardIdx) {
+    const card = document.querySelector('#sec-6 .gap-card[data-idx="' + cardIdx + '"]');
+    if (!card) return;
+    // Najpierw szukamy pierwszej luki, ktora nie jest jeszcze "correct".
+    const inputs = card.querySelectorAll('.gap-input');
+    let target = null;
+    for (const inp of inputs) {
+      if (inp.disabled || inp.classList.contains('gap-correct')) continue;
+      target = inp;
+      break;
+    }
+    if (!target) return;
+    const ans = target.dataset.answer;
+    const cur = target.value.toLowerCase();
+    let matchLen = 0;
+    for (let i = 0; i < Math.min(cur.length, ans.length); i++) {
+      if (cur[i] === ans[i]) matchLen++;
+      else break;
+    }
+    const newLen = Math.min(matchLen + 1, ans.length);
+    target.value = ans.slice(0, newLen);
+    target.classList.remove('gap-wrong');
+    target.focus();
+    if (newLen === ans.length) {
+      window.checkGap_6(target);
+    }
+  };
+
+  // Rozwiaz cale zdanie - wstawia poprawne odpowiedzi we wszystkie luki w karcie.
+  window.solveGapOne_6 = function(cardIdx) {
+    const card = document.querySelector('#sec-6 .gap-card[data-idx="' + cardIdx + '"]');
+    if (!card) return;
+    card.querySelectorAll('.gap-input').forEach(inp => {
+      if (inp.classList.contains('gap-correct')) return;
+      inp.value = inp.dataset.answer;
+      inp.classList.add('gap-correct');
+      inp.disabled = true;
+    });
+    card.classList.add('done');
+    const tr = card.querySelector('.gap-translation');
+    if (tr) tr.classList.add('show');
+    _gapDone_6.add(parseInt(card.dataset.idx));
+    if (_gapDone_6.size === _gapTotal_6) {
+      showSectionFeedback(6, true, '✓ Wszystkie luki uzupełnione');
+      markSectionDone(6);
+    }
+  };
+
+  // Pokaz/ukryj polskie tlumaczenie zdania (wskazowka przed rozwiazaniem luki).
+  // Toggle - klikniecie ponownie chowa. Po rozwiazaniu zostaje na stale i tak.
+  window.revealGapTranslation_6 = function(cardIdx) {
+    const card = document.querySelector('#sec-6 .gap-card[data-idx="' + cardIdx + '"]');
+    if (!card) return;
+    const tr = card.querySelector('.gap-translation');
+    const btn = card.querySelector('.gap-translate-btn');
+    if (!tr) return;
+    // Jesli karta jest juz rozwiazana, tlumaczenie zostaje pokazane (nie pozwalamy schowac).
+    if (card.classList.contains('done')) {
+      tr.classList.add('show');
+      return;
+    }
+    tr.classList.toggle('show');
+    if (btn) btn.classList.toggle('active', tr.classList.contains('show'));
+  };
+
+  function _gapCheckCardComplete_6(card) {
+    const all = card.querySelectorAll('.gap-input');
+    const done = card.querySelectorAll('.gap-input.gap-correct');
+    if (all.length === done.length) {
+      card.classList.add('done');
+      // odsłoń tłumaczenie
+      const tr = card.querySelector('.gap-translation');
+      if (tr) tr.classList.add('show');
+      const cardIdx = parseInt(card.dataset.idx);
+      _gapDone_6.add(cardIdx);
+      if (_gapDone_6.size === _gapTotal_6) {
+        showSectionFeedback(6, true, '🧩 Wszystkie luki uzupełnione!');
+        markSectionDone(6);
+        confettiFire();
+      }
+    }
+  }
+
+  window.solveGap_6 = function() {
+    document.querySelectorAll('#sec-6 .gap-card').forEach(card => {
+      card.querySelectorAll('.gap-input').forEach(inp => {
+        if (inp.classList.contains('gap-correct')) return;
+        inp.value = inp.dataset.answer;
+        inp.classList.add('gap-correct');
+        inp.disabled = true;
+      });
+      card.classList.add('done');
+      const tr = card.querySelector('.gap-translation');
+      if (tr) tr.classList.add('show');
+      _gapDone_6.add(parseInt(card.dataset.idx));
+    });
+    showSectionFeedback(6, true, '✓ Wszystkie odpowiedzi pokazane');
+    markSectionDone(6);
+  };
+
+
+  // ── TRANSLATE (section 7) ──
+  let _transDone_7 = new Set();
+  const _transTotal_7 = document.querySelectorAll('#sec-7 .trans-card').length;
+
+  function _transNormalize_7(s) {
+    return s.toLowerCase()
+      .replace(/[.!?]+$/g, '')           // koncowa interpunkcja
+      .replace(/\s+/g, ' ')             // wielokrotne spacje -> jedna
+      .trim();
+  }
+
+  window.checkTranslate_7 = function(textarea) {
+    const ans = textarea.dataset.answer;
+    const val = textarea.value;
+    if (_transNormalize_7(val) === _transNormalize_7(ans)) {
+      textarea.classList.remove('trans-wrong');
+      textarea.classList.add('trans-correct');
+      textarea.disabled = true;
+      const card = textarea.closest('.trans-card');
+      card.classList.add('done');
+      // pokaż wzorzec (na wypadek gdyby user wpisał wariant z innym układem słów ale akceptowalny)
+      const correct = card.querySelector('.trans-correct');
+      if (correct) correct.classList.add('show');
+      const idx = parseInt(card.dataset.idx);
+      _transDone_7.add(idx);
+      if (_transDone_7.size === _transTotal_7) {
+        showSectionFeedback(7, true, '🌐 Wszystkie zdania przetłumaczone!');
+        markSectionDone(7);
+        confettiFire();
+      }
+    } else {
+      textarea.classList.remove('trans-correct');
+      textarea.classList.add('trans-wrong');
+      setTimeout(() => textarea.classList.remove('trans-wrong'), 500);
+    }
+  };
+
+  // Hint: dolewa kolejne poprawne słowo do tego co user już wpisał
+  window.hintTranslate_7 = function(idx) {
+    const card = document.querySelector('#sec-7 .trans-card[data-idx="' + idx + '"]');
+    if (!card) return;
+    const ta = card.querySelector('.trans-input');
+    if (ta.disabled) return;
+    const ans = ta.dataset.answer;
+    const userVal = ta.value;
+    // znajdz najdluzszy prefiks ans (case-insensitive) ktory pasuje do tego co user wpisal
+    let matchLen = 0;
+    for (let i = 0; i < Math.min(userVal.length, ans.length); i++) {
+      if (userVal[i].toLowerCase() === ans[i].toLowerCase()) matchLen++;
+      else break;
+    }
+    if (matchLen >= ans.length) return; // juz wszystko
+    // dodaj kolejna literke z odpowiedzi (w jej oryginalnym case)
+    const newVal = ans.slice(0, matchLen + 1);
+    ta.value = newVal;
+    ta.classList.remove('trans-wrong');
+    // ustaw kursor na koncu
+    ta.focus();
+    try { ta.setSelectionRange(newVal.length, newVal.length); } catch(e) {}
+    // jesli to byla ostatnia literka, automatycznie sprawdz
+    if (matchLen + 1 === ans.length) {
+      window.checkTranslate_7(ta);
+    }
+  };
+
+  window.solveTranslate_7 = function() {
+    document.querySelectorAll('#sec-7 .trans-card').forEach(card => {
+      const ta = card.querySelector('.trans-input');
+      if (ta.classList.contains('trans-correct')) return;
+      ta.value = ta.dataset.answer;
+      ta.classList.add('trans-correct');
+      ta.disabled = true;
+      card.classList.add('done');
+      const correct = card.querySelector('.trans-correct');
+      if (correct) correct.classList.add('show');
+      _transDone_7.add(parseInt(card.dataset.idx));
+    });
+    showSectionFeedback(7, true, '✓ Wszystkie odpowiedzi pokazane');
+    markSectionDone(7);
+  };
+
+  // Rozwiaz jedna konkretna karte translate.
+  window.solveTranslateOne_7 = function(idx) {
+    const card = document.querySelector('#sec-7 .trans-card[data-idx="' + idx + '"]');
+    if (!card) return;
+    const ta = card.querySelector('.trans-input');
+    if (ta.classList.contains('trans-correct')) return;
+    ta.value = ta.dataset.answer;
+    window.checkTranslate_7(ta);
+  };
+
+
+// Load saved progress
+window.addEventListener('load', loadProgress);
+</script>
+</body>
+</html>
