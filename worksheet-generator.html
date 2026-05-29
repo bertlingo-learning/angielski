@@ -366,13 +366,13 @@ body::before {
   border-radius: 6px;
   overflow: hidden;
   border: 1px solid var(--border);
-  max-height: 90px;
   background: var(--bg);
 }
 .task-edit-image-preview img {
   display: block;
   width: 100%;
-  max-height: 90px;
+  /* Wysokosc i object-fit ustawiane inline z JS (wierny podglad kadru). */
+  height: 150px;
   object-fit: cover;
 }
 .task-edit-image-preview.error img {
@@ -385,6 +385,93 @@ body::before {
   font-size: 0.78rem;
   color: var(--warn);
   font-family: var(--mono);
+}
+
+/* ── Panel rozmiaru obrazka (tryb kadru + wysokosc) ── */
+.task-edit-imgsize {
+  display: grid;
+  gap: 0.6rem;
+  padding: 0.6rem 0.7rem;
+  margin-top: 0.1rem;
+  background: var(--surface-2, var(--bg));
+  border: 1px solid var(--border);
+  border-radius: 8px;
+}
+.task-edit-imgsize[hidden] { display: none; }
+.task-edit-imgsize-modes {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.45rem;
+}
+.task-edit-imgmode {
+  font-family: var(--mono);
+  font-size: 0.66rem;
+  font-weight: 600;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+  padding: 0.5rem 0.4rem;
+  border: 1px solid var(--border);
+  border-radius: 7px;
+  background: var(--bg);
+  color: var(--text-dim);
+  cursor: pointer;
+  transition: border-color 0.15s, color 0.15s, background 0.15s;
+  text-align: center;
+  line-height: 1.25;
+}
+.task-edit-imgmode:hover {
+  border-color: var(--accent);
+  color: var(--text);
+}
+.task-edit-imgmode.active {
+  border-color: var(--accent);
+  background: var(--accent);
+  color: #14160a;
+}
+.task-edit-imgsize-height {
+  display: grid;
+  gap: 0.4rem;
+}
+.task-edit-imgsize-row {
+  display: flex;
+  align-items: center;
+  gap: 0.7rem;
+}
+.task-edit-imgheight {
+  -webkit-appearance: none;
+  appearance: none;
+  flex: 1;
+  height: 4px;
+  border-radius: 4px;
+  background: var(--border);
+  cursor: pointer;
+  outline: none;
+}
+.task-edit-imgheight::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: var(--accent);
+  border: 2px solid var(--bg);
+  cursor: pointer;
+}
+.task-edit-imgheight::-moz-range-thumb {
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: var(--accent);
+  border: 2px solid var(--bg);
+  cursor: pointer;
+}
+.task-edit-imgheight-val {
+  font-family: var(--mono);
+  font-size: 0.68rem;
+  font-weight: 600;
+  color: var(--text-dim);
+  min-width: 3.6rem;
+  text-align: right;
 }
 
 .instr-master {
@@ -1314,6 +1401,10 @@ const STATE = {
   taskCustomInstr: { flashcards: '', matching: '', scramble: '', quiz: '', unscramble: '', cornell: '', gapfill: '', translate: '', writing: '' },
   // URL obrazka prezentujacego sekcje. Pusty = bez obrazka.
   taskImages: { flashcards: '', matching: '', scramble: '', quiz: '', unscramble: '', cornell: '', gapfill: '', translate: '', writing: '' },
+  // Tryb wyswietlania obrazka: 'cover' = kadr (banner), 'full' = cala grafika (proporcje).
+  taskImageFit: { flashcards: 'cover', matching: 'cover', scramble: 'cover', quiz: 'cover', unscramble: 'cover', cornell: 'cover', gapfill: 'cover', translate: 'cover', writing: 'cover' },
+  // Wysokosc kadru w px (tryb 'cover'). Domyslnie 150.
+  taskImageHeight: { flashcards: 150, matching: 150, scramble: 150, quiz: 150, unscramble: 150, cornell: 150, gapfill: 150, translate: 150, writing: 150 },
   quizOptions: 4,
   ttsEnabled: true,
   ttsLang: 'en-GB',
@@ -1938,6 +2029,19 @@ function initTaskCard(card) {
         <button type="button" class="task-edit-reset" data-reset="image" title="Usuń obrazek">RESET</button>
       </div>
     </div>
+    <div class="task-edit-imgsize" hidden>
+      <div class="task-edit-imgsize-modes">
+        <button type="button" class="task-edit-imgmode" data-fit="cover">Kadr (banner)</button>
+        <button type="button" class="task-edit-imgmode" data-fit="full">Cała grafika (proporcje)</button>
+      </div>
+      <div class="task-edit-imgsize-height">
+        <span class="task-edit-label">Wysokość kadru</span>
+        <div class="task-edit-imgsize-row">
+          <input type="range" class="task-edit-imgheight" min="80" max="500" step="10" value="150">
+          <span class="task-edit-imgheight-val">150&nbsp;px</span>
+        </div>
+      </div>
+    </div>
     <div class="task-edit-image-preview" hidden>
       <img alt="Podgląd obrazka">
     </div>
@@ -1949,6 +2053,33 @@ function initTaskCard(card) {
   const imageInput = editFields.querySelector('.task-edit-image');
   const imagePreview = editFields.querySelector('.task-edit-image-preview');
   const imagePreviewImg = imagePreview.querySelector('img');
+  const imgSizePanel = editFields.querySelector('.task-edit-imgsize');
+  const imgModeBtns = editFields.querySelectorAll('.task-edit-imgmode');
+  const imgHeightSlider = editFields.querySelector('.task-edit-imgheight');
+  const imgHeightVal = editFields.querySelector('.task-edit-imgheight-val');
+  const imgHeightWrap = editFields.querySelector('.task-edit-imgsize-height');
+
+  // Odswieza podglad i panel rozmiaru wg STATE (fit + wysokosc).
+  function refreshImgSize() {
+    const fit = STATE.taskImageFit[task] || 'cover';
+    const h = STATE.taskImageHeight[task] || 150;
+    imgModeBtns.forEach(b => b.classList.toggle('active', b.dataset.fit === fit));
+    imgHeightSlider.value = h;
+    imgHeightVal.innerHTML = h + '&nbsp;px';
+    // Suwak wysokosci ma sens tylko w trybie "Kadr".
+    imgHeightWrap.style.display = (fit === 'full') ? 'none' : '';
+    // Podglad
+    if (fit === 'full') {
+      imagePreviewImg.style.height = 'auto';
+      imagePreviewImg.style.maxHeight = '240px';
+      imagePreviewImg.style.objectFit = 'contain';
+    } else {
+      imagePreviewImg.style.height = h + 'px';
+      imagePreviewImg.style.maxHeight = '';
+      imagePreviewImg.style.objectFit = 'cover';
+    }
+  }
+
   const defaultTitle = STATE.taskTitles[task] || '';
   if ((STATE.taskTitles[task] || '') !== defaultTitle) {
     titleInput.value = STATE.taskTitles[task] || '';
@@ -1960,7 +2091,9 @@ function initTaskCard(card) {
     imageInput.value = STATE.taskImages[task];
     imagePreviewImg.src = STATE.taskImages[task];
     imagePreview.hidden = false;
+    imgSizePanel.hidden = false;
   }
+  refreshImgSize();
 
   titleInput.addEventListener('input', e => {
     const v = e.target.value.trim();
@@ -1975,10 +2108,24 @@ function initTaskCard(card) {
     if (v) {
       imagePreviewImg.src = v;
       imagePreview.hidden = false;
+      imgSizePanel.hidden = false;
+      refreshImgSize();
     } else {
       imagePreview.hidden = true;
+      imgSizePanel.hidden = true;
       imagePreviewImg.removeAttribute('src');
     }
+  });
+  imgModeBtns.forEach(btn => {
+    btn.addEventListener('click', e => {
+      e.stopPropagation();
+      STATE.taskImageFit[task] = btn.dataset.fit;
+      refreshImgSize();
+    });
+  });
+  imgHeightSlider.addEventListener('input', e => {
+    STATE.taskImageHeight[task] = parseInt(e.target.value, 10) || 150;
+    refreshImgSize();
   });
   imagePreviewImg.addEventListener('error', () => { imagePreview.classList.add('error'); });
   imagePreviewImg.addEventListener('load', () => { imagePreview.classList.remove('error'); });
@@ -1998,6 +2145,7 @@ function initTaskCard(card) {
     imageInput.value = '';
     STATE.taskImages[task] = '';
     imagePreview.hidden = true;
+    imgSizePanel.hidden = true;
     imagePreviewImg.removeAttribute('src');
   });
 
@@ -2007,9 +2155,25 @@ function initTaskCard(card) {
       e.stopPropagation();
     }
   });
-  [titleInput, instrInput, imageInput].forEach(el => {
+  [titleInput, instrInput, imageInput, imgHeightSlider].forEach(el => {
     el.addEventListener('dragstart', e => e.preventDefault());
     el.setAttribute('draggable', 'false');
+  });
+
+  // KLUCZOWE: dragstart odpala się na KARCIE (to ona ma draggable=true), więc
+  // nie da się w nim rozpoznać, że gest zaczął się na suwaku - e.target to karta.
+  // Dlatego na czas interakcji z polami edycji (np. ciągnięcie suwaka wysokości
+  // obrazka) wyłączamy draggable karty, a po puszczeniu przycisku przywracamy.
+  // Dzięki temu suwak działa normalnie i nie chwyta całej sekcji do zmiany kolejności.
+  editFields.addEventListener('pointerdown', () => {
+    card.setAttribute('draggable', 'false');
+    const restore = () => {
+      card.setAttribute('draggable', 'true');
+      document.removeEventListener('pointerup', restore);
+      document.removeEventListener('pointercancel', restore);
+    };
+    document.addEventListener('pointerup', restore);
+    document.addEventListener('pointercancel', restore);
   });
 
   card.addEventListener('click', e => {
@@ -2032,6 +2196,13 @@ function initTaskCard(card) {
 
   // Drag-and-drop reorder
   card.addEventListener('dragstart', e => {
+    // Zabezpieczenie dodatkowe: jeśli z jakiegoś powodu draggable nie zostało
+    // wyłączone (patrz toggle pointerdown wyżej), a gest faktycznie startuje na
+    // elemencie pola edycji, przerwij. Główny fix to jednak toggle draggable.
+    if (e.target.closest && e.target.closest('.task-edit-fields')) {
+      e.preventDefault();
+      return;
+    }
     _draggedTaskCard = card;
     card.classList.add('dragging');
     e.dataTransfer.effectAllowed = 'move';
@@ -2136,6 +2307,8 @@ function syncTaskInstancesUI() {
       }
       if (!(key in STATE.taskCustomInstr)) STATE.taskCustomInstr[key] = '';
       if (!(key in STATE.taskImages)) STATE.taskImages[key] = '';
+      if (!(key in STATE.taskImageFit)) STATE.taskImageFit[key] = 'cover';
+      if (!(key in STATE.taskImageHeight)) STATE.taskImageHeight[key] = 150;
 
       // Zainicjalizuj karte (dodaje order-input, toggle instrukcji, edit-fields, drag-drop)
       initTaskCard(newCard);
@@ -2157,6 +2330,8 @@ function syncTaskInstancesUI() {
       delete STATE.taskTitles[key];
       delete STATE.taskCustomInstr[key];
       delete STATE.taskImages[key];
+      delete STATE.taskImageFit[key];
+      delete STATE.taskImageHeight[key];
       delete STATE.taskInstructions[key];
     }
   });
@@ -2683,11 +2858,17 @@ function sectionTitle(taskName, fallback) {
   return escapeHtml(t || fallback);
 }
 
-// Zwraca <div class="ws-sec-image"><img></div> jesli URL ustawiony, inaczej pusty string
+// Zwraca <div class="ws-sec-image"><img></div> jesli URL ustawiony, inaczej pusty string.
+// Tryb 'full' = cala grafika z zachowaniem proporcji; 'cover' = kadr o zadanej wysokosci.
 function sectionImage(taskName) {
   const url = (STATE.taskImages[taskName] || '').trim();
   if (!url) return '';
-  return `<div class="ws-sec-image"><img src="${escapeHtml(url)}" alt="" loading="lazy" onerror="this.parentElement.style.display='none'"></div>`;
+  const fit = STATE.taskImageFit[taskName] || 'cover';
+  const h = STATE.taskImageHeight[taskName] || 150;
+  if (fit === 'full') {
+    return `<div class="ws-sec-image ws-sec-image-full"><img src="${escapeHtml(url)}" alt="" loading="lazy" onerror="this.parentElement.style.display='none'"></div>`;
+  }
+  return `<div class="ws-sec-image"><img src="${escapeHtml(url)}" alt="" loading="lazy" style="height:${h}px" onerror="this.parentElement.style.display='none'"></div>`;
 }
 
 function buildFlashcardsSection(num, options = {}) {
@@ -3613,6 +3794,7 @@ function buildCornellSection(num, options = {}) {
           <span class="cornell-write-toggle-close">✕ Schowaj pole</span>
         </button>
         <textarea class="cornell-write-area" placeholder="Napisz tu swoją odpowiedź zanim sprawdzisz wzorcową..." rows="3"></textarea>
+        <div class="cornell-print-note" aria-hidden="true"></div>
       </div>
       <div class="cornell-a" id="cornell-a-${num}-${i}">
         <div class="cornell-a-inner">${escapeHtml(r.en)}</div>
@@ -4053,6 +4235,7 @@ function buildWritingSection(num, options = {}) {
           ${enBlock}
         </div>
         <textarea class="write-area" placeholder="Tutaj napisz swoją odpowiedź..." oninput="updateWriteCounter_${num}(this)"></textarea>
+        <div class="write-print-note" aria-hidden="true"></div>
         <div class="write-footer">
           <span class="write-counter"><span class="write-counter-num">0</span> słów</span>
           <button class="write-save" onclick="saveWrite_${num}(this)">✅ Gotowe</button>
@@ -4756,6 +4939,25 @@ function showToast(msg, isError) {
   }, 2000);
 }
 
+// Przed wydrukiem/PDF: skopiuj wpisany tekst (Cornell, Writing) do statycznych
+// kopii widocznych tylko w druku. Dzięki temu długie notatki nie są przycinane
+// (jak w polu textarea ze stałą wysokością) i pokazują się w całości.
+function wsSyncPrintNotes() {
+  document.querySelectorAll('.cornell-write-area').forEach(ta => {
+    const note = ta.parentElement && ta.parentElement.querySelector('.cornell-print-note');
+    if (note) note.textContent = ta.value;
+  });
+  document.querySelectorAll('.write-area').forEach(ta => {
+    const note = ta.parentElement && ta.parentElement.querySelector('.write-print-note');
+    if (note) note.textContent = ta.value;
+  });
+}
+window.addEventListener('beforeprint', wsSyncPrintNotes);
+// Safari/inne: wykrywanie druku przez matchMedia.
+if (window.matchMedia) {
+  try { window.matchMedia('print').addEventListener('change', e => { if (e.matches) wsSyncPrintNotes(); }); } catch (err) {}
+}
+
 // Section-specific scripts
 ${sectionsJS}
 
@@ -5340,6 +5542,18 @@ ${t.extraBgCSS}
   transform: scale(1.12) translateY(0);
   transform-origin: center center;
   will-change: transform;
+}
+/* Tryb "Cała grafika": pełne proporcje obrazka, bez kadrowania i bez parallax.
+   Wysokość wynika z proporcji, szerokość = pełna szerokość sekcji. */
+.ws-sec-image-full {
+  background: transparent;
+}
+.ws-sec-image-full img {
+  height: auto !important;
+  object-fit: contain;
+  transform: none !important;
+  will-change: auto;
+  animation: none !important;
 }
 
 /* Parallax: gdy obrazek wchodzi w viewport, transformacja sie zmienia.
@@ -6972,6 +7186,10 @@ ${t.extraBgCSS}
   transform: none;
 }
 
+/* Kopie wpisanego tekstu (Cornell / Writing) widoczne TYLKO w druku/PDF.
+   Na ekranie zawsze ukryte - na ekranie działa zwykłe pole textarea. */
+.cornell-print-note, .write-print-note { display: none; }
+
 @media print {
   .ws-logo-bottom { display: none; }
   .ws-logo-top img { height: 90px; }
@@ -7048,25 +7266,125 @@ ${t.extraBgCSS}
   /* Ukryj progress bar i przyciski akcji */
   .ws-progress-wrap { display: none !important; }
   .ws-actions { display: none !important; }
-  /* Cornell - rozwiń wszystkie odpowiedzi przy druku */
+  /* Stopka (zapis automatyczny / Reset / TSV) niepotrzebna na druku. */
+  .ws-footer { display: none !important; }
+  /* Polecenia/instrukcje sekcji ("Kliknij...", "Wpisz...") niepotrzebne na druku. */
+  .ws-sec-desc { display: none !important; }
+  /* Szary tekst-podpowiedź w polach (placeholder) niepotrzebny na druku:
+     "Wpisz słowo...", "Tutaj napisz...", "Wpisz tłumaczenie..." oraz ✎ w gap-fill.
+     Tekst placeholdera zostaje (logika :placeholder-shown działa), ale jest niewidoczny. */
+  .scramble-input::placeholder,
+  .trans-input::placeholder,
+  .write-area::placeholder,
+  .gap-input::placeholder,
+  .cornell-write-area::placeholder {
+    color: transparent !important;
+    opacity: 0 !important;
+  }
+
+  /* ── Każdy box podzadania w całości na jednej stronie (nie łamie się w pół,
+        np. quiz A/B na jednej stronie, C/D na drugiej - tego unikamy).
+        UWAGA: celowo NIE dotyczy .ws-section - całe sekcje mają się łamać
+        swobodnie między stronami. ── */
+  .flashcard, .gap-card, .quiz-card, .scramble-card, .unsc-card,
+  .trans-card, .write-card, .cornell-card,
+  .match-item, .match-item-wrap, .ws-sec-image {
+    break-inside: avoid !important;
+    page-break-inside: avoid !important;
+  }
+  /* Zawijanie długich słów/odpowiedzi - nic nie wychodzi poza box. */
+  .ws-section, .quiz-card, .scramble-card, .unsc-card, .cornell-card,
+  .gap-card, .trans-card, .write-card,
+  .quiz-opt-text, .scramble-pl, .unsc-pl,
+  .cornell-q-text, .cornell-a-inner, .write-prompt-pl, .write-prompt-en {
+    overflow-wrap: break-word !important;
+    word-break: normal !important;
+  }
+
+  /* ── Word Scramble: rozsypanka zawsze widoczna (bez klikania),
+        chowamy przycisk "Sprawdź" (✅). Pole wpisu zostaje do pisania. ── */
+  .scramble-check { display: none !important; }
+  .scramble-show-jumbled {
+    background: transparent !important;
+    color: var(--ws-text) !important;
+    padding: 0 !important;
+    cursor: default !important;
+  }
+  .scramble-show-jumbled .scramble-jumbled-hidden { display: none !important; }
+  .scramble-show-jumbled .scramble-jumbled-shown {
+    display: inline !important;
+    color: var(--ws-text) !important;
+  }
+
+  /* ── Sentence Unscramble: pula słów zawsze odsłonięta (bez zasłony),
+        chowamy przyciski (Sprawdź / Podpowiedź / Rozwiąż / Wyczyść) oraz
+        tekst "Kliknij słowa poniżej lub przeciągnij je tutaj".
+        Pole odpowiedzi zostaje jako miejsce do zapisania ułożonego zdania. ── */
+  .unsc-controls { display: none !important; }
+  .unsc-pool-reveal { display: none !important; }
+  .unsc-pool.unsc-pool-hidden {
+    filter: none !important;
+    user-select: auto !important;
+    pointer-events: auto !important;
+  }
+  .unsc-answer-empty { display: none !important; }
+  .unsc-answer-area { min-height: 2.4rem !important; }
+
+  /* ── Cornell - rozwiń wszystkie odpowiedzi przy druku ── */
   .cornell-card .cornell-a {
     max-height: none !important;
     overflow: visible !important;
   }
-  .cornell-card .cornell-write { display: none !important; }
   .cornell-q-arrow { display: none !important; }
-  /* Gap-fill: pokaż tłumaczenia, ukryj inputy puste -> jako linia do napisania */
+  /* Notatka ucznia w Cornell: drukujemy WPISANY tekst (kopia do druku),
+     samo pole textarea i przycisk chowamy. Pusta notatka = nic (oszczędnie). */
+  .cornell-write {
+    max-height: none !important;
+    overflow: visible !important;
+    padding-top: 0 !important;
+    padding-bottom: 0 !important;
+  }
+  .cornell-write-toggle { display: none !important; }
+  .cornell-write-area { display: none !important; }
+  .cornell-print-note:not(:empty) {
+    display: block !important;
+    white-space: pre-wrap !important;
+    padding: 0.15rem 1.1rem 0.9rem 4rem !important;
+    font-family: var(--ws-body) !important;
+    font-size: 1rem !important;
+    line-height: 1.5 !important;
+    color: var(--ws-text) !important;
+  }
+
+  /* Gap-fill: pokaż tłumaczenia, puste inputy jako linia do napisania */
   .gap-translation { display: block !important; }
-  /* Translate: ukryj wzór (żeby był do uzupełnienia) - chyba że kliknięte solve */
+  /* Translate: ukryj wzór i przycisk sprawdzania (pole do uzupełnienia) */
   .trans-input-actions { display: none !important; }
-  /* Writing: ukryj licznik i przycisk Gotowe (puste pole na pisanie) */
+  /* Writing: licznik + "Gotowe" niepotrzebne. Wpisaną odpowiedź drukujemy
+     (kopia do druku); puste pole zostaje jako miejsce do pisania ręcznie. */
   .write-footer { display: none !important; }
-  .write-area {
+  .write-area:placeholder-shown {
     min-height: 12rem !important;
     background: transparent !important;
   }
-  /* Sekcje płyną normalnie między stronami - mogą się łamać. */
-  /* (wcześniej była tu reguła page-break-inside: avoid, która wypychała każdą sekcję na osobną stronę) */
+  .write-area:not(:placeholder-shown) { display: none !important; }
+  .write-print-note:not(:empty) {
+    display: block !important;
+    white-space: pre-wrap !important;
+    padding: 0.3rem 0 !important;
+    font-family: var(--ws-body) !important;
+    font-size: 1.05rem !important;
+    line-height: 1.55 !important;
+    color: var(--ws-text) !important;
+  }
+
+  /* Obrazki sekcji: bez animacji parallax w druku (czysty kadr).
+     W trybie "cała grafika" obraz i tak ma transform: none. */
+  .ws-sec-image img { animation: none !important; }
+  .ws-sec-image:not(.ws-sec-image-full) img { transform: none !important; }
+
+  /* Sekcje płyną normalnie między stronami - mogą się łamać.
+     (page-break-inside: avoid celowo NIE jest tu ustawione na .ws-section) */
 }
 `;
 }
