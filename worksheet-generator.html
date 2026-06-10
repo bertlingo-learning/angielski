@@ -610,6 +610,13 @@ body::before {
   -webkit-appearance: none;
   margin: 0;
 }
+/* Zadanie odznaczone: nie liczy sie do kolejnosci - puste, zablokowane pole */
+.task-order-num.order-inactive {
+  opacity: 0.25;
+  cursor: default;
+  border-style: dashed;
+}
+.task-order-num.order-inactive::after { content: ''; }
 .task-card:hover .task-order-num,
 .task-card.checked .task-order-num {
   opacity: 1;
@@ -747,6 +754,44 @@ body::before {
   padding: 0.3rem 0.55rem; cursor: pointer; transition: all 0.15s;
 }
 .color-reset:hover { color: var(--accent); border-color: var(--accent); }
+/* Toggle: kolorystyka karty wyprowadzana z koloru akcentu */
+.accent-derive-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.7rem;
+  margin-top: 0.9rem;
+  padding: 0.85rem 1rem;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  cursor: pointer;
+  transition: border-color 0.15s, background 0.15s;
+}
+.accent-derive-row:hover { border-color: var(--border-bright); }
+.accent-derive-row input[type="checkbox"] { display: none; }
+.accent-derive-box {
+  flex-shrink: 0;
+  width: 20px; height: 20px;
+  margin-top: 0.1rem;
+  border: 2px solid var(--border-bright);
+  border-radius: 5px;
+  display: grid; place-items: center;
+  transition: all 0.15s;
+}
+.accent-derive-row input:checked + .accent-derive-box {
+  background: var(--accent);
+  border-color: var(--accent);
+}
+.accent-derive-row input:checked + .accent-derive-box::after {
+  content: '✓';
+  color: #0d0d0d;
+  font-size: 0.8rem;
+  font-weight: 800;
+  line-height: 1;
+}
+.accent-derive-text { display: flex; flex-direction: column; gap: 0.2rem; }
+.accent-derive-text strong { font-size: 0.92rem; }
+.accent-derive-hint { font-size: 0.8rem; color: var(--text-dim); line-height: 1.45; }
 @media (max-width: 700px) { .color-row { grid-template-columns: 1fr; } }
 
 /* TTS SECTION */
@@ -1268,6 +1313,14 @@ Napisz krótki email do przyjaciela o ostatnim weekendzie.	Use past simple. Incl
           <button type="button" class="color-reset" data-target="text">RESET</button>
         </div>
       </div>
+      <label class="accent-derive-row" for="accentDeriveChk" title="Tła sekcji, boxów zadań, fiszek i ramki przyjmują mocno rozjaśnione odcienie koloru akcentu">
+        <input type="checkbox" id="accentDeriveChk">
+        <span class="accent-derive-box" aria-hidden="true"></span>
+        <span class="accent-derive-text">
+          <strong>🎨 Kolorystyka z koloru akcentu</strong>
+          <span class="accent-derive-hint">Tła sekcji, boxów zadań i fiszek staną się mocno rozjaśnionymi odcieniami akcentu - spójna paleta z jednego koloru. Tło karty i kolor tekstu zostają bez zmian.</span>
+        </span>
+      </label>
     </div>
   </div>
 
@@ -1375,6 +1428,8 @@ const STATE = {
   rows: [],
   headers: [],
   preset: 'vintage',
+  // Tryb kolorystyczny: tla sekcji/boxow/fiszek wyprowadzane z koloru akcentu
+  accentDerived: false,
   customAccent: null,
   customBg: null,
   customText: null,
@@ -1421,7 +1476,7 @@ const STATE = {
 const DEFAULT_INSTRUCTIONS = {
   flashcards: 'Kliknij kartę, żeby odsłonić tłumaczenie. Spróbuj najpierw zgadnąć w głowie!',
   matching:   'Kliknij słowo z lewej strony, potem jego tłumaczenie z prawej.',
-  scramble:   'Wpisz angielskie słowo (Enter sprawdza). Kliknij rozsypankę, żeby zobaczyć pomieszane litery. Kliknij 💡, żeby wstawić kolejną literę odpowiedzi, lub ✨, żeby rozwiązać od razu.',
+  scramble:   'Ułóż słowo z rozsypanych liter: klikaj kafelki albo wpisz odpowiedź (Enter sprawdza). Kliknij 💡, żeby wstawić kolejną literę, lub ✨, żeby rozwiązać od razu.',
   quiz:       'Wybierz prawidłowe tłumaczenie polskiego słowa. Tylko jedna odpowiedź jest poprawna.',
   unscramble: 'Kliknij pole "Pokaż słowa", a następnie ułóż je w odpowiedniej kolejności. Możesz też przeciągać słowa. Kliknij 💡, aby wstawić kolejne poprawne słowo, lub ✨, aby rozwiązać od razu.',
   cornell:    'Kliknij pytanie, żeby odsłonić odpowiedź. Spróbuj najpierw odpowiedzieć w głowie!',
@@ -1775,6 +1830,8 @@ function updateTaskAvailability() {
   });
   // Po kazdej zmianie dostepnosci odswiez stan przycisku "Zaznacz wszystkie"
   if (typeof updateSelectAllState === 'function') updateSelectAllState();
+  // ...i numeracje (zadania automatycznie od/zaznaczone zmieniaja kolejnosc)
+  if (typeof syncOrderInputs === 'function') syncOrderInputs();
 }
 
 function validateGenerate() {
@@ -1829,8 +1886,7 @@ document.getElementById('tsvExampleUse').addEventListener('click', () => {
     btn.classList.remove('copied');
     btn.textContent = original;
   }, 1400);
-  // Scroll do pola TSV
-  tsvField.scrollIntoView({ behavior: 'smooth', block: 'center' });
+  // Celowo BEZ scrollIntoView - przewijanie do pola TSV bylo irytujace.
 });
 
 // Aktualizuje wygląd master toggle na podstawie stanu wszystkich per-task toggli
@@ -1920,6 +1976,7 @@ document.getElementById('selectAllBtn').addEventListener('click', () => {
   });
 
   STATE.userOverrodeTasks = true;
+  syncOrderInputs();
   updateSelectAllState();
   updateOrphanWarning();
   validateGenerate();
@@ -1928,6 +1985,8 @@ document.getElementById('selectAllBtn').addEventListener('click', () => {
 document.querySelectorAll('.task-card').forEach(card => {
   initTaskCard(card);
 });
+// Nadaj poczatkowe numery (tylko aktywnym zadaniom)
+syncOrderInputs();
 
 // Inicjalizacja jednej karty zadania w gridzie. Funkcja wyciagnieta z petli,
 // zeby mozna ja bylo wywolac rowniez dla dynamicznie wstrzykiwanych kart
@@ -1944,7 +2003,7 @@ function initTaskCard(card) {
   orderInput.min = '1';
   orderInput.max = String(STATE.taskOrder.length);
   orderInput.title = 'Wpisz numer pozycji, na ktorej ma byc to zadanie';
-  orderInput.value = String(STATE.taskOrder.indexOf(task) + 1);
+  // Wartosc nadaje syncOrderInputs() - numerowane sa tylko zadania aktywne.
   orderInput.addEventListener('click', e => e.stopPropagation());
   orderInput.addEventListener('mousedown', e => e.stopPropagation());
   orderInput.addEventListener('dragstart', e => { e.preventDefault(); e.stopPropagation(); });
@@ -1956,16 +2015,24 @@ function initTaskCard(card) {
     }
   });
   orderInput.addEventListener('change', () => {
-    const total = STATE.taskOrder.length;
+    // Przestawiamy zadanie WYLACZNIE w obrebie aktywnych zadan.
+    // Karty odznaczone zostaja w swoich miejscach w gridzie i nie licza sie
+    // do numeracji - aktywne zadania wymieniaja sie miedzy "aktywnymi slotami".
+    const active = activeTaskOrder();
+    const total = active.length;
     let newPos = parseInt(orderInput.value, 10);
-    if (isNaN(newPos)) { syncOrderInputs(); return; }
+    if (isNaN(newPos) || total === 0) { syncOrderInputs(); return; }
     newPos = Math.max(1, Math.min(total, newPos));
     const newIdx = newPos - 1;
-    const oldIdx = STATE.taskOrder.indexOf(task);
-    if (oldIdx === newIdx) { syncOrderInputs(); return; }
-    // Przesun w STATE.taskOrder
-    STATE.taskOrder.splice(oldIdx, 1);
-    STATE.taskOrder.splice(newIdx, 0, task);
+    const oldIdx = active.indexOf(task);
+    if (oldIdx === -1 || oldIdx === newIdx) { syncOrderInputs(); return; }
+    // Przestaw w liscie aktywnych
+    active.splice(oldIdx, 1);
+    active.splice(newIdx, 0, task);
+    // Wstaw aktywne z powrotem w sloty, ktore zajmowaly w pelnym taskOrder
+    const activeSlots = [];
+    STATE.taskOrder.forEach((t, i) => { if (STATE.tasks[t]) activeSlots.push(i); });
+    activeSlots.forEach((slot, k) => { STATE.taskOrder[slot] = active[k]; });
     // Zsynchronizuj DOM: ulozyc karty zgodnie z nowa kolejnoscia
     const grid = document.getElementById('taskGrid');
     STATE.taskOrder.forEach(t => {
@@ -2188,6 +2255,7 @@ function initTaskCard(card) {
     card.classList.toggle('checked', cb.checked);
     STATE.tasks[card.dataset.task] = cb.checked;
     STATE.userOverrodeTasks = true;
+    syncOrderInputs(); // odznaczone zadania wypadaja z numeracji
     updateOrphanWarning();
     validateGenerate();
     updateSelectAllState();
@@ -2356,13 +2424,31 @@ function updateTaskOrder() {
   syncOrderInputs();
 }
 
-// Po kazdej zmianie kolejnosci aktualizuj wartosci wpisane w inputach numerow.
+// Zwraca kolejnosc TYLKO aktywnych (zaznaczonych) zadan.
+// Odznaczone zadania nie licza sie do numeracji.
+function activeTaskOrder() {
+  return STATE.taskOrder.filter(t => STATE.tasks[t]);
+}
+
+// Po kazdej zmianie kolejnosci LUB zaznaczenia aktualizuj numery.
+// Numerowane sa wylacznie zadania zaznaczone; odznaczone maja puste,
+// zablokowane pole (nie biora udzialu w kolejnosci).
 function syncOrderInputs() {
+  const active = activeTaskOrder();
   document.querySelectorAll('#taskGrid .task-card').forEach(card => {
     const inp = card.querySelector('.task-order-num');
     if (!inp) return;
-    const pos = STATE.taskOrder.indexOf(card.dataset.task) + 1;
-    if (pos > 0) inp.value = String(pos);
+    const pos = active.indexOf(card.dataset.task) + 1;
+    if (pos > 0) {
+      inp.value = String(pos);
+      inp.disabled = false;
+      inp.max = String(active.length);
+      inp.classList.remove('order-inactive');
+    } else {
+      inp.value = '';
+      inp.disabled = true;
+      inp.classList.add('order-inactive');
+    }
   });
 }
 
@@ -2375,6 +2461,11 @@ document.getElementById('reorderReset').addEventListener('click', () => {
   });
   STATE.taskOrder = defaultOrder.slice();
   syncOrderInputs();
+});
+
+// Toggle: kolorystyka karty z koloru akcentu
+document.getElementById('accentDeriveChk').addEventListener('change', e => {
+  STATE.accentDerived = e.target.checked;
 });
 
 // Quiz suboption buttons
@@ -3201,13 +3292,15 @@ function buildScrambleSection(num, options = {}) {
       <div class="scramble-card" data-idx="${i}">
         <div class="scramble-prompt">
           <span class="scramble-pl">${escapeHtml(r.pl)}</span>
-          <button class="scramble-show-jumbled" onclick="toggleJumbled_${num}(this, ${num}, ${i})">
-            <span class="scramble-jumbled-hidden">Pokaż rozsypankę</span>
-            <span class="scramble-jumbled-shown" data-jumbled="${escapeHtml(scrambled)}">${escapeHtml(scrambled)}</span>
-          </button>
+        </div>
+        <div class="scramble-letters">
+          ${scrambled.toLowerCase().split('').map(ch => ch === ' '
+            ? `<button type="button" class="scramble-letter scramble-letter-space" data-letter=" " onclick="wsScrambleTile(this)" aria-label="Spacja">␣</button>`
+            : `<button type="button" class="scramble-letter" data-letter="${escapeHtml(ch)}" onclick="wsScrambleTile(this)" aria-label="Litera ${escapeHtml(ch)}">${escapeHtml(ch)}</button>`).join('')}
+          <button type="button" class="scramble-backspace" onclick="wsScrambleBackspace(this)" title="Usuń ostatnią literę" aria-label="Usuń ostatnią literę">⌫</button>
         </div>
         <div class="scramble-input-row">
-          <input type="text" class="scramble-input" data-answer="${escapeHtml(r.en.toLowerCase())}" placeholder="Wpisz słowo..." onkeydown="if(event.key==='Enter') checkScramble_${num}(this)">
+          <input type="text" class="scramble-input" data-answer="${escapeHtml(r.en.toLowerCase())}" placeholder="Klikaj literki albo wpisz słowo..." oninput="wsSyncScrambleTiles(this)" onkeydown="if(event.key==='Enter') checkScramble_${num}(this)">
           <button class="scramble-check" onclick="checkScramble_${num}(this.previousElementSibling)" title="Sprawdź" aria-label="Sprawdź">✅</button>
           <button class="scramble-hint-btn" onclick="hintScramble_${num}(${i})" title="Podpowiedź - wstaw kolejną literę" aria-label="Podpowiedź">💡</button>
           <button class="scramble-solve-btn" onclick="solveScrambleOne_${num}(${i})" title="Rozwiąż to słowo" aria-label="Rozwiąż">✨</button>
@@ -3224,7 +3317,7 @@ function buildScrambleSection(num, options = {}) {
         <div class="ws-sec-num">${num < 10 ? "0" + num : num}</div>
         <h2 class="ws-sec-title">${sectionTitle(taskKey, 'Word Scramble')}</h2>
       </div>
-      ${sectionInstr(taskKey, 'Wpisz angielskie słowo (Enter sprawdza). Kliknij rozsypankę, żeby zobaczyć pomieszane litery. Kliknij 💡, żeby wstawić kolejną literę odpowiedzi, lub ✨, żeby rozwiązać od razu.')}
+      ${sectionInstr(taskKey, 'Ułóż słowo z rozsypanych liter: klikaj kafelki albo wpisz odpowiedź (Enter sprawdza). Kliknij 💡, żeby wstawić kolejną literę, lub ✨, żeby rozwiązać od razu.')}
       <div class="scramble-grid">${items}</div>
       <div class="ws-actions">
         <button class="ws-btn-solve" onclick="solveScramble_${num}()">Pokaż wszystkie odpowiedzi</button>
@@ -3243,10 +3336,6 @@ function buildScrambleJS(num, options = {}) {
   let _scrambleDone_${num} = new Set();
   const _scrambleTotal_${num} = _scrambleWords_${num}.length;
 
-  window.toggleJumbled_${num} = function(btn, secNum, idx) {
-    btn.classList.toggle('revealed');
-  };
-
   window.checkScramble_${num} = function(input) {
     const ans = input.dataset.answer;
     const val = input.value.trim().toLowerCase();
@@ -3256,6 +3345,7 @@ function buildScrambleJS(num, options = {}) {
       input.disabled = true;
       const card = input.closest('.scramble-card');
       card.classList.add('done');
+      wsSyncScrambleTiles(input);
       const idx = parseInt(card.dataset.idx);
       _scrambleDone_${num}.add(idx);
       if (_scrambleDone_${num}.size === _scrambleTotal_${num}) {
@@ -3285,6 +3375,7 @@ function buildScrambleJS(num, options = {}) {
     const newLen = Math.min(matchLen + 1, ans.length);
     input.value = ans.slice(0, newLen);
     input.classList.remove('wrong');
+    wsSyncScrambleTiles(input);
     input.focus();
     if (newLen === ans.length) {
       window.checkScramble_${num}(input);
@@ -3299,6 +3390,7 @@ function buildScrambleJS(num, options = {}) {
       inp.disabled = true;
       const card = inp.closest('.scramble-card');
       card.classList.add('done');
+      wsSyncScrambleTiles(inp);
       _scrambleDone_${num}.add(parseInt(card.dataset.idx));
     });
     showSectionFeedback(${num}, true, '✓ Wszystkie odpowiedzi pokazane');
@@ -4348,6 +4440,11 @@ ${bgEffectHTML}
 </div>
 
 <script>
+// Migawka czystego dokumentu - robiona od razu przy starcie skryptu, ZANIM
+// loadProgress() odtworzy zapisany stan. Potrzebna do dzialajacego resetu
+// w trybie podgladu (blob: URL jest po chwili uniewazniany przez generator,
+// wiec location.reload() przestaje dzialac - patrz resetWorksheet()).
+const WS_INITIAL_HTML = '<!DOCTYPE html>\\n' + document.documentElement.outerHTML;
 const WS_DATA = ${rowsJSON};
 const WS_HEADERS = ${JSON.stringify(STATE.headers)};
 const WS_TITLE = ${JSON.stringify(title)};
@@ -4411,6 +4508,53 @@ function speakText(text, btn) {
 function ttsBtnClick(event, text) {
   event.stopPropagation();
   speakText(text, event.currentTarget);
+}
+
+// ── WORD SCRAMBLE: KAFELKI LITER ─────────────────────
+// Kliknięcie kafelka dopisuje literę do pola. Stan "zużycia" kafelków jest
+// zawsze wyliczany z aktualnej wartości pola (wsSyncScrambleTiles), dzięki
+// czemu klikanie, ręczne wpisywanie i kasowanie działają spójnie.
+function wsScrambleTile(btn) {
+  const card = btn.closest('.scramble-card');
+  if (!card) return;
+  const input = card.querySelector('.scramble-input');
+  if (!input || input.disabled) return;
+  if (btn.classList.contains('used')) return;
+  input.value += btn.dataset.letter;
+  input.classList.remove('wrong');
+  wsSyncScrambleTiles(input);
+  wsScheduleSave();
+}
+
+function wsScrambleBackspace(btn) {
+  const card = btn.closest('.scramble-card');
+  if (!card) return;
+  const input = card.querySelector('.scramble-input');
+  if (!input || input.disabled || !input.value) return;
+  input.value = input.value.slice(0, -1);
+  input.classList.remove('wrong');
+  wsSyncScrambleTiles(input);
+  wsScheduleSave();
+}
+
+// Zaznacza jako "zużyte" te kafelki, których litery są już w polu.
+// Dopasowanie zachłanne, bez rozróżniania wielkości liter.
+function wsSyncScrambleTiles(input) {
+  const card = input.closest('.scramble-card');
+  if (!card) return;
+  const tiles = Array.from(card.querySelectorAll('.scramble-letter'));
+  const taken = new Set();
+  for (const ch of input.value.toLowerCase()) {
+    for (let i = 0; i < tiles.length; i++) {
+      if (!taken.has(i) && tiles[i].dataset.letter === ch) { taken.add(i); break; }
+    }
+  }
+  tiles.forEach((t, i) => t.classList.toggle('used', taken.has(i)));
+  // Słowo zaliczone - wyłącz kafelki i kasowanie
+  const lock = input.disabled;
+  tiles.forEach(t => { t.disabled = lock; });
+  const back = card.querySelector('.scramble-backspace');
+  if (back) back.disabled = lock;
 }
 
 function markSectionDone(num) {
@@ -4693,7 +4837,10 @@ function _wsRestoreScramble(data) {
         if (saved.correct) {
           inp.classList.add('correct');
           inp.disabled = true;
+          const card = inp.closest('.scramble-card');
+          if (card) card.classList.add('done');
         }
+        wsSyncScrambleTiles(inp);
       }
     });
   });
@@ -4887,8 +5034,16 @@ document.addEventListener('change', () => wsScheduleSave(), true);
 
 function resetWorksheet() {
   if (!confirm('Wyczyścić wszystkie odpowiedzi?')) return;
-  localStorage.removeItem(WS_STORAGE_KEY);
-  location.reload();
+  try { localStorage.removeItem(WS_STORAGE_KEY); } catch (e) {}
+  // W trybie podgladu strona zyje pod adresem blob:, ktory generator po chwili
+  // uniewaznia (revokeObjectURL). location.reload() wtedy cicho zawodzi.
+  // Dlatego odtwarzamy strone z migawki czystego HTML zapisanej przy starcie.
+  if (location.protocol === 'blob:') {
+    const blob = new Blob([WS_INITIAL_HTML], { type: 'text/html;charset=utf-8' });
+    location.replace(URL.createObjectURL(blob));
+  } else {
+    location.reload();
+  }
 }
 
 // Konwertuje WS_DATA z powrotem na TSV i pobiera plik. Naglowki sa zapisane w WS_HEADERS.
@@ -4971,11 +5126,37 @@ window.addEventListener('load', loadProgress);
 // ============================================================
 // PRESET THEMES
 // ============================================================
+// Miesza kolor hex z bielą. ratio 0..1 - im wyżej, tym bliżej bieli.
+function tintHex(hex, ratio) {
+  const [r, g, b] = hexToRgb(hex);
+  const m = c => Math.round(c + (255 - c) * ratio);
+  return '#' + [m(r), m(g), m(b)].map(v => v.toString(16).padStart(2, '0')).join('');
+}
+
+// Tryb "kolorystyka z akcentu": tla sekcji, boxow zadan i fiszek staja sie
+// MOCNO rozjasnionymi odcieniami akcentu (różnica wzgledem akcentu ma byc
+// naprawde widoczna), ramki to polprzezroczysty akcent. Tlo strony (bg)
+// i kolory tekstu (text, textDim) celowo zostaja nietknięte.
+function applyAccentDerivedPalette(t, accent) {
+  t.cardBg = tintHex(accent, 0.94);          // tlo sekcji - ledwie zabarwione
+  t.surface = tintHex(accent, 0.96);         // powierzchnie (np. pasek postepu)
+  t.boxBg = tintHex(accent, 0.87);           // boxy zadan - wyraznie jasny odcien akcentu
+  t.flashGradient = `linear-gradient(135deg, ${tintHex(accent, 0.93)} 0%, ${tintHex(accent, 0.78)} 100%)`;
+  t.flashBorder = tintHex(accent, 0.45);
+  t.border = rgba(accent, 0.26);
+  t.borderStrong = rgba(accent, 0.52);
+  t.cardShadow = `0 1px 3px ${rgba(accent, 0.1)}, 0 8px 24px ${rgba(accent, 0.07)}`;
+  return t;
+}
+
 function getPresetTheme(preset, accent, bg, textColor, isCustomAccent) {
-  if (preset === 'vintage') return getVintageTheme(accent, bg, textColor, isCustomAccent);
-  if (preset === 'pastel') return getPastelTheme(accent, bg, textColor, isCustomAccent);
-  if (preset === 'atelier') return getAtelierTheme(accent, bg, textColor, isCustomAccent);
-  return getVintageTheme(accent, bg, textColor, isCustomAccent);
+  let t;
+  if (preset === 'vintage') t = getVintageTheme(accent, bg, textColor, isCustomAccent);
+  else if (preset === 'pastel') t = getPastelTheme(accent, bg, textColor, isCustomAccent);
+  else if (preset === 'atelier') t = getAtelierTheme(accent, bg, textColor, isCustomAccent);
+  else t = getVintageTheme(accent, bg, textColor, isCustomAccent);
+  if (STATE.accentDerived) applyAccentDerivedPalette(t, accent);
+  return t;
 }
 
 function getVintageTheme(accent, bg, textColor, isCustomAccent) {
@@ -5089,8 +5270,8 @@ function getPastelTheme(accent, bg, textColor, isCustomAccent) {
 // ============================================================
 // ATELIER - elegancki, modernistyczny editorial styl.
 // Glowny ton: gleboki granat na cieplo-bialym papierze (off-white).
-// Czcionki: Spectral (serif, modernistyczny) na tytuly, Inter Tight (sans
-// geometryczny) na tekst, IBM Plex Mono na cyfry. Wszystkie rogi 0px - czyste
+// Czcionki: Eczar (serif display) na tytuly, Signika (sans) na tresc
+// zadan, IBM Plex Mono na cyfry. Wszystkie rogi 0px - czyste
 // prostokaty. Cienie zastapione 1px liniami. Cienie subtelne, zadnych gradientow
 // na duzych powierzchniach. Maksymalna ilosc whitespace.
 // ============================================================
@@ -5140,7 +5321,7 @@ function getAtelierTheme(accent, bg, textColor, isCustomAccent) {
     linear-gradient(90deg, ${rgba(accent, 0.06)} 1px, transparent 1px);
   background-size: 64px 64px;
 }
-/* === ATELIER: body Signika 400 (regular variable) === */
+/* === ATELIER: treść zadań w Signika 400, nagłówki w Eczar === */
 body {
   font-weight: 400 !important;
 }
@@ -5157,6 +5338,13 @@ body {
   font-weight: 500 !important;
 }
 /* === ATELIER OVERRIDES: ostre rogi, cienkie linie, brak cieni === */
+/* Tytuł jednolicie granatowy - gradient z bazy nie pasuje do editorial palety */
+.ws-title {
+  background: none !important;
+  -webkit-text-fill-color: var(--ws-accent) !important;
+  color: var(--ws-accent) !important;
+  padding-bottom: 0 !important;
+}
 .ws-section {
   border: 1px solid var(--ws-border-strong) !important;
   border-radius: 0 !important;
@@ -5172,6 +5360,7 @@ body {
 /* Nagłówek sekcji: cienka linia pod, granatowy kwadrat z numerem */
 .ws-sec-head {
   border-bottom: 1px solid var(--ws-border) !important;
+  border-image: none !important;
   padding-bottom: 1.25rem;
   margin-bottom: 1.5rem;
   align-items: center !important;
@@ -5180,6 +5369,7 @@ body {
 .ws-sec-num {
   /* Kwadrat z cienkim granatowym borderem - editorial wersja "kapsuly" */
   background: transparent !important;
+  box-shadow: none !important;
   color: var(--ws-accent) !important;
   border: 1px solid var(--ws-accent) !important;
   width: 44px !important;
@@ -5243,7 +5433,7 @@ body {
 /* Inputy, textarea, buttony - ostre rogi */
 .scramble-input, .trans-input, .write-area, .gap-input,
 .scramble-check, .scramble-hint-btn, .scramble-solve-btn,
-.scramble-show-jumbled, .scramble-jumbled,
+.scramble-letter, .scramble-backspace,
 .trans-check, .trans-hint-btn, .trans-solve-btn,
 .unsc-check-btn, .unsc-hint-btn, .unsc-solve-btn, .unsc-clear-btn,
 .write-save, .ws-btn-solve, .ws-btn-celebrate, .ws-btn-reset,
@@ -5452,6 +5642,14 @@ ${t.extraBgCSS}
   font-weight: 700;
   line-height: 1.1; letter-spacing: -0.02em;
   color: var(--ws-accent);
+  /* Gradientowy tytuł - ozdobny akcent w nagłówku karty */
+  background: var(--ws-accent-gradient-3);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  -webkit-print-color-adjust: exact;
+  print-color-adjust: exact;
+  padding-bottom: 0.08em; /* zapas na dolne wydłużenia liter przy clip:text */
 }
 .ws-subtitle {
   color: var(--ws-text-dim);
@@ -5595,6 +5793,10 @@ ${t.extraBgCSS}
   gap: 1rem;
   margin-bottom: 0.7rem;
   flex-wrap: wrap;
+  /* Ozdobna, wygasająca gradientowa linia pod nagłówkiem sekcji */
+  padding-bottom: 0.75rem;
+  border-bottom: 2px solid transparent;
+  border-image: linear-gradient(90deg, var(--ws-accent) 0%, var(--ws-accent-2) 45%, transparent 95%) 1;
 }
 .ws-sec-head .ws-sec-title { flex: 1; min-width: 0; }
 .ws-part-badge {
@@ -5624,8 +5826,12 @@ ${t.extraBgCSS}
   font-size: 0.95rem; font-weight: 700;
   width: 48px; height: 48px;
   border-radius: 12px;
-  background: var(--ws-accent);
+  /* Glansowana odznaka: gradient akcentów + delikatny połysk u góry */
+  background: var(--ws-accent-gradient);
   color: #fff;
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,0.4),
+    inset 0 -2px 0 rgba(0,0,0,0.12);
   display: grid; place-items: center;
   letter-spacing: -0.03em;
   flex-shrink: 0;
@@ -6000,40 +6206,63 @@ ${t.extraBgCSS}
   font-size: 1.2rem;
   color: var(--ws-text);
 }
-.scramble-jumbled,
-.scramble-show-jumbled {
-  font-family: var(--ws-mono);
-  font-weight: 700;
-  font-size: 1.15rem;
-  letter-spacing: 0.25em;
-  color: ${isDarkTheme ? t.bg : '#fff'};
-  background: var(--ws-accent);
-  padding: 0.5rem 0.95rem;
-  border-radius: 8px;
-  text-transform: lowercase;
-  border: none;
-  cursor: pointer;
-  transition: opacity 0.18s;
+/* Kafelki liter - "fizyczne" przyciski z efektem wciśnięcia 3D.
+   Kliknięcie dopisuje literę do pola; zużyty kafelek zostaje wciśnięty.
+   Tło: rozjaśniony, jednolity akcent. Krawędź 3D: pełny akcent - dzięki temu
+   efekt jest czytelny także przy bardzo ciemnych akcentach (np. Atelier). */
+.scramble-letters {
+  display: flex; flex-wrap: wrap; align-items: center;
+  gap: 0.45rem;
+  margin-bottom: 1rem;
 }
-.scramble-show-jumbled .scramble-jumbled-shown {
-  display: none;
-  letter-spacing: 0.25em;
-}
-.scramble-show-jumbled.revealed .scramble-jumbled-hidden {
-  display: none;
-}
-.scramble-show-jumbled.revealed .scramble-jumbled-shown {
-  display: inline;
-}
-.scramble-show-jumbled .scramble-jumbled-hidden {
+.scramble-letter {
   font-family: var(--ws-body);
-  letter-spacing: 0.02em;
-  font-size: 0.95rem;
-  text-transform: none;
-  font-weight: 600;
-  opacity: 0.95;
+  font-weight: 700;
+  font-size: 1.12rem;
+  text-transform: lowercase;
+  line-height: 1;
+  min-width: 42px; height: 42px;
+  padding: 0 0.5rem;
+  color: ${isDarkTheme ? t.bg : '#fff'};
+  background: color-mix(in srgb, var(--ws-accent) 72%, #fff);
+  border: none;
+  border-radius: 10px;
+  cursor: pointer;
+  box-shadow: 0 4px 0 var(--ws-accent);
+  transition: transform 0.07s ease, box-shadow 0.07s ease, opacity 0.2s, filter 0.15s;
+  user-select: none;
+  -webkit-user-select: none;
+  touch-action: manipulation;
+  -webkit-print-color-adjust: exact;
+  print-color-adjust: exact;
 }
-.scramble-show-jumbled:hover { opacity: 0.85; }
+.scramble-letter:hover:not(.used):not(:disabled) { filter: brightness(1.06); }
+.scramble-letter:active:not(.used):not(:disabled) {
+  transform: translateY(4px);
+  box-shadow: 0 0 0 var(--ws-accent);
+}
+.scramble-letter.used {
+  transform: translateY(4px);
+  opacity: 0.32;
+  cursor: default;
+  box-shadow: inset 0 2px 5px rgba(0,0,0,0.22);
+}
+.scramble-letter:disabled { cursor: default; }
+.scramble-letter-space { opacity: 0.85; font-size: 0.95rem; }
+.scramble-letter-space.used { opacity: 0.28; }
+.scramble-backspace {
+  font-size: 1.05rem;
+  width: 42px; height: 42px;
+  margin-left: 0.2rem;
+  background: var(--ws-bg);
+  color: var(--ws-text-dim);
+  border: 1.5px solid var(--ws-border-strong);
+  border-radius: 10px;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+.scramble-backspace:hover:not(:disabled) { color: var(--ws-accent); border-color: var(--ws-accent); }
+.scramble-backspace:disabled { opacity: 0.35; cursor: default; }
 .scramble-input-row {
   display: flex; gap: 0.5rem;
   align-items: stretch;
@@ -6144,6 +6373,25 @@ ${t.extraBgCSS}
   margin: 0 0.4rem 0.5rem;
   box-shadow: 0 8px 24px ${accentRgba(0.35)};
   letter-spacing: -0.01em;
+  position: relative;
+  overflow: hidden;
+}
+/* Szybki "shine" przesuwający się po przycisku przy hover */
+.ws-btn-celebrate::after {
+  content: '';
+  position: absolute;
+  top: 0; left: -80%;
+  width: 50%; height: 100%;
+  background: linear-gradient(105deg, transparent 0%, rgba(255,255,255,0.45) 50%, transparent 100%);
+  transform: skewX(-20deg);
+  pointer-events: none;
+}
+.ws-btn-celebrate:hover::after {
+  animation: wsShineSweep 0.7s ease-out;
+}
+@keyframes wsShineSweep {
+  from { left: -80%; }
+  to { left: 130%; }
 }
 .ws-btn-celebrate:hover {
   transform: scale(1.04);
@@ -7301,19 +7549,18 @@ ${t.extraBgCSS}
     word-break: normal !important;
   }
 
-  /* ── Word Scramble: rozsypanka zawsze widoczna (bez klikania),
-        chowamy przycisk "Sprawdź" (✅). Pole wpisu zostaje do pisania. ── */
+  /* ── Word Scramble: kafelki liter w wersji płaskiej do druku,
+        chowamy przycisk "Sprawdź" (✅) i kasowanie (⌫).
+        Pole wpisu zostaje do pisania. ── */
   .scramble-check { display: none !important; }
-  .scramble-show-jumbled {
+  .scramble-backspace { display: none !important; }
+  .scramble-letter {
     background: transparent !important;
     color: var(--ws-text) !important;
-    padding: 0 !important;
-    cursor: default !important;
-  }
-  .scramble-show-jumbled .scramble-jumbled-hidden { display: none !important; }
-  .scramble-show-jumbled .scramble-jumbled-shown {
-    display: inline !important;
-    color: var(--ws-text) !important;
+    border: 1.5px solid var(--ws-border-strong) !important;
+    box-shadow: none !important;
+    transform: none !important;
+    opacity: 1 !important;
   }
 
   /* ── Sentence Unscramble: pula słów zawsze odsłonięta (bez zasłony),
