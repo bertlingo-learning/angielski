@@ -3,7 +3,18 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Materiały Roberta – Nauka Angielskiego</title>
+<title>Robert D. – Korepetycje z języka angielskiego online</title>
+<meta name="description" content="Korepetycje z angielskiego online z certyfikowanym lektorem (C1). Lekcje dopasowane do Twoich zainteresowań, autorskie materiały i notatki. Lekcja próbna 40 zł.">
+<link rel="canonical" href="https://english-robert.github.io/angielski/index-np.html">
+
+<!-- Open Graph (podgląd przy udostępnianiu linku) -->
+<meta property="og:type" content="website">
+<meta property="og:title" content="Robert D. – Korepetycje z języka angielskiego online">
+<meta property="og:description" content="Lekcje angielskiego online z certyfikowanym lektorem C1, dopasowane do Twoich zainteresowań. Lekcja próbna 40 zł.">
+<meta property="og:url" content="https://english-robert.github.io/angielski/index-np.html">
+<meta property="og:image" content="https://english-robert.github.io/angielski/img/loga/ewr-logo.svg">
+<meta property="og:locale" content="pl_PL">
+<meta name="twitter:card" content="summary">
 
 <!-- Font: Montserrat -->
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -65,17 +76,6 @@ body{
 a{color:inherit;text-decoration:none}
 img{display:block;max-width:100%}
 button{font-family:inherit;cursor:pointer;border:none;background:none}
-
-/* ═════════════════════════════════════════
-   SCROLL PROGRESS
-═════════════════════════════════════════ */
-#scroll-progress{
-  position:fixed;top:0;left:0;
-  height:2px;width:0%;
-  background:var(--accent);
-  z-index:9999;
-  transition:width 0.05s linear;
-}
 
 /* ═════════════════════════════════════════
    NAV
@@ -141,6 +141,33 @@ nav{
 }
 .nav-links a:hover{color:var(--accent)}
 .nav-links a:hover::after{transform:scaleX(1)}
+
+/* Hamburger - ukryty na desktopie */
+.nav-toggle{
+  display:none;
+  flex-direction:column;
+  justify-content:center;
+  gap:5px;
+  width:42px;height:42px;
+  padding:0;
+  border:1px solid var(--line);
+  border-radius:10px;
+  background:var(--paper);
+  cursor:pointer;
+  transition:border-color 0.2s;
+}
+.nav-toggle:hover{border-color:var(--line-strong)}
+.nav-toggle span{
+  display:block;
+  width:18px;height:2px;
+  margin:0 auto;
+  background:var(--accent);
+  border-radius:2px;
+  transition:transform 0.3s, opacity 0.2s;
+}
+.nav-toggle.open span:nth-child(1){transform:translateY(7px) rotate(45deg)}
+.nav-toggle.open span:nth-child(2){opacity:0}
+.nav-toggle.open span:nth-child(3){transform:translateY(-7px) rotate(-45deg)}
 
 /* ═════════════════════════════════════════
    LAYOUT
@@ -411,24 +438,27 @@ section{position:relative;z-index:2}
 /* ── PASEK STATYSTYK ── */
 .stats-bar{
   display:grid;
-  grid-template-columns:repeat(4, 1fr);
-  gap:1.2rem;
-  margin-top:3.5rem;
+  grid-template-columns:repeat(4, minmax(0, 1fr));
+  gap:clamp(0.7rem, 1.5vw, 1.4rem);
+  margin-top:4rem;
 }
 .stat-card{
   background:var(--paper);
   border:1px solid var(--line);
-  border-radius:16px;
-  padding:1.8rem 1.2rem;
+  border-radius:18px;
+  padding:clamp(1.3rem, 2.5vw, 2.2rem) clamp(0.7rem, 1.5vw, 1.4rem);
   text-align:center;
   box-shadow:var(--shadow-soft);
+  position:relative;
+  min-width:0;
 }
 .stat-num{
   font-family:var(--display);
   font-weight:800;
-  font-size:2.2rem;
+  font-size:clamp(1.7rem, 4.2vw, 2.8rem);
   line-height:1;
   letter-spacing:-0.03em;
+  white-space:nowrap;
   background:linear-gradient(135deg, var(--accent) 0%, var(--accent-deep) 100%);
   -webkit-background-clip:text;
   background-clip:text;
@@ -443,18 +473,42 @@ section{position:relative;z-index:2}
   gap:0.1rem;
   margin-top:0.1rem;
 }
-.stat-stars svg{width:16px;height:16px;fill:var(--gold)}
+.stat-stars svg{width:clamp(14px, 2.5vw, 20px);height:clamp(14px, 2.5vw, 20px);fill:var(--gold)}
 .stat-label{
-  font-size:0.85rem;
+  font-size:clamp(0.78rem, 1.3vw, 0.9rem);
   color:var(--ink-muted);
   font-weight:600;
   letter-spacing:0.01em;
-  margin-top:0.6rem;
+  margin-top:0.7rem;
 }
-@media (max-width:680px){
-  .stats-bar{grid-template-columns:repeat(2, 1fr);gap:0.8rem}
-  .stat-num{font-size:1.8rem}
-  .stat-card{padding:1.4rem 0.8rem}
+/* Wyróżniona karta lekcji próbnej */
+.stat-card-trial{
+  background:linear-gradient(150deg, var(--accent) 0%, var(--accent-deep) 100%);
+  border-color:transparent;
+  box-shadow:0 18px 40px -18px rgba(30,42,94,0.55);
+}
+.stat-card-trial .stat-num{
+  background:none;
+  -webkit-text-fill-color:#fff;
+  color:#fff;
+  font-size:clamp(1.8rem, 4.5vw, 3rem);
+}
+.stat-card-trial .stat-label{color:rgba(255,255,255,0.85)}
+.stat-trial-tag{
+  display:inline-block;
+  margin-top:0.9rem;
+  font-size:clamp(0.62rem, 1.2vw, 0.72rem);
+  font-weight:700;
+  letter-spacing:0.08em;
+  text-transform:uppercase;
+  color:var(--accent-deep);
+  background:var(--gold);
+  padding:0.3rem 0.75rem;
+  border-radius:999px;
+}
+/* Wąskie ekrany: 2 kolumny zamiast ściskać 4 */
+@media (max-width:560px){
+  .stats-bar{grid-template-columns:repeat(2, minmax(0, 1fr));gap:0.8rem}
 }
 
 /* ── OPINIE ── */
@@ -752,13 +806,47 @@ section{position:relative;z-index:2}
 }
 #my-cal-inline-angielski{
   width:100%;
-  min-height:680px;
+  min-height:520px;
   position:relative;
   z-index:1;
   border-radius:12px;
   overflow:hidden;
   background:var(--paper);
 }
+.booking-alt{
+  margin:1.5rem auto 0;
+  text-align:center;
+  font-size:0.95rem;
+  color:var(--ink-soft);
+  line-height:1.6;
+}
+.booking-alt strong{color:var(--ink)}
+.booking-alt-links{
+  display:flex;
+  flex-wrap:wrap;
+  gap:0.6rem;
+  justify-content:center;
+  margin-top:0.9rem;
+}
+.booking-alt-link{
+  display:inline-flex;
+  align-items:center;
+  gap:0.45rem;
+  padding:0.55rem 1.1rem;
+  border:1px solid var(--line);
+  border-radius:999px;
+  background:var(--paper);
+  color:var(--accent);
+  font-weight:600;
+  font-size:0.9rem;
+  text-decoration:none;
+  transition:border-color 0.2s, background 0.2s;
+}
+.booking-alt-link:hover{
+  border-color:var(--accent);
+  background:var(--accent-soft);
+}
+.booking-alt-link svg{width:18px;height:18px;fill:currentColor}
 
 /* ═════════════════════════════════════════
    MATERIALS – KARTY PRACY
@@ -888,18 +976,6 @@ section{position:relative;z-index:2}
   background:var(--accent-deep);
   transform:scale(1.03);
 }
-.gate-cta{
-  margin-top:1.2rem;
-  font-size:0.85rem;
-  color:var(--ink-muted);
-}
-.gate-cta a{
-  color:var(--accent);
-  font-weight:600;
-  border-bottom:1px solid var(--accent);
-  transition:opacity 0.2s;
-}
-.gate-cta a:hover{opacity:0.75}
 
 /* CARDS GRID – czyste karty z hover scale */
 .cards-grid{
@@ -1062,6 +1138,26 @@ section{position:relative;z-index:2}
 }
 .picks-head{margin-bottom:2.5rem}
 
+.video-embed{
+  position:relative;
+  width:100%;
+  max-width:900px;
+  margin:0 auto;
+  aspect-ratio:16 / 9;
+  border-radius:16px;
+  overflow:hidden;
+  border:1px solid var(--line);
+  box-shadow:var(--shadow-soft);
+  background:var(--ink);
+}
+.video-embed iframe{
+  position:absolute;
+  inset:0;
+  width:100%;
+  height:100%;
+  border:0;
+}
+
 .coming-soon{
   background:var(--paper);
   border:1px dashed var(--line-strong);
@@ -1149,9 +1245,42 @@ footer{
   .info-grid{grid-template-columns:1fr;gap:2rem}
   .materials-head{align-items:flex-start}
 }
+@media (max-width:860px){
+  .nav-toggle{display:flex}
+  .nav-links{
+    display:flex;
+    position:absolute;
+    top:100%;
+    left:0;right:0;
+    flex-direction:column;
+    gap:0;
+    background:var(--paper);
+    border-bottom:1px solid var(--line);
+    box-shadow:var(--shadow-mid);
+    padding:0.5rem 1.2rem 1rem;
+    max-height:0;
+    overflow:hidden;
+    opacity:0;
+    pointer-events:none;
+    transition:max-height 0.3s ease, opacity 0.2s ease, padding 0.3s ease;
+  }
+  .nav-links.open{
+    max-height:80vh;
+    opacity:1;
+    pointer-events:auto;
+  }
+  .nav-links li{width:100%}
+  .nav-links a{
+    display:block;
+    padding:0.9rem 0;
+    font-size:0.8rem;
+    border-bottom:1px solid var(--line);
+  }
+  .nav-links a::after{display:none}
+  .nav-inner{position:relative}
+}
 @media (max-width:680px){
   nav{height:64px}
-  .nav-links{display:none}
   .nav-inner{padding:0 1.2rem}
   .wrap{padding:0 1.2rem}
   .footer-inner{padding:0 1.2rem;flex-direction:column;text-align:center}
@@ -1181,7 +1310,6 @@ footer{
 <body>
 
 <!-- SCROLL PROGRESS -->
-<div id="scroll-progress"></div>
 
 <!-- NAV -->
 <nav>
@@ -1190,7 +1318,10 @@ footer{
       <span class="mark">EWR</span>
       <span class="nav-logo-sub">English with Robert</span>
     </a>
-    <ul class="nav-links">
+    <button class="nav-toggle" id="nav-toggle" aria-label="Menu" aria-expanded="false">
+      <span></span><span></span><span></span>
+    </button>
+    <ul class="nav-links" id="nav-links">
       <li><a href="#about">O mnie</a></li>
       <li><a href="#reviews">Opinie</a></li>
       <li><a href="#faq">FAQ</a></li>
@@ -1208,7 +1339,7 @@ footer{
       <div class="hero-main-grid">
 
         <div class="hero-logo-col reveal">
-          <img class="hero-logo-inline" src="https://bertlingo-learning.github.io/Angielski/Obrazki/loga/ewr-logo.svg" alt="English with Robert">
+          <img class="hero-logo-inline" src="img/loga/ewr-logo.svg" alt="English with Robert">
         </div>
 
         <div class="hero-content-col">
@@ -1216,13 +1347,13 @@ footer{
 
           <div class="hero-identity reveal" data-delay="1">
             <div class="hero-avatar">
-              <img src="Obrazki/profilowe.jpg" alt="Robert D.">
+              <img src="img/profilowe.jpg" alt="Robert D.">
             </div>
             <div class="hero-identity-text">
               <h1 class="profile-name">Robert <span class="em">D.</span></h1>
               <div class="profile-sub-row">
                 <span>Polska</span>
-                <img class="flag-img" src="Obrazki/mini-faga-polski.svg" alt="Polska">
+                <img class="flag-img" src="img/mini-faga-polski.svg" alt="Polska">
                 <span class="dot">·</span>
                 <span><span class="live-dot"></span> Lekcje online</span>
               </div>
@@ -1243,32 +1374,33 @@ footer{
               Profesjonalny lektor
             </span>
           </div>
-
-          <div class="stats-bar reveal" data-delay="3">
-            <div class="stat-card">
-              <div class="stat-num"><span class="count" data-target="150">0</span>+</div>
-              <div class="stat-label">przeprowadzonych lekcji</div>
-            </div>
-            <div class="stat-card">
-              <div class="stat-num">
-                5,0
-                <span class="stat-stars">
-                  <svg viewBox="0 0 24 24"><path d="m12 2 3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01z"/></svg>
-                </span>
-              </div>
-              <div class="stat-label">średnia ocen uczniów</div>
-            </div>
-            <div class="stat-card">
-              <div class="stat-num"><span class="count" data-target="75">0</span><span>zł</span></div>
-              <div class="stat-label">za lekcję (50 min)</div>
-            </div>
-            <div class="stat-card">
-              <div class="stat-num"><span class="count" data-target="40">0</span><span>zł</span></div>
-              <div class="stat-label">lekcja próbna</div>
-            </div>
-          </div>
         </div>
 
+      </div>
+
+      <div class="stats-bar reveal" data-delay="3">
+        <div class="stat-card">
+          <div class="stat-num"><span class="count" data-target="150">0</span>+</div>
+          <div class="stat-label">przeprowadzonych lekcji</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-num">
+            5,0
+            <span class="stat-stars">
+              <svg viewBox="0 0 24 24"><path d="m12 2 3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01z"/></svg>
+            </span>
+          </div>
+          <div class="stat-label">średnia ocen uczniów</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-num"><span class="count" data-target="75">0</span><span>zł</span></div>
+          <div class="stat-label">za lekcję (50 min)</div>
+        </div>
+        <div class="stat-card stat-card-trial">
+          <div class="stat-num"><span class="count" data-target="40">0</span><span>zł</span></div>
+          <div class="stat-label">lekcja próbna</div>
+          <div class="stat-trial-tag">pierwsza lekcja</div>
+        </div>
       </div>
     </div>
   </div>
@@ -1340,7 +1472,7 @@ footer{
 
         <p class="about-intro">
           Cześć! Mam na imię <strong>Robert</strong>, mam 25 lat i jestem Polakiem.
-          <img class="flag" src="Obrazki/mini-faga-polski.svg" alt="Polska">
+          <img class="flag" src="img/mini-faga-polski.svg" alt="Polska">
         </p>
 
         <p class="about-teaser">
@@ -1541,6 +1673,23 @@ footer{
         </div>
       </div>
 
+      <div class="faq-item">
+        <button class="faq-question" aria-expanded="false">
+          <span>Co, jeśli muszę odwołać lekcję?</span>
+          <span class="faq-icon">
+            <svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>
+          </span>
+        </button>
+        <div class="faq-answer">
+          <div class="faq-answer-inner">
+            <div class="faq-answer-content">
+              <p>Rozumiem, że życie bywa nieprzewidywalne, dlatego staram się być elastyczny. Jeśli uprzedzisz mnie z wyprzedzeniem (najlepiej co najmniej 24 godziny wcześniej), spokojnie przeniesiemy lekcję na inny termin, bez żadnych kosztów.</p>
+              <p>Pierwszą nieobecność bez uprzedzenia traktuję ulgowo, więc nic się nie dzieje. W przypadku kolejnych nieusprawiedliwionych nieobecności nie jestem już w stanie zwrócić środków za daną lekcję, ponieważ ten czas był zarezerwowany dla Ciebie. Wystarczy jednak dać znać, a zawsze znajdziemy rozwiązanie.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
     </div>
   </div>
 </section>
@@ -1556,6 +1705,23 @@ footer{
 
     <div class="booking-wrapper reveal" data-delay="2">
       <div id="my-cal-inline-angielski"></div>
+    </div>
+
+    <p class="booking-alt reveal" data-delay="2">
+      <strong>Masz trudność z umówieniem się przez kalendarz?</strong><br>
+      Nic nie szkodzi, napisz do mnie bezpośrednio, a wspólnie ustalimy termin.
+    </p>
+    <div class="booking-alt-links reveal" data-delay="2">
+      <!-- TODO: wpisz swój adres e-mail w miejsce twoj@email.pl -->
+      <a class="booking-alt-link" href="mailto:twoj@email.pl">
+        <svg viewBox="0 0 24 24"><path d="M20 4H4a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V6a2 2 0 0 0-2-2m0 4-8 5-8-5V6l8 5 8-5z"/></svg>
+        E-mail
+      </a>
+      <!-- TODO: wpisz swój nick na Instagramie w miejsce twoj_nick -->
+      <a class="booking-alt-link" href="https://instagram.com/twoj_nick" target="_blank" rel="noopener">
+        <svg viewBox="0 0 24 24"><path d="M12 2.16c3.2 0 3.58 0 4.85.07 3.25.15 4.77 1.69 4.92 4.92.06 1.27.07 1.65.07 4.85s0 3.58-.07 4.85c-.15 3.23-1.66 4.77-4.92 4.92-1.27.06-1.65.07-4.85.07s-3.58 0-4.85-.07c-3.26-.15-4.77-1.7-4.92-4.92-.06-1.27-.07-1.65-.07-4.85s0-3.58.07-4.85C2.38 3.92 3.9 2.38 7.15 2.23 8.42 2.18 8.8 2.16 12 2.16m0 3.68a6.16 6.16 0 1 0 0 12.32 6.16 6.16 0 0 0 0-12.32M12 16a4 4 0 1 1 0-8 4 4 0 0 1 0 8m6.41-10.85a1.44 1.44 0 1 0 0 2.88 1.44 1.44 0 0 0 0-2.88"/></svg>
+        Instagram
+      </a>
     </div>
   </div>
 </section>
@@ -1583,7 +1749,6 @@ footer{
           <input class="gate-input" type="password" placeholder="Wpisz hasło..." id="gate-password" autocomplete="off">
           <button class="gate-submit" id="gate-btn">Odblokuj</button>
         </div>
-        <p class="gate-cta">Nie masz hasła? <a href="#booking">Umów się na lekcję</a></p>
       </div>
 
       <div class="gated-content" id="gated-materials">
@@ -1708,7 +1873,7 @@ footer{
         <div class="rec-list">
 
           <a class="rec-item" href="https://www.youtube.com/@ArlenaWitt" target="_blank">
-            <img class="rec-logo rec-logo-photo" src="Obrazki/Arlena-Witt.jpeg" alt="Arlena Witt">
+            <img class="rec-logo rec-logo-photo" src="img/loga/arlena-witt.jpeg" alt="Arlena Witt">
             <div class="rec-content">
               <div class="rec-name">Arlena Witt</div>
               <div class="rec-desc">Kanał na YouTube, na którym Arlena prowadzi główną serię "Po Cudzemu". Uczy w niej poprawnej wymowy angielskiej na przykładach z filmów, seriali i piosenek. Profesjonalnie, merytorycznie i z przymrużeniem oka.</div>
@@ -1719,7 +1884,7 @@ footer{
           </a>
 
           <a class="rec-item" href="https://dictionary.cambridge.org/" target="_blank">
-            <img class="rec-logo rec-logo-dark" src="Obrazki/Cambridge-Dictionary-logo.svg" alt="Cambridge Dictionary">
+            <img class="rec-logo rec-logo-dark" src="img/loga/cambridge-dictionary-logo.svg" alt="Cambridge Dictionary">
             <div class="rec-content">
               <div class="rec-name">Cambridge Dictionary</div>
               <div class="rec-desc">Jeden z najlepszych słowników angielskich online – definicje, wymowa i przykłady użycia.</div>
@@ -1730,7 +1895,7 @@ footer{
           </a>
 
           <a class="rec-item" href="https://www.youtube.com/c/EnglishwithLucy" target="_blank">
-            <img class="rec-logo rec-logo-photo" src="Obrazki/English-with-Lucy-photo.jpg" alt="English with Lucy">
+            <img class="rec-logo rec-logo-photo" src="img/loga/english-with-lucy-photo.jpg" alt="English with Lucy">
             <div class="rec-content">
               <div class="rec-name">English with Lucy</div>
               <div class="rec-desc">Popularny kanał YouTube do nauki angielskiego – słownictwo, gramatyka i wymowa po angielsku.</div>
@@ -1741,7 +1906,7 @@ footer{
           </a>
 
           <a class="rec-item" href="https://www.diki.pl/" target="_blank">
-            <img class="rec-logo" src="Obrazki/diki_logo.svg" alt="Diki">
+            <img class="rec-logo" src="img/loga/diki-logo.svg" alt="Diki">
             <div class="rec-content">
               <div class="rec-name">Diki.pl</div>
               <div class="rec-desc">Polsko-angielski słownik online z wymową, przykładami i odmianą wyrazów.</div>
@@ -1752,7 +1917,7 @@ footer{
           </a>
 
           <a class="rec-item" href="https://www.gamestolearnenglish.com/" target="_blank">
-            <img class="rec-logo" src="Obrazki/games-to-learn-english-logo.png" alt="Games to Learn English">
+            <img class="rec-logo" src="img/loga/games-to-learn-english-logo.png" alt="Games to Learn English">
             <div class="rec-content">
               <div class="rec-name">Games to Learn English</div>
               <div class="rec-desc">Nauka angielskiego przez gry – słownictwo, pisownia i gramatyka w formie zabawy.</div>
@@ -1763,7 +1928,7 @@ footer{
           </a>
 
           <a class="rec-item" href="https://kwadransnaangielski.pl/" target="_blank">
-            <img class="rec-logo" src="Obrazki/kna-logo.png" alt="Kwadrans na Angielski">
+            <img class="rec-logo" src="img/loga/kna-logo.png" alt="Kwadrans na Angielski">
             <div class="rec-content">
               <div class="rec-name">Kwadrans na Angielski</div>
               <div class="rec-desc">Krótkie, przystępne lekcje angielskiego po polsku – idealne na szybką naukę każdego dnia.</div>
@@ -1774,7 +1939,7 @@ footer{
           </a>
 
           <a class="rec-item" href="https://www.umiemyangielski.pl/" target="_blank">
-            <img class="rec-logo" src="Obrazki/umiemy-to-logo.svg" alt="Umiemy Angielski">
+            <img class="rec-logo" src="img/loga/umiemy-to-logo.svg" alt="Umiemy Angielski">
             <div class="rec-content">
               <div class="rec-name">Umiemy Angielski</div>
               <div class="rec-desc">Polska platforma do nauki angielskiego z ćwiczeniami, testami i materiałami na różnych poziomach.</div>
@@ -1785,7 +1950,7 @@ footer{
           </a>
 
           <a class="rec-item" href="https://babadum.com/" target="_blank">
-            <img class="rec-logo" src="Obrazki/loga/babadum-logo.jpg" alt="BABADUM">
+            <img class="rec-logo" src="img/loga/babadum-logo.jpg" alt="BABADUM">
             <div class="rec-content">
               <div class="rec-name">BABADUM</div>
               <div class="rec-desc">Darmowa gra do nauki słownictwa w kilkunastu językach – nauka obrazkowa przez minigry z wymową lektora.</div>
@@ -1796,7 +1961,7 @@ footer{
           </a>
 
           <a class="rec-item" href="https://www.bbc.co.uk/learningenglish/" target="_blank">
-            <img class="rec-logo" src="Obrazki/loga/bbc-logo.png" alt="BBC Learning English">
+            <img class="rec-logo" src="img/loga/bbc-logo.png" alt="BBC Learning English">
             <div class="rec-content">
               <div class="rec-name">BBC Learning English</div>
               <div class="rec-desc">Darmowa platforma BBC do nauki angielskiego – kursy, filmy, podcasty i ćwiczenia na każdym poziomie zaawansowania.</div>
@@ -1807,7 +1972,7 @@ footer{
           </a>
 
           <a class="rec-item" href="https://www.merriam-webster.com/" target="_blank">
-            <img class="rec-logo" src="Obrazki/loga/merriam-webster-logo.png" alt="Merriam-Webster">
+            <img class="rec-logo" src="img/loga/merriam-webster-logo.png" alt="Merriam-Webster">
             <div class="rec-content">
               <div class="rec-name">Merriam-Webster</div>
               <div class="rec-desc">Klasyczny słownik amerykańskiego angielskiego – definicje, wymowa, synonimy oraz etymologia słów.</div>
@@ -1818,7 +1983,7 @@ footer{
           </a>
 
           <a class="rec-item" href="https://pbskids.org/" target="_blank">
-            <img class="rec-logo" src="Obrazki/loga/pbs-kids-logo.svg" alt="PBS KIDS">
+            <img class="rec-logo" src="img/loga/pbs-kids-logo.svg" alt="PBS KIDS">
             <div class="rec-content">
               <div class="rec-name">PBS KIDS</div>
               <div class="rec-desc">Amerykański serwis dla dzieci z grami, bajkami i animacjami – świetne źródło prostego, naturalnego angielskiego dla początkujących.</div>
@@ -1829,7 +1994,7 @@ footer{
           </a>
 
           <a class="rec-item" href="https://www.seeingspeech.ac.uk/ipa-charts/" target="_blank">
-            <img class="rec-logo" src="Obrazki/loga/seeing-speech-logo.png" alt="Seeing Speech">
+            <img class="rec-logo" src="img/loga/seeing-speech-logo.png" alt="Seeing Speech">
             <div class="rec-content">
               <div class="rec-name">Seeing Speech</div>
               <div class="rec-desc">Interaktywne tablice IPA z nagraniami wideo i USG pokazującymi, jak układać język i usta przy wymowie każdego dźwięku angielskiego.</div>
@@ -1840,7 +2005,7 @@ footer{
           </a>
 
           <a class="rec-item" href="https://www.youtube.com/@sozox/videos" target="_blank">
-            <img class="rec-logo rec-logo-photo" src="Obrazki/loga/speak-sozo-english-logo.jpg" alt="SOZO-X">
+            <img class="rec-logo rec-logo-photo" src="img/loga/speak-sozo-english-logo.jpg" alt="SOZO-X">
             <div class="rec-content">
               <div class="rec-name">SOZO-X</div>
               <div class="rec-desc">SPEAK ENGLISH WITH SOZO-X is a free YouTube Channel for English learners. Start speaking English in minutes with Audio and Video lessons.</div>
@@ -1851,7 +2016,7 @@ footer{
           </a>
 
           <a class="rec-item" href="https://www.ted.com/" target="_blank">
-            <img class="rec-logo" src="Obrazki/loga/ted-logo.png" alt="TED">
+            <img class="rec-logo" src="img/loga/ted-logo.png" alt="TED">
             <div class="rec-content">
               <div class="rec-name">TED</div>
               <div class="rec-desc">Inspirujące prelekcje ekspertów z całego świata – świetne źródło żywego, naturalnego angielskiego z napisami i transkrypcjami.</div>
@@ -1862,7 +2027,7 @@ footer{
           </a>
 
           <a class="rec-item" href="https://www.vocabulary.com/" target="_blank">
-            <img class="rec-logo" src="Obrazki/loga/vocabulary-com-logo.png" alt="Vocabulary.com">
+            <img class="rec-logo" src="img/loga/vocabulary-com-logo.png" alt="Vocabulary.com">
             <div class="rec-content">
               <div class="rec-name">Vocabulary.com</div>
               <div class="rec-desc">Inteligentny trener słownictwa – uczy nowych słów w kontekście, dopasowuje pytania do Twojego poziomu i pilnuje, żebyś nie zapomniał.</div>
@@ -1873,8 +2038,7 @@ footer{
           </a>
 
           <a class="rec-item" href="https://www.clozemaster.com/" target="_blank">
-            <!-- TODO: wklej link do logo Clozemaster w src poniżej -->
-            <img class="rec-logo" src="https://placehold.co/88x88?text=Clozemaster" alt="Clozemaster">
+            <img class="rec-logo" src="img/loga/clozemaster-logo.png" alt="Clozemaster">
             <div class="rec-content">
               <div class="rec-name">Clozemaster</div>
               <div class="rec-desc">Prosta aplikacja do nauki języków przez uzupełnianie luk w zdaniach. Czysty, skuteczny sposób na osłuchanie się ze słownictwem w naturalnym kontekście.</div>
@@ -1885,8 +2049,7 @@ footer{
           </a>
 
           <a class="rec-item" href="https://apps.ankiweb.net/" target="_blank">
-            <!-- TODO: wklej link do logo Anki w src poniżej -->
-            <img class="rec-logo" src="https://placehold.co/88x88?text=Anki" alt="Anki Flashcards">
+            <img class="rec-logo" src="img/loga/anki-logo.png" alt="Anki Flashcards">
             <div class="rec-content">
               <div class="rec-name">Anki Flashcards</div>
               <div class="rec-desc">Potężny program do fiszek z systemem powtórek rozłożonych w czasie. Idealny do zapamiętywania słówek i utrwalania ich na długo.</div>
@@ -1911,10 +2074,14 @@ footer{
       <p class="sec-lead reveal" data-delay="2">Wybrane perełki z internetu, które warto zobaczyć.</p>
     </div>
 
-    <div class="coming-soon reveal">
-      <div class="coming-soon-icon">🎬</div>
-      <div class="coming-soon-text"><em>Wkrótce.</em></div>
-      <div class="coming-soon-sub">Już niedługo pojawią się tutaj polecane filmiki, artykuły i inne materiały do nauki angielskiego.</div>
+    <div class="video-embed reveal">
+      <iframe
+        src="https://www.youtube-nocookie.com/embed/nsrTJ8tjEDw?list=PLJ-cNWgEeSuaA4zKhK_cwAhs8wFYssiYX&rel=0"
+        title="Filmik od Roberta"
+        frameborder="0"
+        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+        referrerpolicy="strict-origin-when-cross-origin"
+        allowfullscreen></iframe>
     </div>
   </div>
 </section>
@@ -1932,13 +2099,23 @@ footer{
 
 <script>
 (function() {
-  /* ─── SCROLL PROGRESS ─── */
-  const progress = document.getElementById('scroll-progress');
-  window.addEventListener('scroll', () => {
-    const h = document.documentElement;
-    const scrolled = (h.scrollTop) / (h.scrollHeight - h.clientHeight);
-    progress.style.width = (scrolled * 100) + '%';
-  }, {passive:true});
+  /* ─── MENU MOBILNE ─── */
+  var navToggle = document.getElementById('nav-toggle');
+  var navLinks = document.getElementById('nav-links');
+  if (navToggle && navLinks) {
+    navToggle.addEventListener('click', function() {
+      var isOpen = navLinks.classList.toggle('open');
+      navToggle.classList.toggle('open');
+      navToggle.setAttribute('aria-expanded', isOpen ? 'true' : 'false');
+    });
+    navLinks.querySelectorAll('a').forEach(function(link) {
+      link.addEventListener('click', function() {
+        navLinks.classList.remove('open');
+        navToggle.classList.remove('open');
+        navToggle.setAttribute('aria-expanded', 'false');
+      });
+    });
+  }
 
   /* ─── SCROLL REVEAL ─── */
   const io = new IntersectionObserver((entries) => {
