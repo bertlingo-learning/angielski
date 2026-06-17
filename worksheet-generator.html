@@ -1114,38 +1114,36 @@ pies	dog
       <div class="tsv-example-wrap" id="tsvExampleBox">
         <div class="tsv-example-head">
           <div class="tsv-example-info">
-            <strong>Przykładowe dane TSV</strong> dopasowane do wszystkich typów zadań. Kolumna <code>tasks</code> (opcjonalna) ogranicza wiersz do konkretnych typów. Puste = wiersz idzie do wszystkich zaznaczonych typów. Skróty: <code>f</code>=flashcards, <code>m</code>=matching, <code>s</code>=scramble, <code>q</code>=quiz, <code>u</code>=unscramble, <code>c</code>=cornell, <code>g</code>=gapfill, <code>t</code>=translate, <code>w</code>=writing. Quiz z własnymi odpowiedziami: w kolumnie <code>en</code> oddziel opcje kreską, np. <code>cat|cut|cot|cap</code> - pierwsza jest poprawna, pytanie używa dokładnie tych opcji (globalna liczba opcji go nie dotyczy), a w pozostałych zadaniach wiersz działa jak samo <code>cat</code>.
+            <strong>Przykładowe dane TSV</strong> dopasowane do różnych typów zadań. Kolumna <code>tasks</code> (opcjonalna) ogranicza wiersz do konkretnych typów. Puste = wiersz idzie do wszystkich zaznaczonych typów. Skróty: <code>f</code>=flashcards, <code>m</code>=matching, <code>s</code>=scramble, <code>q</code>=quiz, <code>u</code>=unscramble, <code>c</code>=cornell, <code>g</code>=gapfill, <code>t</code>=translate, <code>w</code>=writing. Możesz podać kilka tagów po przecinku (np. <code>f,m</code>), ale zwykle czytelniej jest dać jeden tag na wiersz. Quiz z własnymi odpowiedziami: w kolumnie <code>en</code> oddziel opcje kreską, np. <code>cat|cut|cot|cap</code> - pierwsza jest poprawna, pytanie używa dokładnie tych opcji (globalna liczba opcji go nie dotyczy), a w pozostałych zadaniach wiersz działa jak samo <code>cat</code>. Kolumna <code>distractors</code> (opcjonalna): atrapy oddzielone kreską, np. <code>commuter|commute</code>. W zadaniu Matching dokładają do prawej kolumny dodatkowe słowa bez pary, których nie da się połączyć - utrudnienie. Zbierane są z całej części sekcji.
           </div>
           <button type="button" class="tsv-example-use" id="tsvExampleUse" title="Wklej te dane do pola">📋 Użyj tych danych</button>
         </div>
-        <div class="tsv-example-box" id="tsvExampleData">pl	en	tasks
-kot	cat	
-pies	dog	
-ptak	bird	
-ryba	fish	
-koń	horse	
-krowa	cow	
-owca	sheep	
-kura	chicken	
-słońce	sun	f,m,s,q
-księżyc	moon	f,m,s,q
-gwiazda	star	f,m,s,q
-chmura	cloud	f,m,s,q
-statek	ship|sheep|shop|chip	q
-Lubię uczyć się angielskiego.	I like learning English.	u,t
-Gdzie jest najbliższa stacja?	Where is the nearest station?	u,t
-Mój brat mieszka w Krakowie.	My brother lives in Krakow.	u,t
-Wczoraj padał deszcz cały dzień.	Yesterday it rained all day.	u,t
-Mam dwa koty i jednego psa.	I have two cats and one dog.	u,t
-Idę do szkoły o ósmej rano.	I {go} to school at eight in the morning.	g
-Ona pije kawę każdego ranka.	She {drinks} coffee every morning.	g
-Oni mieszkają w dużym domu.	They {live} in a {big} house.	g
-Czytam książkę przed snem.	I {read} a book before bed.	g
-Co lubisz robić w wolnym czasie?	I like reading books and listening to music.	c
-Jaka jest twoja ulubiona pora roku?	My favourite season is spring because everything wakes up.	c
-Dlaczego uczysz się języków obcych?	Languages open doors to new cultures and friendships.	c
-Opisz swój idealny dzień.	Write 5-8 sentences about how you would spend your perfect day.	w
-Napisz krótki email do przyjaciela o ostatnim weekendzie.	Use past simple. Include at least 3 things you did.	w</div>
+        <div class="tsv-example-box" id="tsvExampleData">pl	en	tasks	distractors
+kot	cat	m	kitten|cats
+pies	dog	m	
+ptak	bird	m	
+ryba	fish	m	fishing
+słońce	sun	f	
+księżyc	moon	f	
+gwiazda	star	f	
+chmura	cloud	f	
+dziękuję	thank you	s	
+przepraszam	sorry	s	
+proszę	please	s	
+statek	ship|sheep|shop|chip	q	
+jabłko	apple|orange|grape|lemon	q	
+Lubię uczyć się angielskiego.	I like learning English.	u	
+Gdzie jest najbliższa stacja?	Where is the nearest station?	u	
+Mój brat mieszka w Krakowie.	My brother lives in Krakow.	u	
+Idę do szkoły o ósmej rano.	I {go} to school at eight in the morning.	g	
+Ona pije kawę każdego ranka.	She {drinks} coffee every morning.	g	
+Oni mieszkają w dużym domu.	They {live} in a {big} house.	g	
+Jak przetłumaczysz "dzień dobry"?	Good morning.	t	
+Przetłumacz: "Do zobaczenia jutro."	See you tomorrow.	t	
+Co lubisz robić w wolnym czasie?	I like reading books and listening to music.	c	
+Jaka jest twoja ulubiona pora roku?	My favourite season is spring because everything wakes up.	c	
+Opisz swój idealny dzień.	Write 5-8 sentences about how you would spend your perfect day.	w	
+Napisz krótki email do przyjaciela o weekendzie.	Use past simple. Include at least 3 things you did.	w	</div>
       </div>
       <div class="tsv-status" id="tsvStatus">
         <span class="icon">ⓘ</span> Wklej dane, żeby zobaczyć dostępne typy zadań.
@@ -1415,18 +1413,19 @@ Napisz krótki email do przyjaciela o ostatnim weekendzie.	Use past simple. Incl
       <label class="checkbox-row">
         <input type="checkbox" id="difficultyEnabled" checked>
         <span class="checkbox-mark"></span>
-        <span class="checkbox-label">Dodaj przyciski oceny trudności (1-4, jak w Anki) do każdego słówka / podzadania</span>
+        <span class="checkbox-label">Dodaj przyciski oznaczania trudności (nowe + 4 oceny jak w Anki) do każdego słówka / podzadania</span>
       </label>
     </div>
 
     <div class="field" id="difficultyConfig">
       <div class="tts-info">
-        ⓘ Przy każdym elemencie karty pojawią się cztery małe przyciski:
-        <strong style="color:#dc2626">1 · nie umiem</strong>,
-        <strong style="color:#d97706">2 · trudne</strong>,
-        <strong style="color:#16a34a">3 · dobre</strong>,
-        <strong style="color:#2563eb">4 · łatwe</strong>.
-        W zadaniu Matching oceniasz parę zaraz po jej poprawnym połączeniu (nakładka na kafelku), a potem możesz zmienić ocenę klikając plakietkę obok kafelka. Oceny zapisują się automatycznie razem z postępem, a po kliknięciu „⤓ TSV" trafiają do pliku jako kolumna <strong>difficulty</strong> (wiersze bez oceny zostają puste). Ponowne kliknięcie wybranej oceny usuwa ją.
+        ⓘ Przy każdym elemencie karty pojawi się pięć małych przycisków z symbolami (bez cyfr):
+        <strong style="color:#6b7280">✦ · nowe słowo</strong>,
+        <strong style="color:#dc2626">✕ · nie umiem</strong>,
+        <strong style="color:#d97706">▲ · trudne</strong>,
+        <strong style="color:#16a34a">⬤ · dobre</strong>,
+        <strong style="color:#2563eb">✓ · łatwe</strong>.
+        Symbole są rozróżnialne także bez koloru (przyjazne dla daltonizmu). W zadaniu Matching oceniasz parę zaraz po jej poprawnym połączeniu (nakładka na kafelku), a potem możesz zmienić ocenę klikając plakietkę obok kafelka. Oznaczenia zapisują się automatycznie razem z postępem, a po kliknięciu „⤓ TSV" trafiają do pliku jako kolumna <strong>difficulty</strong> (wiersze bez oznaczenia zostają puste). Ponowne kliknięcie wybranego symbolu usuwa go.
       </div>
     </div>
   </div>
@@ -1496,7 +1495,7 @@ const STATE = {
   // w wygenerowanej karcie + uzywana w teście w generatorze.
   ttsRate: 0.75,
   logoEnabled: true,
-  logoUrl: 'https://bertlingo-learning.github.io/Angielski/Obrazki/loga/ewr-logo.svg',
+  logoUrl: 'https://english-robert.github.io/angielski/img/loga/ewr-logo.svg',
   // Sledzenie trudnosci (Anki-style 1-4). Domyslnie WLACZONE.
   difficultyEnabled: true
 };
@@ -1565,6 +1564,19 @@ function parseTSV(text) {
     if (obj.pl && obj.en) {
       // Parse tasks column if present (skróty f/m/s/q lub pełne nazwy, comma-separated)
       obj._tasks = parseTaskTags(obj.tasks || '');
+      // Kolumna "distractors": atrapy (np. dla matchingu) oddzielone "|".
+      // Spacje przycinane, puste i duplikaty (tez wzgledem poprawnej EN) usuwane.
+      obj._distractors = [];
+      if (obj.distractors && obj.distractors.includes('|') || (obj.distractors && obj.distractors.trim())) {
+        const seen = new Set(obj.en ? [obj.en.trim().toLowerCase()] : []);
+        obj._distractors = obj.distractors.split('|').map(p => p.trim()).filter(p => {
+          if (!p) return false;
+          const k = p.toLowerCase();
+          if (seen.has(k)) return false;
+          seen.add(k);
+          return true;
+        });
+      }
       rows.push(obj);
     }
   }
@@ -2795,6 +2807,17 @@ function escapeHtml(s) {
     .replace(/'/g, '&#39;');
 }
 
+// Owija emoji w <span class="ws-emoji"> tak, by w nagłówkach z gradientowym
+// tekstem (background-clip:text + text-fill-color:transparent) emoji NIE stawalo
+// sie przezroczyste/gradientowe. Span resetuje clip i przywraca normalny kolor.
+// WAZNE: wywolywac PO escapeHtml (emoji nie zawieraja znakow HTML-niebezpiecznych,
+// wiec doklejenie spanow po escape jest bezpieczne). Regex obejmuje typowe zakresy
+// emoji + selektory wariantow/ZWJ, pomijajac zwykle symbole tekstowe.
+const WS_EMOJI_RE = /(\p{Extended_Pictographic}(\u200d\p{Extended_Pictographic}|[\u{1F3FB}-\u{1F3FF}]|\uFE0F)*)/gu;
+function wrapEmoji(escaped) {
+  return String(escaped).replace(WS_EMOJI_RE, '<span class="ws-emoji">$1</span>');
+}
+
 // SVG flagi z OpenMoji (CC BY-SA 4.0) - inline żeby nie zależeć od CDN.
 // viewBox dopasowany do rzeczywistego prostokąta flagi (bez paddingu), żeby
 // obramowanie CSS przylegało dokładnie do krawędzi flagi.
@@ -3029,8 +3052,14 @@ function sectionImage(taskName) {
 // ============================================================
 // ŚLEDZENIE TRUDNOŚCI - helpery budujące widgety w karcie
 // ============================================================
-// Tytuly poziomow (Anki: again / hard / good / easy).
-const DIFF_TITLES = { 1: 'Nie umiem', 2: 'Trudne', 3: 'Dobre', 4: 'Łatwe' };
+// Tytuly poziomow. "new" = nowe slowo/wyrazenie (szary znacznik, przed ocenami).
+// Pozostale to klasyczne Anki: again / hard / good / easy.
+const DIFF_TITLES = { 'new': 'Nowe słowo dla mnie', 1: 'Nie umiem', 2: 'Trudne', 3: 'Dobre', 4: 'Łatwe' };
+// Symbole zamiast cyfr - wypelnione ksztalty rozroznialne takze bez koloru
+// (czern-biel / daltonizm). NIE sa to emoji, wiec renderuja sie spojnie.
+const DIFF_SYMBOLS = { 'new': '✦', 1: '✕', 2: '▲', 3: '⬤', 4: '✓' };
+// Kolejnosc poziomow w rzedzie przyciskow.
+const DIFF_LEVELS = ['new', 1, 2, 3, 4];
 
 // Zwraca globalny indeks wiersza w STATE.rows (potrzebny, bo buildery pracuja
 // na PRZEFILTROWANYCH tablicach rowsForTask, a oceny zapisujemy per wiersz danych).
@@ -3038,13 +3067,15 @@ function diffRowIdx(r) {
   return STATE.rows.indexOf(r);
 }
 
-// Kompaktowy rzad 4 przyciskow oceny. opts.label = maly napis "trudność" z przodu,
-// opts.cls = dodatkowa klasa CSS. Zwraca '' gdy funkcja wylaczona.
+// Kompaktowy rzad przyciskow oceny (5 poziomow: nowe + 4 oceny).
+// opts.label = maly napis "trudność" z przodu, opts.cls = dodatkowa klasa CSS.
+// Zwraca '' gdy funkcja wylaczona. Symbole sa w <span> dla spojnej animacji skali.
 function diffWidget(gi, opts = {}) {
   if (!STATE.difficultyEnabled || gi < 0) return '';
-  const btns = [1, 2, 3, 4].map(l =>
-    `<button type="button" class="ws-diff-btn ws-diff-${l}" data-level="${l}" onclick="wsSetDiff(event, ${gi}, ${l})" title="${DIFF_TITLES[l]}" aria-label="Trudność: ${DIFF_TITLES[l]}"><span class="ws-diff-num">${l}</span></button>`
-  ).join('');
+  const btns = DIFF_LEVELS.map(l => {
+    const cls = (l === 'new') ? 'ws-diff-new' : 'ws-diff-' + l;
+    return `<button type="button" class="ws-diff-btn ${cls}" data-level="${l}" onclick="wsSetDiff(event, ${gi}, '${l}')" title="${DIFF_TITLES[l]}" aria-label="Trudność: ${DIFF_TITLES[l]}"><span class="ws-diff-num">${DIFF_SYMBOLS[l]}</span></button>`;
+  }).join('');
   const lab = opts.label ? '<span class="ws-diff-lab">trudność</span>' : '';
   return `<div class="ws-diff${opts.cls ? ' ' + opts.cls : ''}" data-row="${gi}" role="group" aria-label="Oceń trudność">${lab}${btns}</div>`;
 }
@@ -3181,9 +3212,53 @@ function buildMatchingSection(num, options = {}) {
       <button class="tts-btn tts-btn-side match-solve-btn" onclick="solveMatchingOne_${num}(${i})" title="Rozwiąż tę parę" aria-label="Rozwiąż">✨</button>
       <button class="match-item match-pl" data-idx="${i}" onclick="pickMatch_${num}(this, 'pl')">${escapeHtml(r.pl)}</button>
     </div>`).join('');
-  const shuffledEn = shuffle(pairs.map((r, i) => ({ idx: i, en: r.en, gi: diffRowIdx(r) })));
+  // Atrapy (dystraktory): angielskie kafelki BEZ pary po lewej. Zbieramy je
+  // z wierszy tej czesci sekcji (te same 8 par), deduplikujemy wzgledem siebie
+  // i wzgledem prawdziwych odpowiedzi EN, zeby nie bylo dwoch identycznych kafelkow.
+  const realEnSet = new Set(pairs.map(r => r.en.trim().toLowerCase()));
+  const distractorSeen = new Set();
+  const distractors = [];
+  pairs.forEach(r => {
+    (r._distractors || []).forEach(d => {
+      const k = d.trim().toLowerCase();
+      if (!k || realEnSet.has(k) || distractorSeen.has(k)) return;
+      distractorSeen.add(k);
+      distractors.push(d);
+    });
+  });
+  // Prawa kolumna: prawdziwe pary (idx >= 0) + atrapy (idx = -1), wszystko potasowane.
+  const realItems = pairs.map((r, i) => ({ idx: i, en: r.en, gi: diffRowIdx(r), distractor: false }));
+  const distractorItems = distractors.map(d => ({ idx: -1, en: d, gi: -1, distractor: true }));
+  const shuffledEn = shuffle([...realItems, ...distractorItems]);
   const enList = shuffledEn.map(item => {
     const ttsBtn = `<button class="tts-btn tts-btn-side" onclick="ttsBtnClick(event, ${JSON.stringify(item.en).replace(/"/g, '&quot;')})" title="Czytaj" aria-label="Czytaj">🔊</button>`;
+    // Atrapa: kafelek bez pary (data-idx="-1"). Gdy wlaczone sledzenie trudnosci,
+    // dostaje TE SAMA strukture co prawdziwe kafelki (match-en-box + plakietka),
+    // zeby rozmiary byly spojne. Plakietka atrapy jest jednak nieaktywna -
+    // atrapy nie da sie ocenic, wiec nie generuje wpisu w TSV.
+    if (item.distractor) {
+      const enBtn = `<button class="match-item match-en match-distractor" data-idx="-1" onclick="pickMatch_${num}(this, 'en')">${escapeHtml(item.en)}</button>`;
+      if (STATE.difficultyEnabled) {
+        // WAŻNE: plakietka atrapy wyglada IDENTYCZNIE jak przy zwyklym kafelku
+        // (ten sam pytajnik, te same klasy), zeby atrapa NIE zdradzala sie przed
+        // polaczeniem. Roznica jest tylko funkcjonalna: klik nie otwiera oceny
+        // (wsBadgeClick wykrywa atrape po data-row="-1"). Po rozwiazaniu sekcji
+        // atrapa i tak znika (animacja), wiec nigdy nie wejdzie w stan "rated".
+        return `
+    <div class="match-item-wrap">
+      <div class="match-en-box">
+        ${enBtn}
+      </div>
+      <button type="button" class="ws-diff-badge" data-row="-1" onclick="wsBadgeClick(event, this)" title="Oceń trudność" aria-label="Oceń trudność">?</button>
+      ${ttsBtn}
+    </div>`;
+      }
+      return `
+    <div class="match-item-wrap">
+      ${enBtn}
+      ${ttsBtn}
+    </div>`;
+    }
     const enBtn = `<button class="match-item match-en" data-idx="${item.idx}" onclick="pickMatch_${num}(this, 'en')">${escapeHtml(item.en)}</button>`;
     // Z trudnoscia: kafelek owijamy .match-en-box (kotwica dla nakladki ktora
     // lezy TYLKO na kafelku), obok kwadratowa plakietka oceny i przycisk czytaj.
@@ -3311,6 +3386,7 @@ function buildMatchingJS(num, options = {}) {
           showSectionFeedback(${num}, true, '🔗 Wszystkie pary połączone!');
           markSectionDone(${num});
           confettiFire();
+          wsBurstDistractors('sec-${num}');
         }
       } else {
         _matchSelPL_${num}.classList.add('wrong');
@@ -3358,6 +3434,8 @@ function buildMatchingJS(num, options = {}) {
       });
       _matchedPairs_${num}.add(idx);
     });
+    // Atrapy (bez pary): efektowny rozpad na cząsteczki - znikają z karty i z wydruku.
+    wsBurstDistractors('sec-${num}');
     showSectionFeedback(${num}, true, '✓ Wszystkie pary pokazane');
     markSectionDone(${num});
   };
@@ -3396,6 +3474,7 @@ function buildMatchingJS(num, options = {}) {
     if (_matchedPairs_${num}.size === _matchTotal_${num}) {
       showSectionFeedback(${num}, true, '✓ Wszystkie pary połączone');
       markSectionDone(${num});
+      wsBurstDistractors('sec-${num}');
     }
   };
 `;
@@ -3420,7 +3499,6 @@ function buildScrambleSection(num, options = {}) {
       <div class="scramble-card" data-idx="${i}">
         <div class="scramble-prompt">
           <span class="scramble-pl">${escapeHtml(r.pl)}</span>
-          ${diffWidget(diffRowIdx(r), { label: true })}
         </div>
         <div class="scramble-letters">
           ${scrambled.toLowerCase().split('').map(ch => ch === ' '
@@ -3435,6 +3513,7 @@ function buildScrambleSection(num, options = {}) {
           <button class="scramble-solve-btn" onclick="solveScrambleOne_${num}(${i})" title="Rozwiąż to słowo" aria-label="Rozwiąż">✨</button>
           <button class="scramble-tts-btn tts-btn" onclick="ttsBtnClick(event, ${JSON.stringify(r.en).replace(/"/g, '&quot;')})" title="Posłuchaj" aria-label="Czytaj">🔊</button>
         </div>
+        ${diffRow(diffRowIdx(r))}
       </div>`;
   }).join('');
 
@@ -3711,8 +3790,8 @@ function buildUnscrambleSection(num, options = {}) {
           <button class="unsc-hint-btn" onclick="hintUnscramble_${num}(${i})">💡 Podpowiedź</button>
           <button class="unsc-solve-btn" onclick="solveUnscrambleOne_${num}(${i})">✨ Rozwiąż</button>
           <button class="unsc-clear-btn" onclick="clearUnscramble_${num}(${i})">Wyczyść</button>
-          ${diffWidget(diffRowIdx(r), { label: true, cls: 'ws-diff-push' })}
         </div>
+        ${diffRow(diffRowIdx(r))}
       </div>`;
   }).filter(s => s.length > 0).join('');
 
@@ -4484,9 +4563,9 @@ function buildWritingSection(num, options = {}) {
         <div class="write-print-note" aria-hidden="true"></div>
         <div class="write-footer">
           <span class="write-counter"><span class="write-counter-num">0</span> słów</span>
-          ${diffWidget(diffRowIdx(r), { label: true })}
           <button class="write-save" onclick="saveWrite_${num}(this)">✅ Gotowe</button>
         </div>
+        ${diffRow(diffRowIdx(r))}
       </div>`;
   }).join('');
 
@@ -4563,7 +4642,7 @@ ${bgEffectHTML}
     ${logoConfig.show ? `<div class="ws-logo ws-logo-top"><img src="${logoConfig.url}" alt="Logo" loading="lazy" /></div>` : ''}
     <div class="ws-header-text">
       <div class="ws-eyebrow">Worksheet</div>
-      <h1 class="ws-title">${escapeHtml(title)}</h1>
+      <h1 class="ws-title">${wrapEmoji(escapeHtml(title))}</h1>
       ${subtitle ? `<p class="ws-subtitle">${escapeHtml(subtitle)}</p>` : ''}
       <div class="ws-line"></div>
     </div>
@@ -4578,12 +4657,13 @@ ${bgEffectHTML}
   </div>
 
   ${difficulty ? `<div class="ws-diff-legend" aria-hidden="false">
-    <span class="ws-diff-legend-title">Oceń trudność:</span>
-    <span class="ws-diff-key"><span class="ws-diff-dot" style="background:#dc2626"></span>1 nie umiem</span>
-    <span class="ws-diff-key"><span class="ws-diff-dot" style="background:#d97706"></span>2 trudne</span>
-    <span class="ws-diff-key"><span class="ws-diff-dot" style="background:#16a34a"></span>3 dobre</span>
-    <span class="ws-diff-key"><span class="ws-diff-dot" style="background:#2563eb"></span>4 łatwe</span>
-    <span class="ws-diff-legend-hint">oceny zapisują się i trafiają do pliku TSV</span>
+    <span class="ws-diff-legend-title">Oznacz trudność:</span>
+    <span class="ws-diff-key"><span class="ws-diff-chip" style="background:#9ca3af">✦</span>nowe słowo</span>
+    <span class="ws-diff-key"><span class="ws-diff-chip" style="background:#dc2626">✕</span>nie umiem</span>
+    <span class="ws-diff-key"><span class="ws-diff-chip" style="background:#d97706">▲</span>trudne</span>
+    <span class="ws-diff-key"><span class="ws-diff-chip" style="background:#16a34a">⬤</span>dobre</span>
+    <span class="ws-diff-key"><span class="ws-diff-chip" style="background:#2563eb">✓</span>łatwe</span>
+    <span class="ws-diff-legend-hint">oznaczenia zapisują się i trafiają do pliku TSV</span>
   </div>` : ''}
 
   ${sectionsHTML}
@@ -4624,28 +4704,37 @@ function _wsHash(s) {
 }
 const WS_STORAGE_KEY = 'ws-progress-' + _wsHash(${JSON.stringify(title)} + '|' + ${JSON.stringify(sectionCount)} + '|' + JSON.stringify(WS_DATA));
 const WS_TTS = ${JSON.stringify(ttsConfig)};
-// ── ŚLEDZENIE TRUDNOŚCI (przyciski 1-4 jak w Anki) ─────
+// ── ŚLEDZENIE TRUDNOŚCI (nowe + 4 oceny jak w Anki) ─────
 const WS_DIFF_ENABLED = ${difficulty ? 'true' : 'false'};
-const WS_DIFF_LABELS = { 1: 'nie umiem', 2: 'trudne', 3: 'dobre', 4: 'łatwe' };
-const WS_DIFF_COLORS = { 1: '#dc2626', 2: '#d97706', 3: '#16a34a', 4: '#2563eb' };
+const WS_DIFF_LABELS = { 'new': 'nowe słowo', 1: 'nie umiem', 2: 'trudne', 3: 'dobre', 4: 'łatwe' };
+const WS_DIFF_COLORS = { 'new': '#9ca3af', 1: '#dc2626', 2: '#d97706', 3: '#16a34a', 4: '#2563eb' };
+// Symbole pokazywane na przyciskach i plakietkach (NIE cyfry, NIE emoji).
+const WS_DIFF_SYMBOLS = { 'new': '✦', 1: '✕', 2: '▲', 3: '⬤', 4: '✓' };
+// Wartosc zapisywana do kolumny TSV "difficulty" (czytelna i odwracalna przy imporcie).
+const WS_DIFF_TSV = { 'new': 'nowe', 1: '1 - nie umiem', 2: '2 - trudne', 3: '3 - dobre', 4: '4 - łatwe' };
 
-// Jesli zaimportowany TSV mial juz kolumne "difficulty" (np. "2 - trudne" albo
-// samo "3"), wczytaj te oceny jako stan poczatkowy - dziala round-trip.
+// Jesli zaimportowany TSV mial juz kolumne "difficulty" (np. "2 - trudne",
+// samo "3", albo "nowe"), wczytaj te oceny jako stan poczatkowy - dziala round-trip.
 if (WS_DIFF_ENABLED) {
   WS_DATA.forEach(r => {
-    const m = /^\\s*([1-4])/.exec(r.difficulty || '');
+    const raw = (r.difficulty || '').trim().toLowerCase();
+    if (!raw) return;
+    if (raw.startsWith('nowe') || raw === 'new') { r._diff = 'new'; return; }
+    const m = /^\\s*([1-4])/.exec(raw);
     if (m) r._diff = parseInt(m[1], 10);
   });
 }
 
 // Ustawia (lub zdejmuje - klik w te sama ocene) trudnosc wiersza danych.
 // rowIdx to indeks w WS_DATA, wspolny dla wszystkich sekcji uzywajacych
-// tego samego slowka - ocena synchronizuje sie wszedzie.
+// tego samego slowka - ocena synchronizuje sie wszedzie. level to 'new' albo 1-4.
 function wsSetDiff(event, rowIdx, level) {
   if (event) { event.stopPropagation(); event.preventDefault(); }
   const row = WS_DATA[rowIdx];
   if (!row) return;
-  row._diff = (row._diff === level) ? 0 : level;
+  // Cyfry przychodza jako stringi ('1'..'4') - normalizujemy do liczb; 'new' zostaje.
+  const lvl = (level === 'new') ? 'new' : parseInt(level, 10);
+  row._diff = (row._diff === lvl) ? 0 : lvl;
   wsPaintDiff(rowIdx);
   wsHideDiffOverlays();
   if (typeof wsScheduleSave === 'function') wsScheduleSave();
@@ -4654,20 +4743,23 @@ function wsSetDiff(event, rowIdx, level) {
 // Odswieza wyglad wszystkich widgetow i plakietek danego wiersza.
 function wsPaintDiff(rowIdx) {
   const lvl = (WS_DATA[rowIdx] && WS_DATA[rowIdx]._diff) || 0;
+  // Porownanie bezpieczne dla 'new' (string) i 1-4: dataset.level jest stringiem,
+  // wiec normalizujemy obie strony do stringa.
+  const lvlStr = String(lvl);
   document.querySelectorAll('.ws-diff[data-row="' + rowIdx + '"]').forEach(w => {
     w.querySelectorAll('.ws-diff-btn').forEach(b => {
-      b.classList.toggle('sel', parseInt(b.dataset.level, 10) === lvl);
+      b.classList.toggle('sel', b.dataset.level === lvlStr);
     });
-    if (lvl) w.setAttribute('data-sel', lvl); else w.removeAttribute('data-sel');
+    if (lvl) w.setAttribute('data-sel', lvlStr); else w.removeAttribute('data-sel');
   });
   document.querySelectorAll('.ws-diff-badge[data-row="' + rowIdx + '"]').forEach(b => {
     if (lvl) {
-      b.textContent = lvl;
+      b.textContent = WS_DIFF_SYMBOLS[lvl];
       b.classList.add('rated');
       b.style.background = WS_DIFF_COLORS[lvl];
       b.style.borderColor = WS_DIFF_COLORS[lvl];
       b.style.color = '#fff';
-      b.title = 'Trudność: ' + lvl + ' (' + WS_DIFF_LABELS[lvl] + '). Kliknij, żeby zmienić.';
+      b.title = 'Trudność: ' + WS_DIFF_LABELS[lvl] + '. Kliknij, żeby zmienić.';
     } else {
       b.textContent = '?';
       b.classList.remove('rated');
@@ -4701,6 +4793,9 @@ function wsHideDiffOverlays() {
 function wsBadgeClick(event, badge) {
   event.stopPropagation();
   event.preventDefault();
+  // Plakietka atrapy (data-row="-1") wyglada tak samo, ale nie da sie jej ocenic.
+  // Klik nic nie robi - dzieki temu atrapa nie zdradza sie az do rozwiazania sekcji.
+  if (badge.getAttribute('data-row') === '-1') return;
   const wrap = badge.closest('.match-item-wrap');
   const ov = wrap && wrap.querySelector('.ws-diff-overlay');
   if (!ov) return;
@@ -4858,6 +4953,23 @@ function bigCelebrate() {
     confetti({ particleCount: 8, spread: 100, origin: { y: Math.random() * 0.4 + 0.4 }, colors: WS_CONFETTI_COLORS });
     if (Date.now() < end) requestAnimationFrame(frame);
   })();
+}
+
+// Znikanie atrap: po ukonczeniu sekcji matching atrapy (kafelki bez pary)
+// znikaja z efektem "puff" - WSZYSTKIE NARAZ. Kafelek znika z ukladu (i z wydruku).
+// Idempotentne: kafelki juz oznaczone (.distractor-bursting/.distractor-gone) sa pomijane.
+function wsBurstDistractors(sectionId) {
+  const sec = document.getElementById(sectionId);
+  if (!sec) return;
+  const distractors = sec.querySelectorAll('.match-distractor:not(.distractor-bursting)');
+  distractors.forEach(tile => {
+    tile.classList.add('distractor-bursting');
+    // Po zakonczeniu animacji (0.42s) chowamy caly wrapper.
+    const wrap = tile.closest('.match-item-wrap') || tile;
+    setTimeout(() => {
+      wrap.classList.add('distractor-gone');
+    }, 440);
+  });
 }
 
 // ── PROGRES: ZAPIS I ODCZYT ──────────────────────────
@@ -5076,6 +5188,17 @@ function _wsRestoreMatching(data) {
         });
       }
     });
+    // Jesli wszystkie pary w sekcji sa juz polaczone (sekcja ukonczona),
+    // atrapy byly wczesniej rozbite - przy odtwarzaniu chowamy je BEZ animacji.
+    const totalPairs = sec.querySelectorAll('.match-pl').length;
+    const matchedPairs = sec.querySelectorAll('.match-pl.matched').length;
+    if (totalPairs > 0 && matchedPairs === totalPairs) {
+      sec.querySelectorAll('.match-distractor').forEach(tile => {
+        tile.classList.add('distractor-bursting');
+        const wrap = tile.closest('.match-item-wrap') || tile;
+        wrap.classList.add('distractor-gone');
+      });
+    }
   });
 }
 
@@ -5324,7 +5447,7 @@ function downloadTSV() {
   WS_DATA.forEach(row => {
     const cols = headers.map(h => {
       if (h === 'difficulty' && WS_DIFF_ENABLED) {
-        if (row._diff) return row._diff + ' - ' + WS_DIFF_LABELS[row._diff];
+        if (row._diff) return WS_DIFF_TSV[row._diff] || '';
         return row.difficulty || '';
       }
       const v = row[h];
@@ -5925,6 +6048,17 @@ ${t.extraBgCSS}
   print-color-adjust: exact;
   padding-bottom: 0.08em; /* zapas na dolne wydłużenia liter przy clip:text */
 }
+/* Emoji w gradientowym tytule: resetujemy clip i przezroczystosc, zeby emoji
+   zachowalo swoje wlasne kolory zamiast stac sie gradientowe/niewidoczne.
+   inline-block + odpowiednia szerokosc, by glif sie nie przycial. */
+.ws-title .ws-emoji {
+  background: none !important;
+  -webkit-background-clip: initial !important;
+  background-clip: initial !important;
+  -webkit-text-fill-color: initial !important;
+  color: initial !important;
+  display: inline-block;
+}
 .ws-subtitle {
   color: var(--ws-text-dim);
   margin-top: 0.7rem;
@@ -6378,6 +6512,32 @@ ${t.extraBgCSS}
   background: var(--ws-no-bg);
   color: var(--ws-no);
   animation: wsBuzz 0.5s, wsFlashWrong 0.6s ease-out;
+}
+/* === ZNIKANIE ATRAPY (puff) ===
+   Po ukonczeniu sekcji atrapa rozszerza sie i znika - jak rozwiany obloczek.
+   Animujemy WYLACZNIE transform + opacity (warstwa composite na GPU), bez filter
+   ani box-shadow - dzieki temu jest plynnie i nie przycina karty. */
+.match-item.match-distractor.distractor-bursting {
+  pointer-events: none;
+  position: relative;
+  z-index: 2;
+  transform: translateZ(0);
+  backface-visibility: hidden;
+  will-change: transform, opacity;
+  animation: wsDistractorPuff 0.42s ease-out forwards;
+}
+@keyframes wsDistractorPuff {
+  0%   { transform: scale(1); opacity: 1; }
+  100% { transform: scale(1.4); opacity: 0; }
+}
+/* Po animacji kafelek (i jego wrapper) znika z układu - także z wydruku. */
+.match-item-wrap.distractor-gone { display: none !important; }
+/* Szacunek dla preferencji ograniczonego ruchu - bez powiekszania, samo zniknięcie. */
+@media (prefers-reduced-motion: reduce) {
+  .match-item.match-distractor.distractor-bursting {
+    animation: wsDistractorFade 0.3s ease forwards;
+  }
+  @keyframes wsDistractorFade { to { opacity: 0; } }
 }
 @keyframes wsShake {
   0%, 100% { transform: translateX(0); }
@@ -7729,23 +7889,20 @@ ${t.extraBgCSS}
   margin-right: 0.2rem;
 }
 .ws-diff-btn {
-  /* Caly przycisk (ramka + cyfra) skaluje sie na hover. Zeby cyfra nie skakala
-     o piksel przy przeskalowaniu (sub-pikselowe zaokraglanie tekstu na malym
-     elemencie), wymuszamy warstwe kompozycji GPU JUZ W STANIE SPOCZYNKU przez
-     translateZ(0) + backface-visibility:hidden. Wtedy hover tylko mnozy istniejaca
-     teksture warstwy zamiast rasteryzowac tekst na nowo - calosc powieksza sie
-     jak jeden obraz, plynnie i bez drgania. */
-  width: 1.85rem; height: 1.85rem;
-  flex: 0 0 1.85rem;
+  /* Caly przycisk (ramka + symbol) skaluje sie na hover. Zeby symbol nie skakal
+     o piksel przy przeskalowaniu, wymuszamy warstwe kompozycji GPU JUZ W STANIE
+     SPOCZYNKU przez translateZ(0) + backface-visibility:hidden. Wtedy hover tylko
+     mnozy istniejaca teksture warstwy - calosc powieksza sie jak jeden obraz,
+     plynnie i bez drgania. */
+  width: 1.95rem; height: 1.95rem;
+  flex: 0 0 1.95rem;
   padding: 0;
   border-radius: 7px;
   border: 2px solid;
   background: var(--ws-card);
-  font-family: var(--ws-mono);
-  font-size: 0.85rem;
+  font-size: 0.92rem;
   font-weight: 700;
   line-height: 1;
-  font-variant-numeric: tabular-nums;
   display: inline-flex; align-items: center; justify-content: center;
   cursor: pointer;
   transform: translateZ(0) scale(1);
@@ -7760,14 +7917,18 @@ ${t.extraBgCSS}
 }
 .ws-diff-btn:hover { transform: translateZ(0) scale(1.14); }
 .ws-diff-btn:active { transform: translateZ(0) scale(0.92); }
+.ws-diff-new { color: #9ca3af; border-color: #9ca3af; }
 .ws-diff-1 { color: #dc2626; border-color: #dc2626; }
 .ws-diff-2 { color: #d97706; border-color: #d97706; }
 .ws-diff-3 { color: #16a34a; border-color: #16a34a; }
 .ws-diff-4 { color: #2563eb; border-color: #2563eb; }
+.ws-diff-new.sel { background: #9ca3af; color: #fff; }
 .ws-diff-1.sel { background: #dc2626; color: #fff; }
 .ws-diff-2.sel { background: #d97706; color: #fff; }
 .ws-diff-3.sel { background: #16a34a; color: #fff; }
 .ws-diff-4.sel { background: #2563eb; color: #fff; }
+/* Kolo "dobre" (⬤) jest optycznie cieższe - leciutko zmniejszamy, by pasowalo do reszty. */
+.ws-diff-3 .ws-diff-num { font-size: 0.82em; }
 /* Po dokonaniu wyboru pozostale przyciski przygasaja - widac wybor na pierwszy rzut oka. */
 .ws-diff[data-sel] .ws-diff-btn:not(.sel) { opacity: 0.38; }
 .ws-diff[data-sel] .ws-diff-btn:not(.sel):hover { opacity: 1; }
@@ -7796,6 +7957,13 @@ ${t.extraBgCSS}
 .ws-diff-legend-title { font-weight: 700; color: var(--ws-text); }
 .ws-diff-key { display: inline-flex; align-items: center; gap: 0.32rem; white-space: nowrap; }
 .ws-diff-dot { width: 0.8rem; height: 0.8rem; border-radius: 50%; display: inline-block; }
+.ws-diff-chip {
+  width: 1.35rem; height: 1.35rem;
+  border-radius: 5px;
+  display: inline-flex; align-items: center; justify-content: center;
+  color: #fff; font-size: 0.78rem; font-weight: 700; line-height: 1;
+  -webkit-print-color-adjust: exact; print-color-adjust: exact;
+}
 .ws-diff-legend-hint { width: 100%; text-align: center; font-size: 0.74rem; opacity: 0.75; }
 
 /* Fiszki: przyciski NAD karta, poza jej obszarem. */
@@ -7849,25 +8017,35 @@ ${t.extraBgCSS}
   border: 1.5px solid var(--ws-border-strong);
   background: var(--ws-card);
   color: var(--ws-text-dim);
-  font-family: var(--ws-mono);
   font-size: 0.95rem; font-weight: 700;
   line-height: 1;
-  font-variant-numeric: tabular-nums;
-  display: none;
+  display: inline-flex;
   align-items: center; justify-content: center;
-  cursor: pointer;
+  cursor: default;
+  /* Przed połączeniem pary plakietka jest przygaszona (i taka sama dla atrap,
+     wiec atrapa sie nie zdradza). Po polaczeniu staje sie pelna - patrz nizej. */
+  opacity: 0.4;
   /* Bez transform:scale na hover - plakietka jest trwalym przyciskiem, wiec
-     zamiast powiekszania (ktore ruszaloby cyfra) dajemy sygnal kolorem.
-     Dzieki temu liczba w plakietce nie drga ani o piksel. */
-  transition: background 0.15s, border-color 0.15s, color 0.15s, box-shadow 0.15s;
+     zamiast powiekszania (ktore ruszaloby symbolem) dajemy sygnal kolorem.
+     Dzieki temu symbol w plakietce nie drga ani o piksel. */
+  transition: background 0.15s, border-color 0.15s, color 0.15s, box-shadow 0.15s, opacity 0.2s;
 }
-.ws-diff-badge:hover {
+/* Po polaczeniu pary plakietka tego kafelka robi sie pelna i klikalna.
+   Oceniona plakietka (.rated, ustawiana przez JS) tez jest zawsze pelna. */
+.match-item-wrap:has(.match-en.matched) .ws-diff-badge,
+.ws-diff-badge.rated {
+  opacity: 1;
+  cursor: pointer;
+}
+/* Hover/active reagują tylko na pełne plakietki - przygaszona (w tym atrapa)
+   nie podswietla sie, wiec nie zdradza, ze cos sie da z nia zrobic. */
+.match-item-wrap:has(.match-en.matched) .ws-diff-badge:hover,
+.ws-diff-badge.rated:hover {
   border-color: var(--ws-accent);
   box-shadow: inset 0 0 0 1px var(--ws-accent);
 }
-.ws-diff-badge:active { background: var(--ws-accent-soft); }
-/* Plakietka pojawia sie dopiero, gdy para zostala polaczona. */
-.match-item-wrap:has(.match-en.matched) .ws-diff-badge { display: inline-flex; }
+.match-item-wrap:has(.match-en.matched) .ws-diff-badge:active,
+.ws-diff-badge.rated:active { background: var(--ws-accent-soft); }
 
 @media print {
   .ws-logo-bottom { display: none; }
@@ -7932,10 +8110,29 @@ ${t.extraBgCSS}
   }
   /* Ukryj przyciski TTS przy druku */
   .tts-btn { display: none !important; }
-  /* Śledzenie trudności to narzędzie do pracy na ekranie - w druku/PDF
-     przyciski, plakietki, nakładki i legenda znikają w całości. */
-  .ws-diff, .ws-diff-row, .ws-diff-overlay, .ws-diff-badge, .ws-diff-legend {
-    display: none !important;
+  /* Śledzenie trudności: na wydruku pokazujemy TYLKO dokonany wybór.
+     Słowo ocenione -> jeden symbol w kolorze; nieocenione -> nic.
+     Interaktywny rząd przycisków, nakładka i nieocenione plakietki znikają,
+     ale LEGENDA u góry zostaje, żeby było widać co oznaczają symbole/kolory. */
+  .ws-diff-overlay { display: none !important; }
+  /* Legenda zostaje na wydruku (z kolorami chipów), ale bez podpowiedzi o TSV. */
+  .ws-diff-legend-hint { display: none !important; }
+  /* Rząd przycisków: ukryj wszystkie poza wybranym. Sam kontener zostaje,
+     żeby wybrany symbol stał w miejscu. Gdy nic nie wybrano, kontener jest
+     pusty i nie zajmuje miejsca (brak widocznych dzieci). */
+  .ws-diff .ws-diff-btn:not(.sel) { display: none !important; }
+  .ws-diff .ws-diff-lab { display: none !important; }
+  .ws-diff-btn.sel {
+    display: inline-flex !important;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+  /* Plakietka oceny (matching): tylko oceniona ('rated'), nieoceniona i atrapowa znika. */
+  .ws-diff-badge { display: none !important; }
+  .ws-diff-badge.rated {
+    display: inline-flex !important;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
   }
   /* Ukryj wszystkie przyciski podpowiedzi i rozwiązań pojedynczych segmentów */
   .scramble-hint-btn, .scramble-solve-btn,
