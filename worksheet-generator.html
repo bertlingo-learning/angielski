@@ -5,6 +5,14 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Generator Kart Pracy</title>
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,700;0,9..144,900;1,9..144,400&family=JetBrains+Mono:wght@400;500;700&family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,500;12..96,600;12..96,700&display=swap" rel="stylesheet">
+<!-- ╔═══════════════════════════════════════════════════════════════════════╗
+     ║  DOMYŚLNY ZESTAW CZCIONEK UŻYTKOWNIKA                                  ║
+     ║  Aby go podmienić, zastąp poniższy <link> (ten z "family=Amaranth...") ║
+     ║  innym linkiem z Google Fonts. To jest jedyne miejsce z tym zestawem.  ║
+     ╚═══════════════════════════════════════════════════════════════════════╝ -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Amaranth:ital,wght@0,400;0,700;1,400;1,700&family=Exo+2:ital,wght@0,100..900;1,100..900&family=Joan&family=Katibeh&family=Libre+Baskerville:ital,wght@0,400..700;1,400..700&family=Lora:ital,wght@0,400..700;1,400..700&family=Montserrat+Alternates:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&family=Montserrat:ital,wght@0,100..900;1,100..900&family=Noto+Serif:ital,wght@0,100..900;1,100..900&family=Onest:wght@100..900&family=Paprika&family=Philosopher:ital,wght@0,400;0,700;1,400;1,700&family=Quicksand:wght@300..700&family=Signika:wght@300..700&display=swap" rel="stylesheet">
 <style>
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
@@ -103,6 +111,42 @@ body::before {
 .sec-title { font-family: var(--display); font-weight: 700; font-size: 1.4rem; letter-spacing: -0.015em; }
 .sec-desc { color: var(--text-dim); font-size: 0.85rem; margin-bottom: 1.2rem; margin-top: -0.6rem; padding-left: 2.65rem; }
 
+/* ── ROZWIJANE SEKCJE PANELU ──
+   Sekcje z klasą .collapsible mają klikalny nagłówek (.sec-head) i chowaną
+   treść (.sec-body). Po zwinięciu zostaje sam nagłówek, więc długie sekcje
+   (np. "Typy zadań") można schować bez przewijania całej strony. */
+.section.collapsible > .sec-head {
+  cursor: pointer;
+  user-select: none;
+  margin-bottom: 1.1rem;
+}
+.section.collapsible > .sec-head .sec-chevron {
+  margin-left: auto;
+  flex-shrink: 0;
+  width: 30px; height: 30px;
+  display: grid; place-items: center;
+  border-radius: 9px;
+  color: var(--accent);
+  background: var(--surface-2);
+  font-size: 1.05rem; line-height: 1;
+  transition: transform 0.25s cubic-bezier(0.16,1,0.3,1), background 0.15s;
+}
+.section.collapsible > .sec-head:hover .sec-chevron { background: var(--accent-dim); }
+.section.collapsible.collapsed > .sec-head { margin-bottom: 0; }
+.section.collapsible.collapsed > .sec-head .sec-chevron { transform: rotate(-90deg); }
+.section.collapsible.collapsed > .sec-body { display: none; }
+
+/* Podtytuły w połączonej sekcji "Opcje dodatkowe". */
+.subsec-title {
+  font-family: var(--display); font-weight: 700; font-size: 1.05rem;
+  color: var(--accent); letter-spacing: -0.01em;
+  margin-bottom: 0.85rem;
+  padding-bottom: 0.4rem;
+  border-bottom: 2px solid transparent;
+  border-image: linear-gradient(90deg, var(--border-bright) 0%, transparent 80%) 1;
+}
+.subsec-title-spaced { margin-top: 1.6rem; }
+
 /* INPUTS */
 .field { margin-bottom: 1rem; }
 .field:last-child { margin-bottom: 0; }
@@ -111,7 +155,7 @@ body::before {
   color: var(--text-dim); margin-bottom: 0.5rem;
   text-transform: uppercase; letter-spacing: 0.08em;
 }
-.input, .textarea {
+.input, .textarea, .select {
   width: 100%;
   background: var(--surface-2);
   border: 1px solid var(--border);
@@ -122,11 +166,12 @@ body::before {
   font-size: 0.95rem;
   transition: border-color 0.18s, background 0.18s;
 }
-.input:focus, .textarea:focus {
+.input:focus, .textarea:focus, .select:focus {
   outline: none;
   border-color: var(--accent);
   background: var(--bg);
 }
+.select { cursor: pointer; }
 .textarea {
   font-family: var(--mono);
   font-size: 0.85rem;
@@ -672,62 +717,65 @@ body::before {
   color: #fff;
 }
 
-/* PRESETS */
-.preset-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 0.8rem; }
-.preset-card {
+/* APPEARANCE EDITOR - background styles */
+.bg-style-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(110px, 1fr)); gap: 0.7rem; }
+.bg-style-btn {
   position: relative; cursor: pointer;
-  border: 1.5px solid var(--border);
-  border-radius: 12px;
-  overflow: hidden;
-  transition: all 0.2s;
-  aspect-ratio: 4/3;
+  display: flex; flex-direction: column; gap: 0.45rem;
+  padding: 0.5rem; background: var(--surface-2);
+  border: 1.5px solid var(--border); border-radius: 12px;
+  transition: all 0.18s; font: inherit; color: inherit; text-align: center;
 }
-.preset-card:hover { transform: scale(1.02); border-color: var(--border-bright); }
-.preset-card.selected { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(196, 245, 58, 0.15); }
-.preset-thumb { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; }
-.preset-name {
-  position: absolute; bottom: 0; left: 0; right: 0;
-  padding: 0.55rem 0.8rem;
-  background: linear-gradient(to top, rgba(0,0,0,0.85), transparent);
-  color: white; font-size: 0.85rem; font-weight: 600;
-  font-family: var(--display);
+.bg-style-btn:hover { border-color: var(--border-bright); transform: translateY(-1px); }
+.bg-style-btn.selected { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(196, 245, 58, 0.15); }
+.bg-style-thumb {
+  display: block; width: 100%; aspect-ratio: 16/10;
+  border-radius: 7px; overflow: hidden; background: #fffaff;
+  border: 1px solid var(--border);
 }
-
-/* PRESET THUMBNAILS - simulated previews */
-.thumb-vintage {
-  background: #faf7f2;
+.bg-style-name { font-size: 0.8rem; font-weight: 600; color: var(--text-dim); }
+.bg-style-btn.selected .bg-style-name { color: var(--text); }
+/* Miniaturki teł - uproszczone podglądy. Akcent demonstracyjny: różowy pastel. */
+.thumb-blobs {
+  background:
+    radial-gradient(ellipse 70% 60% at 0% 0%, rgba(214,90,138,0.55), transparent 62%),
+    radial-gradient(ellipse 60% 52% at 100% 100%, rgba(168,123,200,0.5), transparent 62%),
+    radial-gradient(ellipse 55% 48% at 95% 5%, rgba(126,181,212,0.52), transparent 62%),
+    radial-gradient(ellipse 55% 50% at 5% 100%, rgba(244,168,168,0.42), transparent 62%), #fffaff;
+  filter: blur(3px);
+}
+.thumb-dots {
+  background-image: radial-gradient(rgba(214,90,138,0.7) 1.5px, transparent 1.6px);
+  background-size: 10px 10px; background-color: #fffaff;
+}
+.thumb-grid {
   background-image:
-    repeating-linear-gradient(0deg, transparent, transparent 14px, rgba(26,20,16,0.05) 14px, rgba(26,20,16,0.05) 15px),
-    repeating-linear-gradient(90deg, transparent, transparent 14px, rgba(26,20,16,0.025) 14px, rgba(26,20,16,0.025) 15px);
+    linear-gradient(rgba(214,90,138,0.28) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(214,90,138,0.28) 1px, transparent 1px);
+  background-size: 16px 16px; background-color: #fffaff;
 }
-.thumb-vintage::before {
-  content: 'Aa'; font-family: 'Fraunces', serif; font-weight: 900; font-style: italic;
-  font-size: 3.5rem; color: #c0392b; line-height: 1;
+.thumb-none { background: #fffaff; }
+
+/* Font custom fields */
+.font-custom-wrap { display: grid; gap: 0.5rem; margin-top: 0.6rem; }
+.font-custom-hint { font-size: 0.78rem; color: var(--text-dim); line-height: 1.5; margin: 0.1rem 0 0; }
+.font-custom-hint code { background: var(--surface-2); padding: 0.05rem 0.3rem; border-radius: 4px; font-size: 0.92em; }
+.font-custom-steps { margin: 0.35rem 0 0; padding-left: 1.1rem; display: grid; gap: 0.2rem; }
+.font-custom-steps li { padding-left: 0.15rem; }
+
+/* Corner toggle */
+.corner-grid { display: grid; grid-template-columns: repeat(2, minmax(0,1fr)); gap: 0.7rem; max-width: 320px; }
+.corner-btn {
+  cursor: pointer; display: flex; align-items: center; gap: 0.6rem; justify-content: center;
+  padding: 0.7rem 0.9rem; background: var(--surface-2);
+  border: 1.5px solid var(--border); border-radius: 10px;
+  transition: all 0.18s; font: inherit; color: var(--text-dim); font-weight: 600;
 }
-.thumb-pastel {
-  background: linear-gradient(135deg, #fef3f0 0%, #f0f4ff 100%);
-}
-.thumb-pastel::before {
-  content: 'Aa'; font-family: 'Fraunces', serif; font-weight: 700;
-  font-size: 3.5rem; color: #e8a4b0; line-height: 1;
-}
-/* Atelier: czysta biel/kosc sloniowa, ostre rogi, granatowe Aa w wytwornym serifie.
-   Cienka kreska na dole sugeruje editorial layout.
-   UWAGA: nadpisujemy flex z .preset-thumb na grid, zeby ::before bylo wycentrowane,
-   a ::after (linia) moglo siedziec absolutnie bez zaburzania ukladu. */
-.thumb-atelier {
-  background: #fafaf7;
-}
-.thumb-atelier::before {
-  content: 'Aa';
-  font-family: 'Fraunces', Georgia, serif;
-  font-weight: 500;
-  font-style: italic;
-  font-size: 3.4rem;
-  color: #1a2847;
-  line-height: 1;
-  letter-spacing: -0.02em;
-}
+.corner-btn:hover { border-color: var(--border-bright); }
+.corner-btn.selected { border-color: var(--accent); color: var(--text); box-shadow: 0 0 0 3px rgba(196, 245, 58, 0.15); }
+.corner-thumb { width: 22px; height: 22px; border: 2px solid currentColor; flex-shrink: 0; }
+.corner-round { border-radius: 7px; }
+.corner-sharp { border-radius: 0; }
 
 /* COLOR PICKERS */
 .color-row { display: grid; grid-template-columns: repeat(3, 1fr); gap: 0.8rem; }
@@ -1079,7 +1127,7 @@ body::before {
 <div class="app">
   <header class="header">
     <div class="header-left">
-      <div class="eyebrow">Worksheet Generator · v0.1</div>
+      <div class="eyebrow">Worksheet Generator · v2.4</div>
       <h1>Karta <em>pracy</em><br>w 30 sekund</h1>
       <p>Wklej dane, wybierz styl i typy zadań, pobierz gotowy plik HTML. Działa offline, możesz wysłać uczniowi mailem albo wydrukować.</p>
     </div>
@@ -1087,7 +1135,7 @@ body::before {
   </header>
 
   <!-- SECTION 1: DATA -->
-  <div class="section">
+  <div class="section" data-collapsible="1">
     <div class="sec-head">
       <div class="sec-num">01</div>
       <div class="sec-title">Dane</div>
@@ -1153,7 +1201,7 @@ Napisz krótki email do przyjaciela o weekendzie.	Use past simple. Include at le
   </div>
 
   <!-- SECTION 2: TASK TYPES -->
-  <div class="section">
+  <div class="section" data-collapsible="1">
     <div class="sec-head">
       <div class="sec-num">02</div>
       <div class="sec-title">Typy zadań</div>
@@ -1260,54 +1308,105 @@ Napisz krótki email do przyjaciela o weekendzie.	Use past simple. Include at le
   </div>
 
   <!-- SECTION 3: STYLE -->
-  <div class="section">
+  <div class="section" data-collapsible="1">
     <div class="sec-head">
       <div class="sec-num">03</div>
       <div class="sec-title">Styl wizualny</div>
     </div>
 
     <div class="field">
-      <label class="label">Preset</label>
-      <div class="preset-grid" id="presetGrid">
-        <div class="preset-card selected" data-preset="vintage">
-          <div class="preset-thumb thumb-vintage"></div>
-          <div class="preset-name">Vintage Paper</div>
-        </div>
-        <div class="preset-card" data-preset="pastel">
-          <div class="preset-thumb thumb-pastel"></div>
-          <div class="preset-name">Soft Pastel</div>
-        </div>
-        <div class="preset-card" data-preset="atelier">
-          <div class="preset-thumb thumb-atelier"></div>
-          <div class="preset-name">Atelier</div>
+      <label class="label">Tło karty</label>
+      <div class="bg-style-grid" id="bgStyleGrid">
+        <button type="button" class="bg-style-btn selected" data-bg="blobs">
+          <span class="bg-style-thumb thumb-blobs"></span>
+          <span class="bg-style-name">Plamy</span>
+        </button>
+        <button type="button" class="bg-style-btn" data-bg="dots">
+          <span class="bg-style-thumb thumb-dots"></span>
+          <span class="bg-style-name">Kropki</span>
+        </button>
+        <button type="button" class="bg-style-btn" data-bg="grid">
+          <span class="bg-style-thumb thumb-grid"></span>
+          <span class="bg-style-name">Siatka</span>
+        </button>
+        <button type="button" class="bg-style-btn" data-bg="none">
+          <span class="bg-style-thumb thumb-none"></span>
+          <span class="bg-style-name">Brak</span>
+        </button>
+      </div>
+    </div>
+
+    <div class="field">
+      <label class="label">Czcionka</label>
+      <select id="fontSelect" class="select">
+        <option value="grotesque">Bricolage + Montserrat (nowoczesny)</option>
+        <option value="serif">Fraunces + Merriweather (elegancki serif)</option>
+        <option value="geometric">Space Grotesk + Inter (geometryczny)</option>
+        <option value="system">Systemowa (najszybsza, bez pobierania)</option>
+        <option value="custom">Własna (wklej link Google Fonts)</option>
+      </select>
+      <div id="fontCustomWrap" class="font-custom-wrap" style="display:none;">
+        <input type="text" id="fontCustomUrl" class="input" placeholder="1. Link z Google Fonts (jeden, może zawierać kilka rodzin)">
+        <input type="text" id="fontCustomFamily" class="input" placeholder="2. Nazwa rodziny do tekstu, np. Lora">
+        <input type="text" id="fontCustomDisplay" class="input" placeholder="3. (opcjonalnie) inna rodzina do nagłówków, np. Playfair Display">
+        <div class="font-custom-hint">
+          <strong>Jak to działa:</strong> wklejasz <em>jeden</em> link, nie dwa.
+          <ol class="font-custom-steps">
+            <li>Na <code>fonts.google.com</code> dodaj czcionkę (a jeśli chcesz osobną do nagłówków - dodaj też drugą).</li>
+            <li>Otwórz panel "Get embed code" i skopiuj sam adres z <code>&lt;link href="..."&gt;</code> - jeśli wybrałeś dwie rodziny, ten jeden link zawiera obie. Wklej go w pole 1.</li>
+            <li>W pole 2 wpisz nazwę rodziny do tekstu (to ta z <code>font-family</code>, np. <code>Lora</code>).</li>
+            <li>Pole 3 zostaw puste, żeby nagłówki też używały tej czcionki - albo wpisz drugą rodzinę, np. <code>Playfair Display</code>.</li>
+          </ol>
         </div>
       </div>
     </div>
 
     <div class="field">
-      <label class="label">Kolory (opcjonalnie - nadpisz domyślne dla presetu)</label>
+      <label class="label">Rogi elementów</label>
+      <div class="corner-grid">
+        <button type="button" class="corner-btn selected" data-corner="round">
+          <span class="corner-thumb corner-round"></span>
+          <span>Zaokrąglone</span>
+        </button>
+        <button type="button" class="corner-btn" data-corner="sharp">
+          <span class="corner-thumb corner-sharp"></span>
+          <span>Ostre</span>
+        </button>
+      </div>
+    </div>
+
+    <div class="field">
+      <label class="checkbox-row" for="headerGradientChk">
+        <input type="checkbox" id="headerGradientChk" checked>
+        <span class="checkbox-mark"></span>
+        <span class="checkbox-label">Gradient w tytule karty (kolorowy efekt na nagłówku). Wyłącz, żeby tytuł był jednolicie w kolorze akcentu.</span>
+      </label>
+    </div>
+
+    <div class="field">
+      <label class="label">Kolory (opcjonalnie - nadpisz domyślne)</label>
       <div class="color-row">
         <div class="color-field">
-          <input type="color" id="colorAccent" value="#c0392b">
+          <input type="color" id="colorAccent" value="#d65a8a">
           <div class="color-field-info">
             <div class="color-field-label">Akcent</div>
-            <div class="color-field-hex" id="colorAccentHex">#c0392b</div>
+            <div class="color-field-hex" id="colorAccentHex">#d65a8a</div>
           </div>
           <button type="button" class="color-reset" data-target="accent">RESET</button>
         </div>
         <div class="color-field">
-          <input type="color" id="colorBg" value="#fffaf0">
+          <input type="color" id="colorBg" value="#fffaff">
           <div class="color-field-info">
             <div class="color-field-label">Tło karty</div>
-            <div class="color-field-hex" id="colorBgHex">#fffaf0</div>
+            <div class="color-field-hex" id="colorBgHex">#fffaff</div>
           </div>
           <button type="button" class="color-reset" data-target="bg">RESET</button>
         </div>
         <div class="color-field">
-          <input type="color" id="colorText" value="#1f1a14">
+          <input type="color" id="colorText" value="#1a1414">
           <div class="color-field-info">
             <div class="color-field-label">Kolor tekstu</div>
-            <div class="color-field-hex" id="colorTextHex">#1f1a14</div>
+            <div class="color-field-hex" id="colorTextHex">#1a1414</div>
           </div>
           <button type="button" class="color-reset" data-target="text">RESET</button>
         </div>
@@ -1324,7 +1423,7 @@ Napisz krótki email do przyjaciela o weekendzie.	Use past simple. Include at le
   </div>
 
   <!-- SECTION 4: TTS -->
-  <div class="section">
+  <div class="section" data-collapsible="1">
     <div class="sec-head">
       <div class="sec-num">04</div>
       <div class="sec-title">Czytanie na głos (TTS)</div>
@@ -1378,13 +1477,16 @@ Napisz krótki email do przyjaciela o weekendzie.	Use past simple. Include at le
     </div>
   </div>
 
-  <!-- SECTION 5: LOGO -->
-  <div class="section">
+  <!-- SECTION 5: OPCJE DODATKOWE (Logo + Śledzenie trudności, połączone) -->
+  <div class="section" data-collapsible="1">
     <div class="sec-head">
       <div class="sec-num">05</div>
-      <div class="sec-title">Logo na karcie</div>
+      <div class="sec-title">Opcje dodatkowe</div>
     </div>
+    <div class="sec-desc">Logo na karcie oraz przyciski oznaczania trudności (jak w Anki).</div>
 
+    <!-- Podsekcja: Logo -->
+    <div class="subsec-title">Logo na karcie</div>
     <div class="field">
       <label class="checkbox-row">
         <input type="checkbox" id="logoEnabled" checked>
@@ -1400,15 +1502,9 @@ Napisz krótki email do przyjaciela o weekendzie.	Use past simple. Include at le
         ⓘ Logo ładuje się z podanego URL. Wymaga że URL jest publicznie dostępny i przeglądarka ma internet przy otwieraniu karty (po pierwszym otwarciu jest cache'owane). Domyślny URL wskazuje na twoje GitHub Pages.
       </div>
     </div>
-  </div>
 
-  <!-- SECTION 6: ŚLEDZENIE TRUDNOŚCI -->
-  <div class="section">
-    <div class="sec-head">
-      <div class="sec-num">06</div>
-      <div class="sec-title">Śledzenie trudności</div>
-    </div>
-
+    <!-- Podsekcja: Śledzenie trudności -->
+    <div class="subsec-title subsec-title-spaced">Śledzenie trudności</div>
     <div class="field">
       <label class="checkbox-row">
         <input type="checkbox" id="difficultyEnabled" checked>
@@ -1454,7 +1550,17 @@ Napisz krótki email do przyjaciela o weekendzie.	Use past simple. Include at le
 const STATE = {
   rows: [],
   headers: [],
-  preset: 'vintage',
+  // --- WYGLĄD (edytor zamiast presetów) ---
+  // Styl tła: 'blobs' (miękkie plamy), 'dots' (kropki), 'grid' (siatka), 'none'.
+  bgStyle: 'blobs',
+  // Zestaw czcionek: 'grotesque' | 'serif' | 'geometric' | 'system' | 'custom'.
+  fontKey: 'grotesque',
+  // Własna czcionka (gdy fontKey === 'custom'): { url, family, displayFamily }.
+  fontCustom: { url: '', family: '', displayFamily: '' },
+  // Rogi: true = ostre (0px), false = zaokrąglone.
+  sharpCorners: false,
+  // Gradient w tytule karty: true = kolorowy sweep, false = płaski akcent.
+  headerGradient: true,
   // Tryb kolorystyczny: tla sekcji/boxow/fiszek wyprowadzane z koloru akcentu
   accentDerived: false,
   customAccent: null,
@@ -1514,14 +1620,12 @@ const DEFAULT_INSTRUCTIONS = {
   writing:    'Napisz odpowiedź według polecenia. Kliknij "Gotowe", gdy skończysz.'
 };
 
-// Default colors per preset (cardBg, border, textDim itp. są wyliczane z akcentu w themach)
-const PRESET_DEFAULTS = {
-  vintage: { accent: '#c0392b', bg: '#fffaf0', text: '#1f1a14' },
-  pastel:  { accent: '#d65a8a', bg: '#fffaff', text: '#3a2c33' },
-  // Atelier: gleboki granat na cieplej kremowo-bialej (papier dokumentowy).
-  // Tekst niemal czarny, ale lekko cieplejszy niz #000 zeby pasowal do koloru tla.
-  atelier: { accent: '#1a2847', bg: '#fafaf7', text: '#1a1a1a' }
-};
+// Domyślne kolory wyglądu (startowo jak dawny pastel: jasne tło, ciemny tekst).
+// cardBg, border, textDim itp. wyliczane są w getPresetTheme / accentDerived.
+const APPEARANCE_DEFAULTS = { accent: '#d65a8a', bg: '#fffaff', text: '#1a1414' };
+// Zachowane pod starą nazwą dla zgodności ze starszym kodem, który mógł
+// odwoływać się do PRESET_DEFAULTS[STATE.preset].
+const PRESET_DEFAULTS = { custom: APPEARANCE_DEFAULTS };
 
 // ============================================================
 // TSV PARSING
@@ -1942,6 +2046,49 @@ function validateGenerate() {
 // ============================================================
 // EVENT LISTENERS
 // ============================================================
+
+// ── ROZWIJANE SEKCJE PANELU ──
+// Dla każdej sekcji z data-collapsible: dodaj klasę .collapsible, wstaw chevron
+// do nagłówka i zawiń całą treść po nagłówku w .sec-body, którą można schować.
+(function initCollapsibleSections() {
+  document.querySelectorAll('.section[data-collapsible="1"]').forEach(section => {
+    const head = section.querySelector(':scope > .sec-head');
+    if (!head) return;
+    section.classList.add('collapsible');
+
+    // Chevron w nagłówku.
+    const chevron = document.createElement('span');
+    chevron.className = 'sec-chevron';
+    chevron.textContent = '▾';
+    chevron.setAttribute('aria-hidden', 'true');
+    head.appendChild(chevron);
+
+    // Wszystko po nagłówku przenosimy do .sec-body.
+    const body = document.createElement('div');
+    body.className = 'sec-body';
+    let node = head.nextSibling;
+    while (node) {
+      const next = node.nextSibling;
+      body.appendChild(node);
+      node = next;
+    }
+    section.appendChild(body);
+
+    // Dostępność + klik.
+    head.setAttribute('role', 'button');
+    head.setAttribute('tabindex', '0');
+    head.setAttribute('aria-expanded', 'true');
+    const toggle = () => {
+      const collapsed = section.classList.toggle('collapsed');
+      head.setAttribute('aria-expanded', String(!collapsed));
+    };
+    head.addEventListener('click', toggle);
+    head.addEventListener('keydown', e => {
+      if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); toggle(); }
+    });
+  });
+})();
+
 document.getElementById('tsv').addEventListener('input', updateTSVStatus);
 
 document.getElementById('tsvExampleToggle').addEventListener('click', () => {
@@ -2561,23 +2708,46 @@ document.querySelectorAll('.suboption-buttons button').forEach(btn => {
   });
 });
 
-document.querySelectorAll('.preset-card').forEach(card => {
-  card.addEventListener('click', () => {
-    document.querySelectorAll('.preset-card').forEach(c => c.classList.remove('selected'));
-    card.classList.add('selected');
-    STATE.preset = card.dataset.preset;
-    const def = PRESET_DEFAULTS[STATE.preset];
-    document.getElementById('colorAccent').value = def.accent;
-    document.getElementById('colorAccentHex').textContent = def.accent;
-    document.getElementById('colorBg').value = def.bg;
-    document.getElementById('colorBgHex').textContent = def.bg;
-    document.getElementById('colorText').value = def.text;
-    document.getElementById('colorTextHex').textContent = def.text;
-    STATE.customAccent = null;
-    STATE.customBg = null;
-    STATE.customText = null;
+// --- EDYTOR WYGLĄDU (tła, czcionka, rogi) ---
+// Styl tła (segmentowane przyciski).
+document.querySelectorAll('.bg-style-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.bg-style-btn').forEach(b => b.classList.remove('selected'));
+    btn.classList.add('selected');
+    STATE.bgStyle = btn.dataset.bg;
   });
 });
+
+// Zestaw czcionek (select). 'custom' odsłania pola na własny link.
+const fontSelect = document.getElementById('fontSelect');
+const fontCustomWrap = document.getElementById('fontCustomWrap');
+if (fontSelect) {
+  fontSelect.addEventListener('change', e => {
+    STATE.fontKey = e.target.value;
+    if (fontCustomWrap) fontCustomWrap.style.display = (e.target.value === 'custom') ? 'grid' : 'none';
+  });
+}
+const fontCustomUrl = document.getElementById('fontCustomUrl');
+const fontCustomFamily = document.getElementById('fontCustomFamily');
+const fontCustomDisplay = document.getElementById('fontCustomDisplay');
+if (fontCustomUrl) fontCustomUrl.addEventListener('input', e => { STATE.fontCustom.url = e.target.value.trim(); });
+if (fontCustomFamily) fontCustomFamily.addEventListener('input', e => { STATE.fontCustom.family = e.target.value.trim(); });
+if (fontCustomDisplay) fontCustomDisplay.addEventListener('input', e => { STATE.fontCustom.displayFamily = e.target.value.trim(); });
+
+// Rogi: ostre / zaokrąglone (przełącznik).
+document.querySelectorAll('.corner-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.corner-btn').forEach(b => b.classList.remove('selected'));
+    btn.classList.add('selected');
+    STATE.sharpCorners = (btn.dataset.corner === 'sharp');
+  });
+});
+
+// Gradient w tytule karty (włącz/wyłącz).
+const headerGradChk = document.getElementById('headerGradientChk');
+if (headerGradChk) {
+  headerGradChk.addEventListener('change', e => { STATE.headerGradient = e.target.checked; });
+}
 
 document.getElementById('colorAccent').addEventListener('input', e => {
   STATE.customAccent = e.target.value;
@@ -2595,7 +2765,7 @@ document.getElementById('colorText').addEventListener('input', e => {
 document.querySelectorAll('.color-reset').forEach(btn => {
   btn.addEventListener('click', () => {
     const target = btn.dataset.target;
-    const def = PRESET_DEFAULTS[STATE.preset];
+    const def = APPEARANCE_DEFAULTS;
     if (target === 'accent') {
       document.getElementById('colorAccent').value = def.accent;
       document.getElementById('colorAccentHex').textContent = def.accent;
@@ -2954,8 +3124,7 @@ function downloadHTML(html) {
 function buildWorksheetHTML() {
   const title = document.getElementById('title').value.trim() || 'Vocabulary Practice';
   const subtitle = document.getElementById('subtitle').value.trim();
-  const preset = STATE.preset;
-  const def = PRESET_DEFAULTS[preset];
+  const def = APPEARANCE_DEFAULTS;
   const accent = STATE.customAccent || def.accent;
   const bg = STATE.customBg || def.bg;
   const textColor = STATE.customText || def.text;
@@ -3007,7 +3176,7 @@ function buildWorksheetHTML() {
   return buildWorksheetTemplate({
     title,
     subtitle,
-    preset,
+    preset: 'custom',
     accent,
     bg,
     textColor,
@@ -3809,7 +3978,11 @@ function buildUnscrambleSection(num, options = {}) {
   const rows = rowsForTask(taskKey);
   // każde zdanie -> słowa
   const items = rows.map((r, i) => {
-    const words = r.en.split(/\s+/).filter(w => w.length > 0);
+    // Jesli wiersz jest wspoldzielony z gap-fill (tagi u,g), w danych moga byc
+    // klamry {slowo} oznaczajace luke. W unscramble klamry nie maja sensu -
+    // usuwamy je, zostawiajac samo slowo. To samo robimy dalej dla TTS.
+    const enClean = r.en.replace(/\{([^}]+)\}/g, '$1');
+    const words = enClean.split(/\s+/).filter(w => w.length > 0);
     if (words.length < 2) return ''; // za krótkie - pomijamy ciche, ale generator nie zatrzymuje
     // mieszaj dopóki różny od oryginału (max 5 prób)
     let scrambled = words;
@@ -3827,7 +4000,7 @@ function buildUnscrambleSection(num, options = {}) {
       <div class="unsc-card" data-idx="${i}" data-correct='${correctJSON}'>
         <div class="unsc-prompt">
           <span class="unsc-pl">${escapeHtml(r.pl)}</span>
-          <button class="tts-btn tts-btn-unsc" onclick="ttsBtnClick(event, ${JSON.stringify(r.en).replace(/"/g, '&quot;')})" title="Posłuchaj poprawnego zdania" aria-label="Czytaj">🔊</button>
+          <button class="tts-btn tts-btn-unsc" onclick="ttsBtnClick(event, ${JSON.stringify(enClean).replace(/"/g, '&quot;')})" title="Posłuchaj poprawnego zdania" aria-label="Czytaj">🔊</button>
         </div>
         <div class="unsc-answer-area" data-section="${num}" data-card-idx="${i}">
           <div class="unsc-answer-empty">Kliknij słowa poniżej lub przeciągnij je tutaj</div>
@@ -3870,7 +4043,7 @@ function buildUnscrambleSection(num, options = {}) {
 
 function buildUnscrambleJS(num, options = {}) {
   const taskKey = options.taskKey || 'unscramble';
-  const rows = rowsForTask(taskKey).filter(r => r.en.split(/\s+/).filter(w => w.length > 0).length >= 2);
+  const rows = rowsForTask(taskKey).filter(r => r.en.replace(/\{([^}]+)\}/g, '$1').split(/\s+/).filter(w => w.length > 0).length >= 2);
   const total = rows.length;
   return `
   // ── SENTENCE UNSCRAMBLE (section ${num}) ──
@@ -4284,7 +4457,9 @@ function buildGapfillSection(num, options = {}) {
       if (p.type === 'text') return escapeHtml(p.text);
       // szerokość pola input: trochę więcej niż długość odpowiedzi
       const w = Math.max(p.answer.length + 2, 5);
-      return `<input type="text" class="gap-input" data-answer="${escapeHtml(p.answer.toLowerCase())}" data-gap-idx="${p.idx}" size="${w}" placeholder="✎" onkeydown="if(event.key==='Enter') checkGap_${num}(this)">`;
+      // Liczba słów w odpowiedzi - pokazywana jako ghost text w nawiasach, np. (1) lub (4).
+      const wordCount = p.answer.trim().split(/\s+/).filter(Boolean).length || 1;
+      return `<input type="text" class="gap-input" data-answer="${escapeHtml(p.answer.toLowerCase())}" data-gap-idx="${p.idx}" size="${w}" placeholder="(${wordCount})" onkeydown="if(event.key==='Enter') checkGap_${num}(this)">`;
     }).join('');
     // pełne zdanie EN bez klamr (do TTS)
     const enClean = r.en.replace(/\{([^}]+)\}/g, '$1');
@@ -4784,6 +4959,17 @@ ${bgEffectHTML}
             <button type="button" class="ws-review-sort-btn" data-sort="hist" onclick="wsSetReviewSort('hist')">historycznie</button>
           </div>
           <button type="button" class="ws-review-reveal-all" id="wsReviewRevealAll" onclick="wsRevealAllReview()">👁 Pokaż wszystkie</button>
+          <button type="button" class="ws-review-print" onclick="wsPrintReview()" title="Wydrukuj lub zapisz jako PDF samą powtórkę">🖨 Drukuj powtórkę</button>
+        </div>
+        <div class="ws-review-legend-wrap" aria-hidden="true">
+          <div class="ws-review-legend-title">Legenda ocen</div>
+          <div class="ws-review-legend">
+            <span class="ws-review-legend-item"><span class="ws-review-chip" style="background:#9ca3af">✦</span> nowe słowo</span>
+            <span class="ws-review-legend-item"><span class="ws-review-chip" style="background:#dc2626">✕</span> nie umiem / nie pamiętam</span>
+            <span class="ws-review-legend-item"><span class="ws-review-chip" style="background:#d97706">▲</span> trudne</span>
+            <span class="ws-review-legend-item"><span class="ws-review-chip" style="background:#16a34a">⬤</span> dobre</span>
+            <span class="ws-review-legend-item"><span class="ws-review-chip" style="background:#2563eb">✓</span> łatwe</span>
+          </div>
         </div>
         <div class="ws-review-result" id="wsReviewResult"></div>
       </div>
@@ -4857,6 +5043,46 @@ if (WS_DIFF_ENABLED) {
   });
 }
 
+// ── SCALANIE OCEN DLA IDENTYCZNYCH DANYCH ──
+// Dwa osobne wiersze TSV o IDENTYCZNYCH danych (pl + en) reprezentuja to samo
+// slowo - np. jeden z tagiem F (fiszki), drugi z tagiem M (matching). Bez
+// scalania ich oceny trudnosci byly niezalezne i slowo dublowalo sie w powtorce.
+//
+// WAZNE: klamry {} z gap-fill NIE sa usuwane z klucza. Dzieki temu zdanie
+// "I {go} home" (gap-fill) i "I go home" (unscramble) maja ROZNE klucze i
+// oceniane sa osobno - bo trudnosc ulozenia calego zdania to co innego niz
+// trudnosc wpisania jednego brakujacego slowa. Wiersze bez klamr (fiszki,
+// matching, quiz...) nadal scalaja sie ze soba normalnie.
+function _wsDiffKey(r) {
+  // Normalizacja: po trim/lowercase scalamy ciągi białych znaków do jednej spacji.
+  // Używamy filtra na pustych tokenach zamiast \\s w regexie, bo zagnieżdżone
+  // szablony zjadałyby backslash i psuły wzorzec.
+  const norm = s => String(s || '').trim().toLowerCase().split(' ').filter(Boolean).join(' ');
+  return norm(r.pl) + '||' + norm(r.en);
+}
+const _WS_DIFF_LINKS = {};  // klucz -> [indeksy]
+if (WS_DIFF_ENABLED) {
+  WS_DATA.forEach((r, i) => {
+    const k = _wsDiffKey(r);
+    (_WS_DIFF_LINKS[k] = _WS_DIFF_LINKS[k] || []).push(i);
+    r._diffKey = k;
+  });
+}
+// Zwraca indeksy wszystkich wierszy o tej samej tresci co wiersz pod rowIdx.
+function _wsLinkedIdx(rowIdx) {
+  const r = WS_DATA[rowIdx];
+  if (!r) return [rowIdx];
+  const list = _WS_DIFF_LINKS[r._diffKey];
+  return (list && list.length) ? list : [rowIdx];
+}
+// Ustawia ocene na wszystkich powiazanych wierszach i odswieza ich widgety.
+function _wsApplyDiffToLinked(rowIdx, lvl) {
+  _wsLinkedIdx(rowIdx).forEach(j => {
+    WS_DATA[j]._diff = lvl;
+    wsPaintDiff(j);
+  });
+}
+
 // Ustawia (lub zdejmuje - klik w te sama ocene) trudnosc wiersza danych.
 // rowIdx to indeks w WS_DATA, wspolny dla wszystkich sekcji uzywajacych
 // tego samego slowka - ocena synchronizuje sie wszedzie. level to 'new' albo 1-4.
@@ -4867,8 +5093,8 @@ function wsSetDiff(event, rowIdx, level) {
   wsSound('tap');
   // Cyfry przychodza jako stringi ('1'..'4') - normalizujemy do liczb; 'new' zostaje.
   const lvl = (level === 'new') ? 'new' : parseInt(level, 10);
-  row._diff = (row._diff === lvl) ? 0 : lvl;
-  wsPaintDiff(rowIdx);
+  const next = (row._diff === lvl) ? 0 : lvl;
+  _wsApplyDiffToLinked(rowIdx, next);   // scal ocene na wszystkie identyczne dane
   wsHideDiffOverlays();
   if (typeof wsUpdateReviewCount === 'function') wsUpdateReviewCount();
   if (typeof wsScheduleSave === 'function') wsScheduleSave();
@@ -5130,9 +5356,17 @@ let _wsReviewSort = 'level';
 const _WS_LEVEL_ORDER = { 'new': 0, 1: 1, 2: 2, 3: 3, 4: 4 };
 
 // Zwraca indeksy wierszy WS_DATA, ktore maja jakakolwiek ocene (sa "do powtorki").
+// Identyczne dane liczymy raz (klucz tresci), zeby licznik zgadzal sie z lista.
 function _wsRatedIdx() {
   const out = [];
-  WS_DATA.forEach((r, i) => { if (r._diff) out.push(i); });
+  const seen = new Set();
+  WS_DATA.forEach((r, i) => {
+    if (!r._diff) return;
+    const key = (WS_DIFF_ENABLED && r._diffKey) ? r._diffKey : ('idx' + i);
+    if (seen.has(key)) return;
+    seen.add(key);
+    out.push(i);
+  });
   return out;
 }
 
@@ -5196,6 +5430,26 @@ function wsRevealAllReview() {
   wsSound('tap');
 }
 
+// Drukuje (lub zapisuje do PDF) WYŁĄCZNIE panel szybkiej powtórki. Reszta karty
+// jest na czas druku ukryta przez klasę body.ws-print-review-only (reguły w
+// @media print). Odpowiedzi odsłaniamy, żeby na wydruku były widoczne pogrubione.
+function wsPrintReview() {
+  const body = document.getElementById('wsReviewBody');
+  if (body && body.hidden) { body.hidden = false; const t = document.getElementById('wsReviewToggle'); if (t) t.setAttribute('aria-expanded','true'); }
+  if (typeof wsBuildReview === 'function') wsBuildReview();
+  document.querySelectorAll('.ws-review-item-answer .ws-review-cover').forEach(c => {
+    c.parentNode.classList.add('revealed');
+  });
+  document.querySelectorAll('.ws-review-gap.covered').forEach(g => g.classList.remove('covered'));
+  document.body.classList.add('ws-print-review-only');
+  const cleanup = () => {
+    document.body.classList.remove('ws-print-review-only');
+    window.removeEventListener('afterprint', cleanup);
+  };
+  window.addEventListener('afterprint', cleanup);
+  setTimeout(() => window.print(), 60);
+}
+
 // Czy wiersz to gap-fill (ma tag 'gapfill' i klamry w en).
 function _wsIsGap(r) {
   const tasks = r._tasks || [];
@@ -5221,8 +5475,18 @@ function wsBuildReview() {
   }
   const want = new Set(checked.map(v => v === 'new' ? 'new' : parseInt(v, 10)));
   // Zbieramy indeksy (potrzebne do mini-oceny), zachowujac dostep do wiersza.
+  // Identyczne dane (ten sam klucz tresci) pokazujemy TYLKO raz - reprezentantem
+  // jest pierwszy napotkany wiersz. Dzieki temu slowo z tagami np. F i M nie
+  // dubluje sie na liscie powtorki.
   let items = [];
-  WS_DATA.forEach((r, i) => { if (want.has(r._diff)) items.push({ r: r, i: i }); });
+  const seenKeys = new Set();
+  WS_DATA.forEach((r, i) => {
+    if (!want.has(r._diff)) return;
+    const key = (WS_DIFF_ENABLED && r._diffKey) ? r._diffKey : ('idx' + i);
+    if (seenKeys.has(key)) return;
+    seenKeys.add(key);
+    items.push({ r: r, i: i });
+  });
   if (!items.length) {
     result.innerHTML = '<p class="ws-review-empty">Brak słów na wybranych poziomach. Oceń słowa w zadaniach albo zaznacz inne poziomy.</p>';
     return;
@@ -5256,6 +5520,11 @@ function wsBuildReview() {
         + '<span class="ws-diff-num">' + WS_DIFF_SYMBOLS[L] + '</span></button>';
     }).join('');
     const selAttr = lvl ? (' data-sel="' + String(lvl) + '"') : '';
+    // Znacznik oceny widoczny TYLKO na wydruku, umieszczony PRZED słowem PL.
+    // Dzięki temu na papierze ocena jest przy haśle, a nie w osobnej stopce.
+    const printRating = lvl
+      ? '<span class="ws-review-print-rating ws-diff-' + lvl + '" aria-hidden="true">' + WS_DIFF_SYMBOLS[lvl] + '</span>'
+      : '';
 
     // Strona odpowiedzi. Dla gap-fill: pelne zdanie widoczne, ale luki zaslo-
     // niete osobnymi nakladkami. Dla reszty: cala odpowiedz pod jedna nakladka.
@@ -5263,11 +5532,16 @@ function wsBuildReview() {
     if (isGap) {
       answerInner = '<span class="ws-review-ans-text">' + _wsRenderGapCovered(r) + '</span>';
     } else {
-      answerInner = '<span class="ws-review-ans-text">' + _wsEsc(r.en) + '</span>'
+      // Dla typow innych niz gap-fill odpowiedz jest jednym blokiem pod nakladka.
+      // Jesli w danych zostaly klamry {slowo} (np. wiersz wspoldzielony z gap-fill,
+      // ale tutaj traktowany jako cale zdanie), usuwamy klamry i pogrubiamy te slowa,
+      // zeby nie wyswietlaly sie surowe nawiasy ani nie ginelo pogrubienie.
+      answerInner = '<span class="ws-review-ans-text">' + _wsRenderAnswerText(r.en) + '</span>'
         + '<button type="button" class="ws-review-cover" onclick="wsToggleCover(this)" aria-label="Odsłoń lub zasłoń odpowiedź"></button>';
     }
 
     return '<div class="ws-review-item' + gapCls + '" data-row="' + i + '">'
+      + printRating
       + '<div class="ws-review-row-main">'
       +   '<span class="ws-review-item-pl">' + _wsEsc(r.pl) + '</span>'
       +   '<span class="ws-review-item-arrow">→</span>'
@@ -5303,21 +5577,79 @@ function _wsRenderGapCovered(r) {
   return html;
 }
 
+// Renderuje zwykla odpowiedz EN (typy inne niz gap-fill). Klamry {slowo} w danych
+// sa usuwane, a slowa w nich pogrubiane - dzieki temu wiersz wspoldzielony
+// (np. z gap-fill) nie pokazuje surowych nawiasow i zachowuje pogrubienie,
+// niezaleznie od tego czy klamra konczy sie kropka itp.
+function _wsRenderAnswerText(en) {
+  let html = '';
+  let last = 0;
+  const re = /\{([^}]+)\}/g;
+  let m;
+  let found = false;
+  while ((m = re.exec(en)) !== null) {
+    found = true;
+    if (m.index > last) html += _wsEsc(en.slice(last, m.index));
+    html += '<strong class="ws-review-gap-word">' + _wsEsc(m[1]) + '</strong>';
+    last = m.index + m[0].length;
+  }
+  if (last < en.length) html += _wsEsc(en.slice(last));
+  return found ? html : _wsEsc(en);
+}
+
+// Generuje umiarkowany efekt pekajacego szkla na zaslonie. host = element zaslony
+// (.ws-review-cover lub .ws-review-gap-cover). Tworzy kilka odlamkow (clip-path),
+// kazdy odlatuje w losowym kierunku i znika. Sam kontener usuwa sie po animacji.
+function _wsShatter(host) {
+  if (!host) return;
+  const parent = host.parentNode;
+  if (!parent) return;
+  // Rzadki zestaw odlamkow - 5 wielokatow pokrywajacych prostokat zaslony.
+  const shards = [
+    'polygon(0% 0%, 52% 0%, 38% 46%, 0% 60%)',
+    'polygon(52% 0%, 100% 0%, 100% 38%, 38% 46%)',
+    'polygon(0% 60%, 38% 46%, 46% 100%, 0% 100%)',
+    'polygon(38% 46%, 100% 38%, 100% 72%, 46% 100%)',
+    'polygon(100% 38%, 100% 100%, 46% 100%, 100% 72%)'
+  ];
+  const wrap = document.createElement('span');
+  wrap.className = 'ws-review-shatter';
+  shards.forEach((clip, k) => {
+    const sh = document.createElement('span');
+    sh.className = 'ws-review-shard';
+    sh.style.clipPath = clip;
+    sh.style.webkitClipPath = clip;
+    // Kierunek rozrzutu - lekko losowy, ale stabilny rozklad na boki.
+    const ang = (k / shards.length) * Math.PI * 2 + (Math.random() - 0.5);
+    const dist = 14 + Math.random() * 16;
+    sh.style.setProperty('--sx', (Math.cos(ang) * dist).toFixed(1) + 'px');
+    sh.style.setProperty('--sy', (Math.sin(ang) * dist).toFixed(1) + 'px');
+    sh.style.setProperty('--sr', ((Math.random() - 0.5) * 90).toFixed(1) + 'deg');
+    wrap.appendChild(sh);
+  });
+  parent.appendChild(wrap);
+  setTimeout(() => { if (wrap.parentNode) wrap.parentNode.removeChild(wrap); }, 560);
+}
+
 // Zasłona całej odpowiedzi (typy inne niż gap-fill). Nakładka leży NA widocznej
-// pod spodem odpowiedzi; klik ją zdejmuje, kolejny klik przywraca (toggle).
+// pod spodem odpowiedzi; klik ją zdejmuje (efekt pękania), kolejny klik przywraca.
 function wsToggleCover(btn) {
   const ans = btn.parentNode; // .ws-review-item-answer
   if (!ans) return;
+  const wasCovered = !ans.classList.contains('revealed');
   ans.classList.toggle('revealed');
-  wsSound('tap');
+  if (wasCovered) { _wsShatter(btn); wsSound('shatter'); } // pekanie + dzwiek szkla
+  else wsSound('tap');                                     // zaslanianie z powrotem
 }
 
-// Zasłona pojedynczej luki w gap-fill (toggle).
+// Zasłona pojedynczej luki w gap-fill (toggle, z efektem pekania przy odslanianiu).
 function wsToggleGapCover(btn) {
   const gap = btn.parentNode; // .ws-review-gap
   if (!gap) return;
+  const wasCovered = gap.classList.contains('covered');
   gap.classList.toggle('covered');
-  wsSound('tap');
+  if (wasCovered) { _wsShatter(btn); wsSound('shatter'); }
+  else wsSound('tap');
 }
 
 // Ocena z poziomu listy powtorki. Nadpisuje ocene wiersza i odswieza widget
@@ -5330,8 +5662,8 @@ function wsReviewRate(event, rowIdx, level) {
   const lvl = (level === 'new') ? 'new' : parseInt(level, 10);
   // Klik w aktualna ocene NIE zdejmuje jej (inaczej slowo zniknie z listy) -
   // w powtorce ocena tylko sie zmienia, nigdy nie zeruje.
-  row._diff = lvl;
-  wsPaintDiff(rowIdx);            // odswiez widgety oceny w zadaniach i w liscie
+  // Scalamy ocene na wszystkie identyczne dane (te same pl+en).
+  _wsApplyDiffToLinked(rowIdx, lvl);
   if (typeof wsScheduleSave === 'function') wsScheduleSave();
   wsSound('tap');
   // Odswiez licznik w naglowku.
@@ -5361,8 +5693,8 @@ function showSectionFeedback(num, ok, msg) {
 // nakladac, zamiast czekac na zakonczenie poprzedniego odtworzenia.
 // Stan wlaczenia trzymany w localStorage, przelacznik w stopce karty.
 const WS_SFX_BASE = 'https://english-robert.github.io/angielski/audio/sfx/';
-const WS_SFX_FILES = { tap: 'tap.mp3', correct: 'correct.mp3', wrong: 'wrong.mp3', taskdone: 'correct-task.mp3', confetti: 'confetti.mp3', fanfare: 'fanfare.mp3' };
-const WS_SFX_VOL = { tap: 0.45, correct: 0.6, wrong: 0.55, taskdone: 0.7, confetti: 0.7, fanfare: 0.75 };
+const WS_SFX_FILES = { tap: 'tap.mp3', correct: 'correct.mp3', wrong: 'wrong.mp3', taskdone: 'correct-task.mp3', confetti: 'confetti.mp3', fanfare: 'fanfare.mp3', shatter: 'glass-shatter.mp3' };
+const WS_SFX_VOL = { tap: 0.45, correct: 0.6, wrong: 0.55, taskdone: 0.7, confetti: 0.7, fanfare: 0.75, shatter: 0.55 };
 const WS_SFX_KEY = 'ws-sfx-enabled';
 // Bezpieczny odczyt/zapis localStorage. W trybie PODGLADU karta zyje pod adresem
 // blob:, gdzie origin jest "opaque" i dostep do localStorage rzuca SecurityError.
@@ -5884,6 +6216,16 @@ function loadProgress() {
       state.diff.forEach((lvl, i) => {
         if (WS_DATA[i]) WS_DATA[i]._diff = lvl || 0;
       });
+      // Uzgodnij grupy identycznych danych: jesli ktorykolwiek wiersz w grupie
+      // ma ocene, zastosuj ja do calej grupy (samonaprawa starszych zapisow,
+      // gdzie identyczne dane mogly miec rozne oceny).
+      Object.keys(_WS_DIFF_LINKS).forEach(k => {
+        const group = _WS_DIFF_LINKS[k];
+        if (group.length < 2) return;
+        let chosen = 0;
+        for (const j of group) { if (WS_DATA[j]._diff) { chosen = WS_DATA[j]._diff; break; } }
+        group.forEach(j => { WS_DATA[j]._diff = chosen; });
+      });
     }
 
     // Flashcards - odwróć karty
@@ -6041,14 +6383,135 @@ function tintHex(hex, ratio) {
   return '#' + [m(r), m(g), m(b)].map(v => v.toString(16).padStart(2, '0')).join('');
 }
 
-// Tryb "kolorystyka z akcentu": tla sekcji, boxow zadan i fiszek staja sie
-// MOCNO rozjasnionymi odcieniami akcentu (różnica wzgledem akcentu ma byc
-// naprawde widoczna), ramki to polprzezroczysty akcent. Tlo strony (bg)
-// i kolory tekstu (text, textDim) celowo zostaja nietknięte.
+// ============================================================
+// MOTYW JEDNOLITY (edytor zamiast presetów)
+// Jeden motyw bazowy sterowany opcjami: styl tła, zestaw czcionek,
+// ostrość rogów, kolory. Wcześniej były trzy sztywne presety - teraz
+// składamy dowolny wygląd z klocków, a kod jest krótszy.
+// ============================================================
+
+// Zestawy czcionek do wyboru. Każdy: link do Google Fonts + rodziny.
+// 'custom' jest wypełniany w runtime z pola użytkownika (link + nazwa).
+const FONT_SETS = {
+  grotesque: {
+    label: 'Bricolage + Montserrat (nowoczesny)',
+    imports: '<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,600;12..96,700;12..96,800&family=Montserrat:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">',
+    display: "'Bricolage Grotesque', sans-serif",
+    body: "'Montserrat', sans-serif",
+    mono: "'JetBrains Mono', monospace"
+  },
+  serif: {
+    label: 'Fraunces + Merriweather (elegancki serif)',
+    imports: '<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,wght@0,400;0,700;0,900;1,400&family=DM+Mono:wght@300;400;500&family=Merriweather+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">',
+    display: "'Fraunces', serif",
+    body: "'Merriweather Sans', sans-serif",
+    mono: "'DM Mono', monospace"
+  },
+  geometric: {
+    label: 'Space Grotesk + Inter (geometryczny)',
+    imports: '<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@300;400;500;600;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">',
+    display: "'Space Grotesk', sans-serif",
+    body: "'Inter', sans-serif",
+    mono: "'Space Mono', monospace"
+  },
+  system: {
+    label: 'Systemowa (bez pobierania, najszybsza)',
+    imports: '',
+    display: "system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif",
+    body: "system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif",
+    mono: "ui-monospace, 'SF Mono', 'Cascadia Code', monospace"
+  }
+};
+
+// Buduje <link> i rodziny dla wybranej czcionki. Dla 'custom' korzysta z
+// STATE.fontCustom { url, display, body }. Gdy custom jest niekompletny,
+// spada na zestaw 'grotesque' (bezpieczny default).
+function resolveFontSet(key) {
+  if (key === 'custom') {
+    const c = STATE.fontCustom || {};
+    const fam = (c.family || '').trim();
+    const url = (c.url || '').trim();
+    if (fam) {
+      const imports = url ? `<link href="${url}" rel="stylesheet">` : '';
+      const fallback = "system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif";
+      const famCss = `'${fam.replace(/'/g, '')}', ${fallback}`;
+      return {
+        imports,
+        // Tytuły mogą używać tej samej rodziny; jeśli user podał osobną do nagłówków, użyj jej.
+        display: (c.displayFamily ? `'${c.displayFamily.replace(/'/g, '')}', ` : '') + famCss,
+        body: famCss,
+        mono: "ui-monospace, 'SF Mono', 'Cascadia Code', monospace"
+      };
+    }
+    return FONT_SETS.grotesque;
+  }
+  return FONT_SETS[key] || FONT_SETS.grotesque;
+}
+
+// Generuje warstwę tła wg wybranego stylu: 'blobs' (jak dawny pastel),
+// 'grid' (jak dawny atelier), 'dots' (nowe), 'none'. Zwraca { html, css }.
+// Zwraca { html, css } wstrzykiwane do karty.
+function buildBackground(style, accent, accent2, accent3, accentV) {
+  if (style === 'grid') {
+    return {
+      html: `<div class="ws-bg-grid"></div>`,
+      css: `
+.ws-bg-grid {
+  position: fixed; inset: 0; pointer-events: none; z-index: 0;
+  background-image:
+    linear-gradient(${rgba(accent, 0.06)} 1px, transparent 1px),
+    linear-gradient(90deg, ${rgba(accent, 0.06)} 1px, transparent 1px);
+  background-size: 64px 64px;
+}`
+    };
+  }
+  if (style === 'dots') {
+    return {
+      html: `<div class="ws-bg-dots"></div>`,
+      css: `
+.ws-bg-dots {
+  position: fixed; inset: 0; pointer-events: none; z-index: 0;
+  /* Lekko mocniejsze i odrobinę większe kropki niż wcześniej (były ledwie widoczne). */
+  background-image: radial-gradient(${rgba(accent, 0.22)} 1.6px, transparent 1.7px);
+  background-size: 26px 26px;
+  background-position: 0 0;
+  /* Delikatne wygaszenie na brzegach, żeby kropki nie były "płaskie". */
+  -webkit-mask-image: radial-gradient(ellipse 90% 80% at 50% 30%, #000 55%, transparent 100%);
+          mask-image: radial-gradient(ellipse 90% 80% at 50% 30%, #000 55%, transparent 100%);
+}`
+    };
+  }
+  if (style === 'none') {
+    return { html: '', css: '' };
+  }
+  // domyślnie: blobs (jak dawny pastel, ale WIĘKSZE i bardziej rozmazane).
+  // Plamy są szersze niż ekran (wychodzą poza rogi) i mają mocny blur, więc
+  // tworzą miękkie, malarskie tło zamiast wyraźnych owali.
+  return {
+    html: `<div class="ws-bg-blobs"></div>`,
+    css: `
+.ws-bg-blobs {
+  position: fixed;
+  /* Rozciągamy warstwę poza ekran, żeby rozmazane plamy mogły wychodzić za rogi. */
+  inset: -25vmax;
+  pointer-events: none; z-index: 0;
+  filter: blur(70px);
+  background:
+    radial-gradient(ellipse 60% 52% at 6% 12%, ${rgba(accent, 0.34)}, transparent 60%),
+    radial-gradient(ellipse 52% 44% at 96% 84%, ${rgba(accent2, 0.30)}, transparent 60%),
+    radial-gradient(ellipse 46% 40% at 86% 8%, ${rgba(accent3, 0.32)}, transparent 60%),
+    radial-gradient(ellipse 50% 44% at 10% 92%, ${rgba(accentV, 0.26)}, transparent 60%);
+}`
+  };
+}
+
+// Tryb "kolorystyka z akcentu": tła sekcji, boxów zadań i fiszek stają się
+// mocno rozjaśnionymi odcieniami akcentu, ramki to półprzezroczysty akcent.
+// Tło strony (bg) i kolory tekstu zostają nietknięte.
 function applyAccentDerivedPalette(t, accent) {
-  t.cardBg = tintHex(accent, 0.94);          // tlo sekcji - ledwie zabarwione
-  t.surface = tintHex(accent, 0.96);         // powierzchnie (np. pasek postepu)
-  t.boxBg = tintHex(accent, 0.87);           // boxy zadan - wyraznie jasny odcien akcentu
+  t.cardBg = tintHex(accent, 0.94);
+  t.surface = tintHex(accent, 0.96);
+  t.boxBg = tintHex(accent, 0.87);
   t.flashGradient = `linear-gradient(135deg, ${tintHex(accent, 0.93)} 0%, ${tintHex(accent, 0.78)} 100%)`;
   t.flashBorder = tintHex(accent, 0.45);
   t.border = rgba(accent, 0.26);
@@ -6057,392 +6520,72 @@ function applyAccentDerivedPalette(t, accent) {
   return t;
 }
 
-function getPresetTheme(preset, accent, bg, textColor, isCustomAccent) {
-  let t;
-  if (preset === 'vintage') t = getVintageTheme(accent, bg, textColor, isCustomAccent);
-  else if (preset === 'pastel') t = getPastelTheme(accent, bg, textColor, isCustomAccent);
-  else if (preset === 'atelier') t = getAtelierTheme(accent, bg, textColor, isCustomAccent);
-  else t = getVintageTheme(accent, bg, textColor, isCustomAccent);
+// GŁÓWNA FUNKCJA MOTYWU. Zastępuje getVintage/Pastel/AtelierTheme.
+// opts pochodzą ze STATE: accent, bg, text, isCustomAccent, bgStyle,
+// fontKey, sharpCorners, accentDerived.
+function getPresetTheme(_unused, accent, bg, textColor, isCustomAccent) {
+  const text = textColor || '#141414';
+  const bgStyle = STATE.bgStyle || 'blobs';
+  const fontKey = STATE.fontKey || 'grotesque';
+  const sharp = !!STATE.sharpCorners;
+
+  // Drugi/trzeci/akcentujący kolor do TŁA i konfetti - mogą być dalej od akcentu,
+  // bo tam różnorodność wygląda dobrze (miękkie plamy, kolorowe konfetti).
+  const accent2 = isCustomAccent ? deriveAccentColor(accent, 60, 0.05, -0.08) : '#a87bc8';
+  const accent3 = isCustomAccent ? deriveAccentColor(accent, -50, 0.08, -0.05) : '#7eb5d4';
+  const accentV = isCustomAccent ? deriveAccentColor(accent, 120, 0.1, -0.1) : '#f4a8a8';
+
+  // Kolory gradientu NAGŁÓWKÓW - celowo BLISKO akcentu (mały skok hue + delikatne
+  // przyciemnienie), żeby tytuł był spójny z akcentem, a nie tęczowy. Dawniej
+  // tytuł używał szerokiego accent2/accent3 (pastelowa triada) i przy niektórych
+  // kolorach wyglądał krzykliwie.
+  const titleA = accent;
+  const titleB = deriveAccentColor(accent, 14, -0.06, 0.02);
+  const titleC = deriveAccentColor(accent, -10, -0.12, 0.0);
+  const headerGradient = (STATE.headerGradient !== false);
+
+  const font = resolveFontSet(fontKey);
+  const background = buildBackground(bgStyle, accent, accent2, accent3, accentV);
+  const radius = sharp ? '0px' : '14px';
+  const radiusSm = sharp ? '0px' : '9px';
+
+  const t = {
+    name: 'custom',
+    accent,
+    accentSecondary: accent2,
+    accentTertiary: accent3,
+    accentVibrant: accentV,
+    bg,
+    text,
+    textDim: isDark(bg) ? 'rgba(255,255,255,0.62)' : '#5a5a5a',
+    surface: '#ffffff',
+    border: 'rgba(40, 36, 40, 0.18)',
+    borderStrong: 'rgba(40, 36, 40, 0.38)',
+    confettiColors: [accent, accent2, accent3, accentV, '#7bc89d', '#e8c4a4'],
+    fontImports: font.imports,
+    displayFont: font.display,
+    bodyFont: font.body,
+    monoFont: font.mono,
+    bgEffect: background.html,
+    extraBgCSS: background.css,
+    radius,
+    radiusSm,
+    sharp,
+    // Gradient nagłówków: gdy włączony - wąski sweep blisko akcentu; gdy wyłączony
+    // - płaski akcent (CSS sam wybiera na podstawie tej flagi).
+    headerGradient,
+    titleGradient: `linear-gradient(120deg, ${titleA} 0%, ${titleB} 55%, ${titleC} 100%)`,
+    cardBg: '#ffffff',
+    cardShadow: sharp
+      ? '0 0 0 1px rgba(40,36,40,0.06)'
+      : '0 2px 6px rgba(40, 36, 40, 0.05), 0 12px 32px rgba(40, 36, 40, 0.07)',
+    flashGradient: 'linear-gradient(135deg, #ffffff 0%, #f3f3f6 100%)',
+    flashBorder: 'rgba(40,36,40,0.22)',
+    boxBg: '#f6f4f8'
+  };
+
   if (STATE.accentDerived) applyAccentDerivedPalette(t, accent);
   return t;
-}
-
-function getVintageTheme(accent, bg, textColor, isCustomAccent) {
-  const text = textColor || '#1f1a14';
-  // Jesli uzytkownik wybral wlasny kolor akcentu, generujemy harmonijny drugi/trzeci
-  // kolor automatycznie (analogia kolorystyczna na kole barw). Inaczej uzywamy
-  // recznie dobranych kolorow vintage - czerwony + pomaranczowy + bordo.
-  const accent2 = isCustomAccent
-    ? deriveAccentColor(accent, 28, 0.05, -0.05)
-    : '#d97a3c';
-  const accent3 = isCustomAccent
-    ? deriveAccentColor(accent, -28, -0.08, 0)
-    : '#8b2c4f';
-  const accentV = isCustomAccent
-    ? deriveAccentColor(accent, 50, 0.15, -0.1)
-    : '#e8b54a';
-  const progressEnd = isCustomAccent
-    ? deriveAccentColor(accent, -20, -0.12, 0.05)
-    : '#a83255';
-  return {
-    name: 'vintage',
-    accent,
-    accentSecondary: accent2,
-    accentTertiary: accent3,
-    accentVibrant: accentV,
-    bg,
-    text,
-    textDim: '#6b5d44',
-    surface: '#fbf8f0',
-    border: 'rgba(31, 26, 20, 0.22)',
-    borderStrong: 'rgba(31, 26, 20, 0.42)',
-    confettiColors: [accent, accent2, accent3, accentV, '#1a6b6b', '#1f1a14'],
-    fontImports: '<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,wght@0,400;0,700;0,900;1,400&family=DM+Mono:wght@300;400;500&family=Merriweather+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">',
-    displayFont: "'Fraunces', serif",
-    bodyFont: "'Merriweather Sans', sans-serif",
-    monoFont: "'DM Mono', monospace",
-    bgEffect: `<div class="ws-bg-pattern"></div>`,
-    extraBgCSS: `
-.ws-bg-pattern {
-  position: fixed; inset: 0; pointer-events: none; z-index: 0;
-  background-image:
-    repeating-linear-gradient(0deg, transparent, transparent 28px, rgba(31,26,20,0.06) 28px, rgba(31,26,20,0.06) 29px),
-    repeating-linear-gradient(90deg, transparent, transparent 28px, rgba(31,26,20,0.04) 28px, rgba(31,26,20,0.04) 29px),
-    radial-gradient(ellipse 80% 60% at 50% 0%, ${rgba(accent, 0.06)}, transparent 60%),
-    radial-gradient(ellipse 60% 50% at 100% 100%, ${rgba(accent2, 0.05)}, transparent 60%);
-}`,
-    cardBg: '#fbf8f0',
-    cardShadow: '0 1px 3px rgba(31,26,20,0.08), 0 8px 24px rgba(31,26,20,0.05)',
-    // Fiszki - gradient frontu (tył używa standardowego tła z akcentem)
-    flashGradient: 'linear-gradient(135deg, #fdf6e6 0%, #f3e4c8 100%)',
-    flashBorder: '#d4b896',
-    // Tło dla wszystkich boxów zadań - jeden wspólny jasny kolor.
-    // Możesz go zmienić tutaj, żeby zmienić tło wszystkich sekcji w motywie Vintage.
-    boxBg: '#fff4e5',           // jasny kremowo-piaskowy
-    // Pasek postępu - bez jaskrawego pomarańczu w środku, łagodne przejście czerwone→bordo
-    progressGradient: `linear-gradient(90deg, ${accent} 0%, ${progressEnd} 100%)`
-  };
-}
-
-function getPastelTheme(accent, bg, textColor, isCustomAccent) {
-  const text = textColor || '#3a2c33';
-  // Pastel: harmonia triadyczna pastelowa - drugi/trzeci kolor odsuniety w hue
-  // o spore katy, lekko zjasniony, lekko mniej nasycony - typowa estetyka pastelu.
-  const accent2 = isCustomAccent
-    ? deriveAccentColor(accent, 60, 0.05, -0.08)
-    : '#a87bc8';
-  const accent3 = isCustomAccent
-    ? deriveAccentColor(accent, -50, 0.08, -0.05)
-    : '#7eb5d4';
-  const accentV = isCustomAccent
-    ? deriveAccentColor(accent, 120, 0.1, -0.1)
-    : '#f4a8a8';
-  return {
-    name: 'pastel',
-    accent,
-    accentSecondary: accent2,
-    accentTertiary: accent3,
-    accentVibrant: accentV,
-    bg,
-    text,
-    textDim: '#7a6a72',
-    surface: '#ffffff',
-    border: 'rgba(58, 44, 51, 0.18)',
-    borderStrong: 'rgba(58, 44, 51, 0.36)',
-    confettiColors: [accent, accent2, accent3, accentV, '#7bc89d', '#e8c4a4'],
-    fontImports: '<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,600;12..96,700;12..96,800&family=Montserrat:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">',
-    displayFont: "'Bricolage Grotesque', sans-serif",
-    bodyFont: "'Montserrat', sans-serif",
-    monoFont: "'JetBrains Mono', monospace",
-    bgEffect: `<div class="ws-bg-blobs"></div>`,
-    extraBgCSS: `
-.ws-bg-blobs {
-  position: fixed; inset: 0; pointer-events: none; z-index: 0;
-  background:
-    radial-gradient(ellipse 55% 45% at 8% 18%, ${rgba(accent, 0.22)}, transparent 55%),
-    radial-gradient(ellipse 45% 35% at 92% 78%, ${rgba(accent2, 0.20)}, transparent 55%),
-    radial-gradient(ellipse 35% 30% at 80% 15%, ${rgba(accent3, 0.22)}, transparent 55%),
-    radial-gradient(ellipse 40% 35% at 15% 85%, ${rgba(accentV, 0.18)}, transparent 55%);
-}`,
-    cardBg: '#ffffff',
-    cardShadow: '0 2px 6px rgba(58, 44, 51, 0.05), 0 12px 32px rgba(58, 44, 51, 0.07)',
-    // Fiszki - gradient frontu (tył używa standardowego tła z akcentem)
-    flashGradient: 'linear-gradient(135deg, #fff4f8 0%, #fce4ed 100%)',
-    flashBorder: '#f0b8cd',
-    // Tło dla wszystkich boxów zadań - jeden wspólny jasny kolor.
-    // Możesz go zmienić tutaj, żeby zmienić tło wszystkich sekcji w motywie Pastel.
-    boxBg: '#fdeef8'           // bardzo bladzy pudrowy róż
-  };
-}
-
-// ============================================================
-// ATELIER - elegancki, modernistyczny editorial styl.
-// Glowny ton: gleboki granat na cieplo-bialym papierze (off-white).
-// Czcionki: Eczar (serif display) na tytuly, Signika (sans) na tresc
-// zadan, IBM Plex Mono na cyfry. Wszystkie rogi 0px - czyste
-// prostokaty. Cienie zastapione 1px liniami. Cienie subtelne, zadnych gradientow
-// na duzych powierzchniach. Maksymalna ilosc whitespace.
-// ============================================================
-function getAtelierTheme(accent, bg, textColor, isCustomAccent) {
-  const text = textColor || '#1a1a1a';
-  // Drugi/trzeci kolor: dla customowego akcentu generujemy harmonijne wariacje,
-  // dla domyslnego granatu ustalamy paletke editorial: warm taupe (cieplo)
-  // + ciemny burgund (akcent dla bledow/uwag) + bladozloty (highlight).
-  const accent2 = isCustomAccent
-    ? deriveAccentColor(accent, 18, 0.10, -0.15)
-    : '#8b6f47';
-  const accent3 = isCustomAccent
-    ? deriveAccentColor(accent, -22, -0.05, -0.05)
-    : '#5d4037';
-  const accentV = isCustomAccent
-    ? deriveAccentColor(accent, 30, 0.20, -0.20)
-    : '#c9a961';
-  return {
-    name: 'atelier',
-    accent,
-    accentSecondary: accent2,
-    accentTertiary: accent3,
-    accentVibrant: accentV,
-    bg,
-    text,
-    /* TextDim z lekkim granatowym podtonem zamiast czystej szarosci -
-       cieplej i bardziej spojnie z paleta. Wczesniej #5a5a5a bylo zbyt szare. */
-    textDim: '#4a5468',
-    surface: '#ffffff',
-    /* Bordery lekko mocniejsze niz wczesniej - poprzednie 0.18/0.45 bylo zbyt
-       subtelne i caly motyw wygladal pranny. */
-    border: 'rgba(26, 40, 71, 0.25)',
-    borderStrong: 'rgba(26, 40, 71, 0.55)',
-    confettiColors: [accent, accent2, accent3, accentV, '#2c4870', '#1a1a1a'],
-    fontImports: '<link href="https://fonts.googleapis.com/css2?family=Eczar:wght@400;500;600;700;800&family=Signika:wght@300..700&family=IBM+Plex+Mono:wght@300;400;500&display=swap" rel="stylesheet">',
-    displayFont: "'Eczar', 'Philosopher', Georgia, serif",
-    bodyFont: "'Signika', 'Inter Tight', 'Helvetica Neue', Arial, sans-serif",
-    monoFont: "'IBM Plex Mono', 'JetBrains Mono', monospace",
-    bgEffect: `<div class="ws-bg-grid"></div>`,
-    extraBgCSS: `
-.ws-bg-grid {
-  position: fixed; inset: 0; pointer-events: none; z-index: 0;
-  /* Subtelna siatka editorial - widoczna, ale nie krzykliwa.
-     Wczesniej 0.025 bylo niemal niewidoczne; 0.06 daje czytelny papier kreślarski. */
-  background-image:
-    linear-gradient(${rgba(accent, 0.06)} 1px, transparent 1px),
-    linear-gradient(90deg, ${rgba(accent, 0.06)} 1px, transparent 1px);
-  background-size: 64px 64px;
-}
-/* === ATELIER: treść zadań w Signika 400, nagłówki w Eczar === */
-body {
-  font-weight: 400 !important;
-}
-/* Inputy, textarea, buttony i tresci zadan - dziedzicza wage 400 */
-.scramble-input, .trans-input, .write-area, .gap-input, .quiz-option,
-.flashcard-face, .gap-sentence, .trans-prompt, .unsc-word,
-.cornell-q-text, .cornell-a-inner, .write-prompt-pl, .write-prompt-en,
-.match-item, .gap-translation-text {
-  font-weight: 400 !important;
-}
-/* Tytuly w Eczar 500 (medium) - Eczar ma wagi 400-800, 500 daje wyrazny
-   ale nie przesadny kontrast wzgledem body 350. */
-.ws-title, .ws-sec-title, .ws-finale-title {
-  font-weight: 500 !important;
-}
-/* === ATELIER OVERRIDES: ostre rogi, cienkie linie, brak cieni === */
-/* Tytuł jednolicie granatowy - gradient z bazy nie pasuje do editorial palety */
-.ws-title {
-  background: none !important;
-  -webkit-text-fill-color: var(--ws-accent) !important;
-  color: var(--ws-accent) !important;
-  padding-bottom: 0 !important;
-}
-.ws-section {
-  border: 1px solid var(--ws-border-strong) !important;
-  border-radius: 0 !important;
-  box-shadow: none !important;
-  padding: 2.5rem 2.25rem 2rem !important;
-}
-.ws-section + .ws-section { margin-top: 1.5rem; }
-.ws-section.ws-done {
-  background: var(--ws-card) !important;
-  border-color: var(--ws-accent) !important;
-  box-shadow: none !important;
-}
-/* Nagłówek sekcji: cienka linia pod, granatowy kwadrat z numerem */
-.ws-sec-head {
-  border-bottom: 1px solid var(--ws-border) !important;
-  border-image: none !important;
-  padding-bottom: 1.25rem;
-  margin-bottom: 1.5rem;
-  align-items: center !important;
-  gap: 1rem !important;
-}
-.ws-sec-num {
-  /* Kwadrat z cienkim granatowym borderem - editorial wersja "kapsuly" */
-  background: transparent !important;
-  box-shadow: none !important;
-  color: var(--ws-accent) !important;
-  border: 1px solid var(--ws-accent) !important;
-  width: 44px !important;
-  height: 44px !important;
-  font-family: var(--ws-mono);
-  font-weight: 400 !important;
-  font-size: 0.92rem !important;
-  letter-spacing: 0.02em !important;
-  border-radius: 0 !important;
-  display: grid !important;
-  place-items: center !important;
-  flex-shrink: 0 !important;
-}
-.ws-sec-title {
-  letter-spacing: -0.015em !important;
-}
-.ws-sec-desc {
-  font-style: italic;
-  color: var(--ws-text-dim);
-  font-weight: 300;
-}
-/* Tytul karty pracy: lekko kursywa, ekstra letter-spacing tight */
-.ws-title {
-  letter-spacing: -0.025em !important;
-  line-height: 1 !important;
-}
-.ws-subtitle {
-  font-family: var(--ws-body);
-  font-weight: 300;
-  color: var(--ws-text-dim);
-  letter-spacing: 0.01em;
-}
-/* Karty zadan (scramble, gap, etc.) - ostre, cienkie linie.
-   UWAGA: .flashcard celowo wykluczone - jest tylko kontenerem 3D perspective,
-   widoczny border ma .flashcard-face (oryginalny styl). Inaczej powstaje
-   podwojny border widoczny podczas obrotu fiszki. */
-.scramble-card, .quiz-card, .unsc-card, .cornell-card,
-.gap-card, .trans-card, .write-card {
-  border-radius: 0 !important;
-  box-shadow: none !important;
-  border: 1px solid var(--ws-border) !important;
-}
-/* Matching: jednakowy mocniejszy border na kafelkach (PL/EN) i przyciskach
-   bocznych (TTS, Solve) - dla spójnej, editorial estetyki. */
-.match-item {
-  border-radius: 0 !important;
-  box-shadow: none !important;
-  border: 1.5px solid var(--ws-border-strong) !important;
-}
-.match-item-wrap .tts-btn-side {
-  border-color: var(--ws-border-strong) !important;
-  border-width: 1.5px !important;
-}
-.flashcard {
-  /* Sam kontener bez ramki - widoczny border ma .flashcard-face */
-  box-shadow: none !important;
-}
-.flashcard-face, .flashcard-front, .flashcard-back {
-  border-radius: 0 !important;
-}
-/* Inputy, textarea, buttony - ostre rogi */
-.scramble-input, .trans-input, .write-area, .gap-input,
-.scramble-check, .scramble-hint-btn, .scramble-solve-btn,
-.scramble-letter, .scramble-backspace,
-.trans-check, .trans-hint-btn, .trans-solve-btn,
-.unsc-check-btn, .unsc-hint-btn, .unsc-solve-btn, .unsc-clear-btn,
-.write-save, .ws-btn-solve, .ws-btn-celebrate, .ws-btn-reset,
-.ws-btn-save, .ws-btn-reset-foot, .ws-btn-download-tsv,
-.tts-btn, .quiz-option, .unsc-word {
-  border-radius: 0 !important;
-}
-.gap-input {
-  border-radius: 0 !important;
-  border: none !important;
-  border-bottom: 1.5px solid var(--ws-accent) !important;
-  background: transparent !important;
-  padding: 0.1rem 0.3rem !important;
-}
-.gap-input:focus {
-  outline: none !important;
-  background: ${rgba(accent, 0.06)} !important;
-}
-.gap-input.gap-correct {
-  border-bottom-color: var(--ws-ok) !important;
-}
-/* Pasek postępu: ostre rogi, cienki - poprawne klasy */
-.ws-progress-wrap {
-  border-radius: 0 !important;
-  box-shadow: none !important;
-  border: 1px solid var(--ws-border-strong) !important;
-}
-.ws-progress-track {
-  border-radius: 0 !important;
-  height: 3px !important;
-}
-.ws-progress-fill {
-  border-radius: 0 !important;
-  box-shadow: none !important;
-}
-/* Finale: editorial outline zamiast wypelnionego boxa */
-.ws-finale {
-  border-radius: 0 !important;
-  border: 1px solid var(--ws-accent) !important;
-  background: var(--ws-card) !important;
-}
-/* Stopka */
-.ws-footer { border-radius: 0 !important; }
-/* TTS i akcji per-zadanie: ostre, granatowe, monoline */
-.tts-btn {
-  border-radius: 0 !important;
-  border-width: 1px !important;
-}
-/* Numerki par w matching: monospace, granat, ostre rogi */
-.match-item.matched::before {
-  font-family: var(--ws-mono) !important;
-  font-weight: 500 !important;
-  font-style: normal !important;
-  border-radius: 0 !important;
-}
-/* Word scramble: literki tile - ostre rogi */
-.scramble-letters .scramble-letter {
-  border-radius: 0 !important;
-}
-/* Unscramble: pula slow ostra */
-.unsc-pool, .unsc-answer-area, .unsc-pool-reveal {
-  border-radius: 0 !important;
-}
-.unsc-word { border-radius: 0 !important; }
-/* Cornell: ostre rogi na wszystkich elementach (q, a, write, numerek, strzalka) */
-.cornell-q, .cornell-a, .cornell-write,
-.cornell-q-num, .cornell-q-arrow, .cornell-write-toggle,
-.cornell-write-area { border-radius: 0 !important; }
-
-/* Flagi SVG (PL/UK) - kontenery z border-radius. W editorial estetyce ostre. */
-.gap-translation-label, .trans-pl-label, .write-prompt-flag {
-  border-radius: 0 !important;
-}
-/* Eyebrow badge (np. "ZADANIA") i part-badge (np. "Czesc 1/2") - ostre */
-.ws-eyebrow, .ws-part-badge {
-  border-radius: 0 !important;
-}
-/* Quiz options: ostre */
-.quiz-option { border-radius: 0 !important; }
-/* Feedback boxy */
-.ws-feedback { border-radius: 0 !important; }
-
-/* === UNIWERSALNY OVERRIDE: wszystko w karcie pracy ma ostre rogi ===
-   Editorial estetyka konsekwentna. Wykluczamy jedynie:
-   - elementy .ws-keep-radius (escape hatch jesli kiedys cos celowo ma byc okragle)
-   - wewnetrzne SVG <rect r="..."> (te i tak ignoruja CSS border-radius) */
-.ws-app *:not(.ws-keep-radius):not(img) {
-  border-radius: 0 !important;
-}
-`,
-    cardBg: '#ffffff',
-    cardShadow: 'none',
-    // Fiszki - czysta biel z 1px border, brak gradientu (eleganckie minimum)
-    flashGradient: '#ffffff',
-    flashBorder: 'rgba(26, 40, 71, 0.35)',
-    // Tło dla boxów zadań - delikatne off-white, lekko ciemniejsze od tla
-    // i z odrobina granatowego podtonu (zamiast neutralnego szarego).
-    boxBg: '#eef0f3',
-    // Progress: cienki granat bez gradientu
-    progressGradient: accent
-  };
 }
 
 // ============================================================
@@ -6465,6 +6608,8 @@ function buildWorksheetCSS(t) {
   --ws-accent-vibrant: ${t.accentVibrant || t.accent};
   --ws-accent-gradient: linear-gradient(135deg, ${t.accent} 0%, ${t.accentSecondary || t.accent} 100%);
   --ws-accent-gradient-3: linear-gradient(135deg, ${t.accent} 0%, ${t.accentSecondary || t.accent} 50%, ${t.accentTertiary || t.accent} 100%);
+  /* Gradient TYTUŁU - wąski sweep blisko akcentu, albo płaski akcent gdy wyłączony. */
+  --ws-title-gradient: ${t.headerGradient ? t.titleGradient : `linear-gradient(${t.accent}, ${t.accent})`};
   --ws-progress-gradient: ${t.progressGradient || `linear-gradient(135deg, ${t.accent} 0%, ${t.accentSecondary || t.accent} 50%, ${t.accentTertiary || t.accent} 100%)`};
   --ws-accent-soft: ${accentRgba(0.1)};
   --ws-accent-strong: ${accentRgba(0.25)};
@@ -6480,6 +6625,9 @@ function buildWorksheetCSS(t) {
   --ws-flash-gloss: ${t.flashGloss || 'rgba(255,255,255,0.28)'};
   /* Wspólne tło dla wszystkich boxów zadań w karcie pracy. */
   --ws-box-bg: ${t.boxBg || t.surface};
+  /* Ostrość rogów - sterowana z edytora. radius=0 daje styl "ostry/editorial". */
+  --ws-radius: ${t.radius || '14px'};
+  --ws-radius-sm: ${t.radiusSm || '9px'};
   --ws-ok: #16a34a;
   --ws-ok-bg: rgba(22, 163, 74, 0.1);
   --ws-no: #dc2626;
@@ -6499,6 +6647,13 @@ body {
 }
 
 ${t.extraBgCSS}
+${t.sharp ? `
+/* === ROGI OSTRE (wybór z edytora) ===
+   Jedna reguła zamiast dziesiątek nadpisań - wszystko w karcie pracy traci
+   zaokrąglenia. Wykluczamy .ws-keep-radius (gdyby coś celowo miało być okrągłe)
+   oraz <img>. SVG <rect r=".."> i tak ignoruje border-radius. */
+.ws-app *:not(.ws-keep-radius):not(img) { border-radius: 0 !important; }
+` : ''}
 
 .ws-app {
   position: relative; z-index: 1;
@@ -6548,16 +6703,20 @@ ${t.extraBgCSS}
   font-family: var(--ws-display);
   font-size: clamp(2.1rem, 5.5vw, 3.2rem);
   font-weight: 700;
-  line-height: 1.1; letter-spacing: -0.02em;
+  line-height: 1.22; letter-spacing: -0.02em;
   color: var(--ws-accent);
-  /* Gradientowy tytuł - ozdobny akcent w nagłówku karty */
-  background: var(--ws-accent-gradient-3);
+  /* Gradientowy tytuł - wąski sweep blisko akcentu (lub płaski akcent gdy gradient wyłączony) */
+  background: var(--ws-title-gradient);
   -webkit-background-clip: text;
   background-clip: text;
   -webkit-text-fill-color: transparent;
   -webkit-print-color-adjust: exact;
   print-color-adjust: exact;
-  padding-bottom: 0.08em; /* zapas na dolne wydłużenia liter przy clip:text */
+  /* background-clip:text przycina tło do line-boxa, więc przy czcionkach z
+     dużymi dolnymi wydłużeniami (np. Paprika - litery y, g, p) glify bywały
+     ucinane od dołu. Większy line-height + zapas u dołu daje im miejsce. */
+  padding-bottom: 0.18em;
+  overflow: visible;
 }
 /* Emoji w gradientowym tytule: resetujemy clip i przezroczystosc, zeby emoji
    zachowalo swoje wlasne kolory zamiast stac sie gradientowe/niewidoczne.
@@ -6763,8 +6922,10 @@ ${t.extraBgCSS}
   font-size: 0.95rem; font-weight: 700;
   width: 48px; height: 48px;
   border-radius: 12px;
-  /* Glansowana odznaka: gradient akcentów + delikatny połysk u góry */
-  background: var(--ws-accent-gradient);
+  /* Glansowana odznaka: ten sam gradient co nagłówki karty (--ws-title-gradient),
+     więc numerki zadań i tytuły działają na tej samej zasadzie. Gdy gradient
+     nagłówków jest wyłączony, --ws-title-gradient staje się płaskim akcentem. */
+  background: var(--ws-title-gradient);
   color: #fff;
   box-shadow:
     inset 0 1px 0 rgba(255,255,255,0.4),
@@ -7324,7 +7485,7 @@ ${t.extraBgCSS}
   font-family: var(--ws-display); font-weight: 700; font-size: 1.35rem;
   color: var(--ws-accent); line-height: 1.1;
 }
-.ws-review-toggle-sub { font-size: 0.85rem; color: var(--ws-text-dim); }
+.ws-review-toggle-sub { font-family: var(--ws-body); font-size: 0.85rem; color: var(--ws-text-dim); }
 .ws-review-toggle-arrow {
   font-size: 1.2rem; color: var(--ws-text-dim); flex-shrink: 0;
   transition: transform 0.2s;
@@ -7354,6 +7515,10 @@ ${t.extraBgCSS}
   color: #fff; font-size: 0.8rem; font-weight: 700; line-height: 1;
   -webkit-print-color-adjust: exact; print-color-adjust: exact;
 }
+
+/* Legenda ocen - na ekranie ukryta (picker poziomów pełni tę rolę), pokazuje
+   się tylko na wydruku, żeby symboli nie dało się pomylić (np. czerwony ✕). */
+.ws-review-legend-wrap { display: none; }
 
 /* Pasek narzedzi: sortowanie + pokaz wszystkie. */
 .ws-review-toolbar {
@@ -7386,6 +7551,16 @@ ${t.extraBgCSS}
 }
 .ws-review-reveal-all:hover { border-color: var(--ws-accent); filter: brightness(0.97); }
 
+/* Przycisk "Drukuj powtórkę" - zwyczajny, spójny z "Pokaż wszystkie". */
+.ws-review-print {
+  font-family: var(--ws-body); font-size: 0.85rem; font-weight: 600;
+  padding: 0.4rem 0.9rem; border-radius: 999px;
+  background: var(--ws-accent-soft); color: var(--ws-accent);
+  border: 1px solid var(--ws-border-strong); cursor: pointer;
+  transition: all 0.15s;
+}
+.ws-review-print:hover { border-color: var(--ws-accent); filter: brightness(0.97); }
+
 .ws-review-result { margin-top: 0; }
 .ws-review-empty { color: var(--ws-text-dim); font-size: 0.95rem; text-align: left; }
 .ws-review-list-head {
@@ -7411,6 +7586,8 @@ ${t.extraBgCSS}
   gap: 0.7rem;
 }
 .ws-review-item-pl { font-weight: 600; color: var(--ws-text); }
+/* Znacznik oceny przed słowem - tylko na wydruku (na ekranie używamy stopki). */
+.ws-review-print-rating { display: none; }
 .ws-review-item-arrow { color: var(--ws-text-dim); text-align: center; }
 /* Strefa odpowiedzi: odpowiedz JEST w DOM pod spodem, nakladka lezy na niej. */
 /* Nakladka na CALA odpowiedz (typy inne niz gap-fill). Lezy NAD tekstem
@@ -7422,47 +7599,81 @@ ${t.extraBgCSS}
   -webkit-print-color-adjust: exact; print-color-adjust: exact;
 }
 .ws-review-item-answer { position: relative; min-width: 0; }
-.ws-review-item:not(.ws-review-item-gap) .ws-review-item-answer { padding-right: 1.5rem; }
+.ws-review-item:not(.ws-review-item-gap) .ws-review-item-answer { padding-right: 2.4rem; }
+/* ── ZASŁONA "SZKLANA" (typy inne niż gap-fill) ──
+   Nieprzezroczysta tafla w odcieniu akcentu, z delikatnym połyskiem i cienką
+   ramką. Po kliknięciu pęka (efekt rozbicia szkła generowany w JS) i odsłania
+   odpowiedź. Brak ciężkich, rozmytych cieni - zgodnie z preferencjami. */
 .ws-review-cover {
   position: absolute; inset: -0.15rem -0.3rem; z-index: 2;
   background:
-    repeating-linear-gradient(45deg,
-      rgba(0,0,0,0.04) 0, rgba(0,0,0,0.04) 6px,
-      rgba(0,0,0,0.10) 6px, rgba(0,0,0,0.10) 12px),
-    var(--ws-text-dim);
-  border: 1px solid var(--ws-border-strong); border-radius: 6px;
-  cursor: pointer; transition: filter 0.15s;
+    linear-gradient(135deg,
+      color-mix(in srgb, var(--ws-accent) 30%, #ffffff) 0%,
+      color-mix(in srgb, var(--ws-accent) 52%, #ffffff) 100%);
+  border: 1.5px solid color-mix(in srgb, var(--ws-accent) 60%, #ffffff);
+  border-radius: 8px;
+  cursor: pointer; overflow: hidden;
+  transition: filter 0.15s, transform 0.15s;
   -webkit-print-color-adjust: exact; print-color-adjust: exact;
+}
+/* Połysk - ukośne pasmo światła sugerujące taflę szkła. Lekko rozmyte (szersze
+   pasmo, łagodniejsze krawędzie), żeby biała poświata nie skupiała się zbyt
+   mocno na środku. */
+.ws-review-cover::before {
+  content: ''; position: absolute; inset: 0;
+  background: linear-gradient(115deg,
+    rgba(255,255,255,0) 30%,
+    rgba(255,255,255,0.48) 50%,
+    rgba(255,255,255,0) 70%);
 }
 .ws-review-cover::after {
   content: '👁  odsłoń'; position: absolute; inset: 0;
   display: flex; align-items: center; justify-content: center;
-  font-family: var(--ws-mono); font-size: 0.7rem; letter-spacing: 0.08em;
-  color: var(--ws-card); opacity: 0.92;
+  font-family: var(--ws-body); font-weight: 700; font-size: 0.78rem;
+  letter-spacing: 0.04em;
+  color: color-mix(in srgb, var(--ws-accent) 78%, #000000);
 }
-.ws-review-cover:hover { filter: brightness(1.08); }
-/* Po odsloniu: nakladka znika, ale maly uchwyt "zaslon" zostaje klikalny po prawej. */
+.ws-review-cover:hover { filter: brightness(1.05); }
+.ws-review-cover:active { transform: scale(0.985); }
+/* Po odsłonięciu: zasłona znika, ale mały uchwyt "zasłoń" zostaje po prawej. */
 .ws-review-item-answer.revealed .ws-review-cover {
-  inset: -0.15rem -0.3rem -0.15rem auto; width: 1.5rem;
-  background: var(--ws-box-bg); border-style: dashed;
+  inset: 50% 0 auto auto; transform: translateY(-50%);
+  width: 1.95rem; height: 1.95rem;
+  border-radius: 7px;
+  background: var(--ws-card); border-width: 1.5px; border-style: solid;
+  border-color: var(--ws-border-strong);
+  display: flex; align-items: center; justify-content: center;
 }
+.ws-review-item-answer.revealed .ws-review-cover::before { display: none; }
 .ws-review-item-answer.revealed .ws-review-cover::after {
-  content: '🙈'; color: var(--ws-text-dim); font-size: 0.8rem;
+  content: '🙈'; color: var(--ws-text-dim); font-size: 0.9rem; font-weight: 400;
+  position: static;
 }
 /* Gap-fill: zaslona TYLKO na slowach-lukach. Slowo jest pod spodem, nakladka NAD nim. */
 .ws-review-gap { position: relative; display: inline-block; }
+/* Ten sam kolor co pełne zasłsony (--ws-accent), ale połysk jest mocniej
+   rozmazany - szersze, miększe pasmo światła - bo na wąskich lukach ostry
+   gradient wyglądał brzydko. */
 .ws-review-gap-cover {
   position: absolute; inset: -0.05rem -0.15rem; z-index: 2;
+  /* Prosty, dwukolorowy gradient w tonacji akcentu - BEZ białego błysku w środku,
+     który na wąskich lukach wyglądał źle. */
   background:
-    repeating-linear-gradient(45deg,
-      rgba(0,0,0,0.04) 0, rgba(0,0,0,0.04) 5px,
-      rgba(0,0,0,0.10) 5px, rgba(0,0,0,0.10) 10px),
-    var(--ws-text-dim);
-  border: 1px solid var(--ws-border-strong); border-radius: 4px;
-  cursor: pointer; padding: 0; transition: filter 0.15s;
+    linear-gradient(135deg,
+      color-mix(in srgb, var(--ws-accent) 38%, #ffffff) 0%,
+      color-mix(in srgb, var(--ws-accent) 60%, #ffffff) 100%);
+  border: 1.5px solid color-mix(in srgb, var(--ws-accent) 60%, #ffffff);
+  border-radius: 5px;
+  cursor: pointer; padding: 0; overflow: hidden;
+  transition: filter 0.15s, transform 0.15s;
   -webkit-print-color-adjust: exact; print-color-adjust: exact;
 }
-.ws-review-gap-cover:hover { filter: brightness(1.08); }
+.ws-review-gap-cover::before {
+  content: ''; position: absolute; inset: 0;
+  /* Brak białego pasma światła - na wąskich lukach wyglądało źle. */
+}
+.ws-review-gap-cover:hover { filter: brightness(1.05); }
+.ws-review-gap-cover:active { transform: scale(0.97); }
 /* Po odsloniu luki: nakladka staje sie przezroczysta, ale nadal klikalna na
    calym slowie (klik zaslania ponownie). Subtelne podkreslenie = wskazowka. */
 .ws-review-gap:not(.covered) .ws-review-gap-cover {
@@ -7470,8 +7681,33 @@ ${t.extraBgCSS}
   border-bottom: 2px solid var(--ws-accent);
   -webkit-print-color-adjust: exact; print-color-adjust: exact;
 }
+.ws-review-gap:not(.covered) .ws-review-gap-cover::before { display: none; }
 .ws-review-gap:not(.covered) .ws-review-gap-cover:hover {
   background: var(--ws-accent-soft);
+}
+
+/* ── EFEKT PĘKAJĄCEGO SZKŁA (umiarkowany) ──
+   Po odsłonięciu zasłony nakładamy na nią chwilowy kontener z kilkoma odłamkami
+   (clip-path: polygon). Każdy odłamek odlatuje w innym kierunku z lekką rotacją
+   i zanika. Efekt jest świadomie rzadki (mało odłamków), więc lekki dla przeglądarki. */
+.ws-review-shatter {
+  position: absolute; inset: 0; z-index: 5;
+  pointer-events: none; overflow: visible;
+}
+.ws-review-shard {
+  position: absolute; inset: 0;
+  background:
+    linear-gradient(135deg,
+      color-mix(in srgb, var(--ws-accent) 34%, #ffffff) 0%,
+      color-mix(in srgb, var(--ws-accent) 56%, #ffffff) 100%);
+  border: 1px solid color-mix(in srgb, var(--ws-accent) 55%, #ffffff);
+  -webkit-print-color-adjust: exact; print-color-adjust: exact;
+  animation: wsShardFly 0.5s cubic-bezier(0.3, 0.7, 0.4, 1) forwards;
+}
+@keyframes wsShardFly {
+  0%   { opacity: 1; transform: translate(0,0) rotate(0deg) scale(1); }
+  100% { opacity: 0;
+         transform: translate(var(--sx,0), var(--sy,0)) rotate(var(--sr,0deg)) scale(0.85); }
 }
 
 /* Stopka pozycji: oceny po lewej, TTS po prawej - w osobnym rzedzie, wiec
@@ -7486,7 +7722,7 @@ ${t.extraBgCSS}
 .ws-review-row-foot .ws-diff { display: inline-flex; align-items: center; gap: 0.3rem; flex-wrap: wrap; }
 .ws-review-item-tts {
   flex-shrink: 0; width: 1.95rem; height: 1.95rem;
-  border: 2px solid var(--ws-border-strong); border-radius: 7px;
+  border: 1.5px solid var(--ws-border-strong); border-radius: 7px;
   background: var(--ws-card); cursor: pointer; font-size: 0.9rem;
   display: inline-flex; align-items: center; justify-content: center;
   transition: all 0.15s;
@@ -8291,40 +8527,41 @@ ${t.extraBgCSS}
 }
 .gap-input {
   display: inline-block;
-  font-family: var(--ws-mono);
-  font-size: 1rem;
+  font-family: var(--ws-body);
+  font-size: 1.05rem;
   font-weight: 600;
-  padding: 0.35rem 0.7rem;
+  padding: 0.3rem 0.7rem;
   margin: 0 0.15rem;
   background: var(--ws-bg);
-  border: none;
-  border-bottom: 2.5px solid var(--ws-accent);
-  border-radius: 6px 6px 0 0;
+  border: 1.5px solid var(--ws-border-strong);
+  border-radius: 9px;
   color: var(--ws-text);
   text-align: center;
   min-width: 80px;
-  transition: background 0.18s, border-color 0.18s;
+  transition: background 0.18s, border-color 0.18s, box-shadow 0.18s;
 }
 .gap-input:focus {
   outline: none;
   background: var(--ws-accent-soft);
+  border-color: var(--ws-accent);
 }
 .gap-input.gap-correct {
   background: var(--ws-ok-bg);
-  border-bottom-color: var(--ws-ok);
+  border-color: var(--ws-ok);
   color: var(--ws-ok);
   animation: wsPop 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
 }
 .gap-input.gap-wrong {
   background: var(--ws-no-bg);
-  border-bottom-color: var(--ws-no);
+  border-color: var(--ws-no);
   color: var(--ws-no);
   animation: wsBuzz 0.45s, wsFlashWrong 0.55s ease-out;
 }
 .gap-input::placeholder {
   color: var(--ws-text-dim);
-  opacity: 0.55;
-  font-weight: 400;
+  opacity: 0.5;
+  font-weight: 600;
+  font-style: normal;
 }
 .gap-translation {
   margin-top: 1rem;
@@ -8901,7 +9138,9 @@ ${t.extraBgCSS}
   }
   /* Ukryj progress bar i przyciski akcji */
   .ws-progress-wrap { display: none !important; }
-  .ws-review { display: none !important; }
+  /* Tryb szybkiej powtorki ZOSTAJE na wydruku - patrz reguly nizej (rozwijamy
+     panel, odslaniamy zaslony, pokazujemy odpowiedzi pogrubione). Tu juz nie
+     chowamy go calego. */
   .ws-finale { display: none !important; }
   .ws-actions { display: none !important; }
   /* Stopka (zapis automatyczny / Reset / TSV) niepotrzebna na druku. */
@@ -9033,6 +9272,96 @@ ${t.extraBgCSS}
 
   /* Sekcje płyną normalnie między stronami - mogą się łamać.
      (page-break-inside: avoid celowo NIE jest tu ustawione na .ws-section) */
+
+  /* ── TRYB SZYBKIEJ POWTÓRKI NA WYDRUKU ──
+     Cel: uczeń widzi na papierze, jak ocenił swoje słowa, razem z odpowiedziami.
+     Rozwijamy panel (nawet gdy zwinięty), odsłaniamy wszystkie zasłony i pokazujemy
+     odpowiedzi pogrubione. Chowamy elementy czysto interaktywne (checkboxy poziomów,
+     sortowanie, „Pokaż wszystkie", przyciski oceny - zostaje tylko wybrana ocena). */
+  .ws-review { break-before: page; page-break-before: always; }
+  .ws-review-body[hidden] { display: block !important; }
+  .ws-review-toggle-arrow { display: none !important; }
+  .ws-review-text,
+  .ws-review-levels,
+  .ws-review-toolbar { display: none !important; }
+  /* Odpowiedzi w pełni widoczne: zasłony (overlay/canvas) znikają. */
+  .ws-review-cover,
+  .ws-review-gap-cover,
+  .ws-review-shatter,
+  .ws-review-item-tts { display: none !important; }
+  .ws-review-item-answer { padding-right: 0 !important; }
+  .ws-review-ans-text { color: var(--ws-text) !important; }
+  .ws-review-gap-word {
+    font-weight: 800 !important;
+    color: var(--ws-accent) !important;
+    -webkit-text-fill-color: var(--ws-accent) !important;
+  }
+  /* Na wydruku nie dzielimy pozycji na dwa rzędy: chowamy całą stopkę z ocenami
+     (i TTS), a wybraną ocenę pokazujemy jako znacznik PRZED słowem PL. Dzięki
+     temu layout jest scalony, a symbole oceny stoją równo, zawsze w tym samym
+     miejscu, zamiast skakać na końcu wiersza. */
+  .ws-review-row-foot { display: none !important; }
+  /* Pozycja w druku = grid: wąska kolumna na znacznik oceny + reszta treści.
+     Znacznik nie opływa już tekstu, tylko stoi w swojej kolumnie po lewej. */
+  .ws-review-item {
+    display: grid !important;
+    grid-template-columns: 1.9rem 1fr;
+    align-items: start;
+    column-gap: 0.7rem;
+  }
+  .ws-review-item .ws-review-row-main { grid-column: 2; }
+  .ws-review-print-rating {
+    display: inline-flex !important;
+    align-items: center; justify-content: center;
+    grid-column: 1; grid-row: 1;
+    align-self: start; justify-self: center;
+    /* Wyrównanie do GÓRY (żeby przy wysokich wierszach znacznik stał przy
+       pierwszej linii, a nie pływał na środku), ale z małym marginesem górnym
+       tak dobranym, że przy zwykłym jednowierszowym haśle środek znacznika
+       (1.4rem) pokrywa się z optycznym środkiem linii tekstu (line-height 1.55,
+       ~1.55rem): (1.55 - 1.4) / 2 ≈ 0.075rem. */
+    margin-top: 0.075rem;
+    width: 1.4rem; height: 1.4rem;
+    border-radius: 6px;
+    font-size: 0.82rem; font-weight: 700; line-height: 1;
+    color: #fff !important;
+    -webkit-print-color-adjust: exact; print-color-adjust: exact;
+  }
+  /* Tło plakietki = kolor danej oceny (te same co przyciski .sel). */
+  .ws-review-print-rating.ws-diff-new { background: #9ca3af !important; }
+  .ws-review-print-rating.ws-diff-1   { background: #dc2626 !important; }
+  .ws-review-print-rating.ws-diff-2   { background: #d97706 !important; }
+  .ws-review-print-rating.ws-diff-3   { background: #16a34a !important; }
+  .ws-review-print-rating.ws-diff-4   { background: #2563eb !important; }
+  /* Legenda ocen - widoczna tylko na wydruku, żeby objaśnić symbole. */
+  .ws-review-legend-wrap { display: block !important; margin: 0 0 1rem; }
+  .ws-review-legend-title {
+    font-weight: 700; font-size: 0.9rem; color: var(--ws-text);
+    text-align: center; margin: 0 0 0.45rem;
+  }
+  .ws-review-legend {
+    display: flex !important; flex-wrap: wrap; align-items: center;
+    justify-content: center;
+    gap: 0.4rem 1rem; margin: 0;
+    padding: 0.6rem 0.8rem;
+    border: 1px solid var(--ws-border); border-radius: 10px;
+    font-size: 0.82rem; color: var(--ws-text);
+  }
+  .ws-review-legend-item { display: inline-flex; align-items: center; gap: 0.4rem; }
+  .ws-review-legend .ws-review-chip {
+    width: 1.15rem; height: 1.15rem; font-size: 0.72rem;
+  }
+  .ws-review-item { break-inside: avoid !important; page-break-inside: avoid !important; }
+  /* Sam przycisk "Drukuj powtórkę" nigdy nie trafia na wydruk. */
+  .ws-review-print { display: none !important; }
+
+  /* ── TRYB "DRUKUJ TYLKO POWTÓRKĘ" ──
+     Gdy użytkownik kliknie przycisk w panelu, na body pojawia się klasa
+     ws-print-review-only. Wtedy chowamy wszystko poza panelem powtórki, a sam
+     panel nie ma już łamania strony przed sobą (jest jedyną treścią). */
+  body.ws-print-review-only .ws-app > *:not(.ws-review) { display: none !important; }
+  body.ws-print-review-only .ws-header { display: none !important; }
+  body.ws-print-review-only .ws-review { break-before: auto !important; page-break-before: auto !important; }
 }
 
 /* === OSTATECZNY OVERRIDE: zielone rozwiazane podzadanie (Scramble + Translate) ===
